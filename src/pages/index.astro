@@ -1,10 +1,9 @@
 ---
 import "tw-base"
 import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
-import MiniFish from '../components/MiniFish.astro';
-import HeaderIcon from '../components/HeaderIcon.astro';
-import Dropdown from '../components/Dropdown.astro';
+import Card from 'components/Card.astro';
+import Footer from 'components/Footer.astro';
+import Header from 'components/Header.astro';
 
 
 
@@ -12,22 +11,11 @@ import Dropdown from '../components/Dropdown.astro';
 
 <Layout title="Welcome to Astro.">
   <main>
-    <header class="flex justify-between max-h-min">
-      <div class="invisible w-0 my-auto sm:tracking-tightest sm:w-fit sm:visible"><MiniFish /></div>
-      <div class="my-auto mr-auto text-sm sm:ml-auto text-nowrap">
-        <span class="hidden sm:visible">  welcome to the </span>
-        <ins class="float-left text-blue-300 sm:float-none">fish-lsp</ins>
-      </div>
-      <div class="hidden sm:inline-flex sm:gap-5">
-        <HeaderIcon name="github" />
-        <HeaderIcon name="npm" />
-      </div>
-      <div class="visible sm:hidden">
-        <Dropdown />
-      </div>
-    </header>
+    <Header />
+
+
     <div class="pt-2 pb-4">
-      <img class="" src="/help-msg.svg" alt="Astro logo" />
+      <img class="" src="/help-msg.svg" alt="output built by freeze `fish --help`" />
     </div>
 
     <p id="description">
@@ -59,7 +47,9 @@ import Dropdown from '../components/Dropdown.astro';
         body="Come say hi ❤️"
       />
     </ul>
+    <Footer />
   </main>
+
 </Layout>
 
 <style>
