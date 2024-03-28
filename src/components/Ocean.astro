@@ -1,0 +1,54 @@
+---
+// Your Astro setup remains unchanged.
+import "tw-base";
+---
+
+<div class="w-full">
+  <footer class="w-full h-32 footer">
+  <!-- <footer class="w-full h-32 footer"> -->
+    <svg class="w-full h-full" viewBox="0 -20 700 110" preserveAspectRatio="none">
+      <!-- Wave Layer 1 (deepest) -->
+      <path class="wave-animation" style="animation-duration: 12s;" d="M0,30 c150,-40 300,40 500,0 c200,-40 400,40 600,0 v80 h-1100z" fill="#3c83f6"/>
+      <!-- Wave Layer 2 -->
+      <path class="wave-animation" style="animation-duration: 10s;" d="M0,40 c120,-30 280,30 450,0 c170,-30 330,30 500,0 c170,-30 330,30 500,-20 v60 h-1450z" fill="#3c83f6"/>
+      <!-- Wave Layer 3 -->
+      <path class="wave-animation" style="animation-duration: 8s;" d="M0,50 c100,-20 260,20 400,0 c140,-20 280,20 420,0 c140,-20 280,20 420,-15 v45 h-1240z" fill="#3c83f2"/>
+      <!-- Wave Layer 4 (topmost) -->
+      <path class="wave-animation" style="animation-duration: 6s;" d="M0,55 c80,-18 230,-12 350,7 c80,13 260,17 350,-5 v55 h-700z" fill="#3c83f4"/>
+    </svg>
+  </footer>
+  <div class="bg-blue-500">
+    <slot />
+  </div>
+</div>
+
+<style>
+footer {
+  position: relative; /* Adjust based on your layout needs */
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw; /* Center the footer */
+  height: 100px;
+  overflow: hidden;
+}
+
+.wave-animation {
+  animation-name: wave;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes wave {
+0% {
+  transform: translateX(0%);
+}
+50% {
+  transform: translateX(-25%);
+}
+100% {
+  transform: translateX(0%);
+}
+}
+</style>

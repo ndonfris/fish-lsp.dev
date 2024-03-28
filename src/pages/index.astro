@@ -4,55 +4,57 @@ import Layout from '../layouts/Layout.astro';
 import Card from 'components/Card.astro';
 import Footer from 'components/Footer.astro';
 import Header from 'components/Header.astro';
-import {Image} from "astro:assets"
+// import {Image} from "astro:assets"
+import Ocean from 'components/Ocean.astro';
 
 
 
 ---
 
 <Layout title="Welcome to Astro.">
-  <main>
-    <Header />
+  <div class="relative flex flex-col justify-between min-h-screen overflow-y-hidden">
+    <main class="max-h-full mb-auto content-wrapper">
+      <Header />
+      <div class="pt-2 pb-4">
+        <a href="https://github.com/ndonfris/fish-lsp">
+          <img src="/help-msg.svg" alt="output built by freeze `fish --help`" />
+        </a>
+      </div>
 
+      <p id="description">
+        <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-gradient">fish-lsp</strong></a> is a <a href="https://lsif.dev/">language server protocol (LSP)</a>
+        implementation for the  <a href="https://fishshell.com/">fish shell</a>. It aims to provide a rich set of features
+        including: <i>auto-completion</i>, <i>hover</i>, <i>go-to references</i>, and <i>many others</i>.
+      </p>
+      <br />
 
-    <div class="pt-2 pb-4">
-      <a href="https://github.com/ndonfris/fish-lsp">
-        <img src="/help-msg.svg" alt="output built by freeze `fish --help`" />
-      </a>
-    </div>
-
-    <p id="description">
-      <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-gradient">fish-lsp</strong></a> is a <a href="https://lsif.dev/">language server protocol (LSP)</a>
-      implementation for the  <a href="https://fishshell.com/">fish shell</a>. It aims to provide a rich set of features
-      including: <i>auto-completion</i>, <i>hover</i>, <i>go-to references</i>, and <i>many others</i>.
-    </p>
-    <br />
-
-    <ul role="list" class="link-card-grid">
-      <Card
-        href="https://github.com/ndonfris/fish-lsp/"
-        title="github repo"
-        body="source code for the project."
-      />
-      <Card
-        href="https://www.npmjs.com/package/fish-lsp/"
-        title="npm package"
-        body="release avaliable on node package manager."
-      />
-      <Card
-        href="https://github.com/ndonfris/fish-lsp-language-clients"
-        title="Integrations"
-        body="vscode, vim, neovim, helix, and more."
-      />
-      <Card
-        href="https://github.com/ndonfris/fish-lsp/discussions/"
-        title="Discussions"
-        body="Introduce your own ideas 🤐"
-      />
-    </ul>
-    <Footer />
-  </main>
-
+      <ul role="list" class="link-card-grid">
+        <Card
+          href="https://github.com/ndonfris/fish-lsp/"
+          title="github repo"
+          body="source code for the project."
+        />
+        <Card
+          href="https://www.npmjs.com/package/fish-lsp/"
+          title="npm package"
+          body="release avaliable on node package manager."
+        />
+        <Card
+          href="https://github.com/ndonfris/fish-lsp-language-clients"
+          title="Integrations"
+          body="vscode, vim, neovim, helix, and more."
+        />
+        <Card
+          href="https://github.com/ndonfris/fish-lsp/discussions/"
+          title="Discussions"
+          body="Introduce your own ideas 🤐"
+        />
+      </ul>
+    </main>
+    <Ocean>
+      <Footer />
+    </Ocean>
+  </div>
 </Layout>
 
 <style>
@@ -121,4 +123,10 @@ h1 {
   color: rgb(184 138 243);
   text-decoration: underline;
 }
+ /* Adjustments for the content wrapper */
+/* .content-wrapper { */
+/*   max-width: 800px; */
+/*   margin: auto; */
+/*   padding: 0; */
+/* } */
 </style>
