@@ -1,0 +1,48 @@
+---
+import "tw-base";
+import HeaderIcon from "./HeaderIcon.astro";
+---
+
+<!-- component --><!-- 
+    =======================================================================
+    Name    :   Pure CSS Dropdown Menu
+    Author  :   Surjith S M
+    Twitter :   @surjithctly
+
+    Get more components here ? https://web3templates.com/components
+
+    Copyright © 2021
+    =======================================================================
+ --><!-- <div class="flex flex-col justify-center min-h-screen py-6 bg-white sm:py-12"> -->
+
+<!-- <div class="relative my-auto"> --><!--     <input type="checkbox" id="sortbox" class="absolute hidden"> --><!--     <label for="sortbox" class="flex items-center cursor-pointer space-x-1"> --><!--     <span class="text-xs font-extrabold">code</span> --><!--     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> --><!--         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /> --><!--     </svg> --><!--     </label> --><!--   <div id="sortboxmenu" class="absolute z-10 hidden mt-1 border border-gray-400 rounded shadow right-1 top-full min-w-max transition delay-75 ease-in-out"> --><!--     <ul class="block text-right text-gray-900"> --><!--       <li><a href="https://www.npmjs.com/package/fish-lsp" class="block px-3 py-2 hover:bg-gray-800">npm</a></li> --><!--       <li><a href="https://github.com/ndonfris/fish-lsp" class="block px-3 py-2 hover:bg-gray-800">github</a></li> --><!--     </ul> --><!--   </div> --><!-- </div> -->
+<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+<!-- <div class="flex justify-center h-screen"> -->
+<div x-data="{ dropdownOpen: false }" class="relative">
+  <button @click="dropdownOpen = !dropdownOpen" class="relative z-10 block p-2 bg-[#282a36] rounded-md focus:outline-none">
+    <svg class="w-5 h-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <div x-show="dropdownOpen" @click="dropdownOpen = false" class="fixed z-10 w-full h-full ring-[#5f5fd7]"></div>
+
+  <div x-show="dropdownOpen" class="absolute right-0 z-20 w-48 py-2 mt-2 bg-[#282a36] shadow-lg shadow-black/50 shadow-xl rounded-md ring-[#5f5fd7]">
+    <a href="https://www.npmjs.com/package/fish-lsp" class="block px-3 py-2 hover:bg-gray-800">npm</a>
+    <hr class="opacity-5"/>
+    <a href="https://github.com/ndonfris/fish-lsp" class="block px-3 py-2 hover:bg-gray-800">github</a>
+    <!-- <a href="#" class="block px-4 py-2 text-sm text-purple-400 capitalize hover:bg-blue-500 hover:text-white"> -->
+    <!--   Your projects -->
+    <!-- </a> -->
+    <!-- <a href="#" class="block px-4 py-2 text-sm text-purple-400 capitalize hover:bg-blue-500 hover:text-white"> -->
+    <!--   Help -->
+    <!-- </a> -->
+    <!-- <a href="#" class="block px-4 py-2 text-sm text-purple-400 capitalize hover:bg-blue-500 hover:text-white"> -->
+    <!--   Settings -->
+    <!-- </a> -->
+    <!-- <a href="#" class="block px-4 py-2 text-sm text-purple-400 capitalize hover:bg-blue-500 hover:text-white"> -->
+    <!--   Sign Out -->
+    <!-- </a> -->
+  </div>
+</div>
+</div>

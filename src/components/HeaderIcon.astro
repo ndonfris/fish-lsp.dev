@@ -1,0 +1,31 @@
+---
+import "tw-base"
+import {Icon} from 'astro-icon/components';
+
+let {
+  name,
+} = Astro.props
+
+let href = '#'
+switch (name) {
+  case 'github':
+    href = "https://github.com/ndonfris/fish-lsp/"
+    break;
+  case 'npm':
+    href = "https://www.npmjs.com/package/fish-lsp"
+    break;
+  default:
+    break;
+}
+
+
+
+
+
+
+---
+
+<a title={name} href={href} class="flex text-center sm:flex-col"> 
+  <Icon name={name} class="mx-auto" />
+  <p class="text-sm">{name} </p>
+</a>
