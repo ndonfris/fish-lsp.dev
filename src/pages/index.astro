@@ -8,6 +8,11 @@ import Header from 'components/Header.astro';
 import Ocean from 'components/Ocean.astro';
 
 
+const {
+  autoplay = true,
+  controls = false,
+  loop = true,
+} = Astro.props
 
 ---
 
@@ -17,7 +22,7 @@ import Ocean from 'components/Ocean.astro';
       <Header />
       <div class="pt-2 pb-4">
         <a href="https://github.com/ndonfris/fish-lsp">
-          <img src="/help-msg.svg" alt="output built by freeze `fish --help`" />
+          <img src="/help-msg.png" alt="output built by freeze `fish --help`" />
         </a>
       </div>
 
@@ -47,9 +52,14 @@ import Ocean from 'components/Ocean.astro';
         <Card
           href="https://github.com/ndonfris/fish-lsp/discussions/"
           title="Discussions"
-          body="Introduce your own ideas 🤐"
+          body="Introduce your own ideas"
         />
       </ul>
+
+      <!-- <video controls={false} autoplay={true} loop={true} start={true} speed="2"> -->
+      <!--   <source src="demo-video.mp4" /> -->
+      <!-- </video> -->
+
     </main>
     <Ocean>
       <Footer />
