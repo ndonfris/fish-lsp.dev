@@ -1,4 +1,30 @@
-# Astro Starter Kit: Basics
+# fish-lsp.dev
+
+- Website source code for [fish-lsp](https://github.com/ndonfris/fish-lsp) repo.
+- Built using _astro_, _tailwind_, and _pnpm_.
+- Used __astro basic template__ for initial build
+
+___
+
+Here is some other local dependencies:
+
+- `./build-output-screenshot.fish` -- requires freeze as dependency
+  - can accept any of the three arguments: `'svg' 'png' 'jpeg'`
+  - default will build a __png__ file.
+- consider placing large files here _(probably already stored)_:
+  - `help_output.{svg,png,jpeg}`
+  - `man fish-lsp` - __fish-lsp.1__
+  - `demo.gif`
+  - `project_banner.png`
+  - `favicon.svg`
+- __future plans:__
+  - include browser demo derision for testing the lsp using [monaco](https://www.npmjs.com/package/monaco-languageclient)
+  - add _gif_ to the website
+  - create github _actions_ for main repo
+  - include more info & configuration's here
+- Contributions here will be included in the main repo's list.
+
+## Astro Starter Kit Basics
 
 ```sh
 npm create astro@latest -- --template basics
