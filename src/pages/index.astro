@@ -20,17 +20,25 @@ const {
   <div class="relative flex flex-col justify-between min-h-screen overflow-y-hidden">
     <main class="max-h-full mb-auto content-wrapper">
       <Header />
-      <div class="pt-2 pb-4">
+      <div class="pt-2 pb-2">
         <p id="description" class="py-4">
           <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-gradient">fish-lsp</strong></a> is a <a href="https://lsif.dev/">language server protocol (LSP)</a>
           implementation for the  <a href="https://fishshell.com/">fish shell</a>. It aims to provide a rich set of features
           including: <i>auto-completion</i>, <i>hover</i>, <i>go-to references</i>, and <i>many others</i>.
         </p>
-        <p class="py-1 text-sm text-purple-300 underline text-gradient"> client usage demo: </p>
+
+        <!-- <br class="h-2 y-2" /> -->
+        <!-- <p class="py-2">items</p> -->
+        <!-- <ul class="list-disc pl-14"> -->
+        <!--   <li>a</li> -->
+        <!--   <li>b</li> -->
+        <!-- </ul> -->
+
+        <p class="py-5 text-purple-300 underline text-md underline-offset-1 text-gradient"> client usage demo: </p>
         <img class="px-4" src="/fish-lsp-2024-4-25.gif" />
-        <p class="pt-5 text-sm underline text-fuchsia-300 text-gradient"> sever help output: </p>
+        <p class="pt-5 underline text-md text-fuchsia-300 underline-offset-1 text-gradient"> sever help output: </p>
         <a href="https://github.com/ndonfris/fish-lsp">
-          <img src="/help-msg.png" alt="output built by freeze `fish --help`" />
+          <img src="/help-msg.png" alt="output built by freeze `fish --help`" height="200px"  />
         </a>
       </div>
 
