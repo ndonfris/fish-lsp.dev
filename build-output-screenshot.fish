@@ -26,7 +26,7 @@ if test -z $argv
     # freeze --config user --execute 'fish-lsp --help | grep -B99999 "^Examples:" | grep -v "^Examples:"' -l bash -t dracula --window --output ./public/help-msg.svg
     # freeze --config user --execute 'fish-lsp --help | grep -B99999 "^Examples:" | grep -v "^Examples:"' -l bash -t dracula --window --output ./public/help-msg.png
     # fish-lsp --help | grep -B99999 "^Examples:" | grep -v "^Examples:"
-    freeze --execute=__no_examples
+    freeze --execute 'fish -c "fish-lsp -h | head -n -5 | bat -pp -l help && fish-lsp -h| tail -n -5 | bat -pp -l fish"' --window -b '#24283b' -o public/help-msg-new.png --border.color "#7152dc" --border.width 0.8
     and return 
 end
 
