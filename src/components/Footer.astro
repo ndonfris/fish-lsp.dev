@@ -4,7 +4,8 @@ import 'tw-base'
 
 const site = {
   title: 'fish-lsp.dev',
-  repo: 'https://github.com/ndonfris/fish-lsp.dev'
+  repo: 'https://github.com/ndonfris/fish-lsp.dev',
+  srcRepo: 'https://github.com/ndonfris/fish-lsp'
 }
 
 
@@ -16,16 +17,16 @@ const site = {
     <div class="flex flex-col items-center justify-between md:flex-row divide-y-4 divide-transparent md:divide-y-0">
       <div class="flex md:grid w-fit divide-x-4 divide-black divide-dotted md:divide-x-0">
         <div class="text-center md:text-left md:justify-center">
-          &nbsp<a href="https://github.com/ndonfris/fish-lsp/wiki" class="font-sans text-sm text-black hover:text-white">wiki</a>&nbsp
+          &nbsp<a href={`${site.srcRepo}/wiki`} class="font-sans text-sm text-black hover:text-white">wiki</a>&nbsp
         </div>
         <div class="text-center md:text-left md:justify-center">
-          &nbsp<a href="https://github.com/ndonfris/fish-lsp?tab=readme-ov-file#sources" class="font-sans text-sm text-black hover:text-white">resources</a>&nbsp
+          &nbsp<a href={`${site.srcRepo}/wiki/Sources`} class="font-sans text-sm text-black hover:text-white">resources</a>&nbsp
         </div>
         <div class="text-center md:text-left md:justify-center">
-          &nbsp<a href="https://github.com/ndonfris/fish-lsp?tab=readme-ov-file#features" class="font-sans text-sm text-black hover:text-white">features</a>&nbsp
+          &nbsp<a href={`${site.srcRepo}#features`} class="font-sans text-sm text-black hover:text-white">features</a>&nbsp
         </div>
         <div class="text-center md:text-left md:justify-center">
-          &nbsp<a href="https://github.com/ndonfris/fish-lsp?tab=readme-ov-file#sourcesgg" class="font-sans text-sm text-black hover:text-white">notes</a>&nbsp
+          &nbsp<a href={`${site.srcRepo}/wiki/Development-Notes`} class="font-sans text-sm text-black hover:text-white">notes</a>&nbsp
         </div>
       </div>
 
