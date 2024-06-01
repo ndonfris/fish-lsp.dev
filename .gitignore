@@ -19,3 +19,14 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# Ignore everything in the public/ directory
+public/*
+
+# Re-include specific files
+!public/favicon.svg
+!public/favicon-centered-bluee.svg
+!public/new_output.gif
+!public/mermaid-diagram.png
+!public/help-msg-new.png
+!public/sitemap-index.xml

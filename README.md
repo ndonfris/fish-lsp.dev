@@ -1,3 +1,19 @@
+<!-- <h1 align="center"> -->
+<!--     <div align="center"> -->
+<!--         <a href="https://fish-lsp.dev"> -->
+<!--             <image src="/public/favicon-centered-bluee.svg" alt="fish-lsp" style="position: flex; text-align: center;" height="23rem"> fish-lsp -->
+<!--         </a> -->
+<!--         <div align="center"> -->
+<!--             <img src="https://img.shields.io/github/actions/workflow/status/ndonfris/fish-lsp/eslint.yml?branch=master&labelColor=%23181939" alt="GitHub Actions Workflow Status"> -->
+<!--             <img src="https://img.shields.io/github/license/ndonfris/fish-lsp?&labelColor=%23181939&color=b88af3" alt="License"> -->
+<!--             <img src="https://img.shields.io/github/created-at/ndonfris/fish-lsp?logo=%234e6cfa&label=created&labelColor=%23181939&color=%236198f5" alt="Github Created At"> -->
+<!--         </div> -->
+<!--     </div> -->
+<!-- </h1> -->
+<!---->
+<!-- ![demo.gif](https://github.com/ndonfris/fish-lsp.dev/blob/ndonfris-patch-1/new_output.gif?raw=true) -->
+<!---->
+<!---->
 # fish-lsp.dev
 
 - Website source code for [fish-lsp](https://github.com/ndonfris/fish-lsp) repo.
