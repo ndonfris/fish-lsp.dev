@@ -1,5 +1,11 @@
 {
-  "name": "",
+  "private": true,
+  "funding": {
+    "url": "https://github.com/sponsors/ndonfris",
+    "type": "individual"
+  },
+  "license": "MIT",
+  "name": "fish-lsp.dev",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
