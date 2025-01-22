@@ -9,18 +9,21 @@ import Dropdown from 'components/Dropdown.astro';
 ---
 
 <header class="max-w-4xl mx-auto max-h-min">
-  <div class="container flex justify-between w-full my-auto">
+  <div class="container flex justify-between align-center w-auto my-auto flex-grow">
     <div class="invisible w-0 my-auto sm:tracking-tightest sm:w-fit sm:visible">
       <MiniFish />
     </div>
-    <div class="my-auto mr-auto text-sm sm:ml-auto text-nowrap">
+    <div class="my-auto mr-auto text-sm sm:ml-auto text-nowrap w-auto flex-grow">
       <!-- <span class="hidden sm:visible">  welcome to the </span> -->
-      <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-2xl underline text-gradient">fish-lsp</strong></a>
+      <span class="px-auto mx-[50%]">
+        <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-2xl underline text-gradient">fish-lsp</strong></a>
+      </span>
       <!-- <a href="https://github.com/ndonfris/fish-lsp" class="float-left my-auto text-gradient sm:float-none">fish-lsp</a> -->
     </div>
-    <div class="hidden sm:inline-flex sm:gap-5">
-      <HeaderIcon name="github" />
-      <HeaderIcon name="npm" />
+    <div class="hidden sm:flex sm:w-min relative sm:right-0">
+      <div class=""><HeaderIcon name="github" /></div>
+      <div class="sm:px-4"><HeaderIcon name="npm" />   </div> 
+      <div class="sm:mr-0 relative right-0"><HeaderIcon name="vscode" /></div> 
     </div>
     <div class="visible sm:hidden">
       <Dropdown />
