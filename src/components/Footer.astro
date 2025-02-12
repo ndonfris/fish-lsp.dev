@@ -14,23 +14,24 @@ const site = {
 <!-- <div class="container w-full mx-auto bg-blue-500 h-28"> -->
 <div class="container w-full h-32 mx-auto bg-blue-500 py-auto">
   <div class="container max-w-2xl px-4 mx-auto py-auto">
+    <!-- divide-dotted causes visual bug on ios (safari/firefox/chrome) on rightmost column -->
     <div class="flex flex-col items-center justify-between md:flex-row divide-y-4 divide-transparent md:divide-y-0">
-      <div class="flex md:grid w-fit divide-x-4 divide-black divide-dotted md:divide-x-0">
-        <div class="text-center md:text-left md:justify-center">
+      <div class="flex md:grid w-fit divide-x-2 divide-black/25 divide-solid md:divide-x-0">
+        <div class="text-center px-4 sm:px-8 md:px-0 md:text-left md:justify-center">
           &nbsp<a href={`${site.srcRepo}/wiki`} class="font-sans text-sm text-black hover:text-white">wiki</a>&nbsp
         </div>
-        <div class="text-center md:text-left md:justify-center">
+        <div class="text-center px-4 sm:px-8 md:px-0 md:text-left md:justify-center">
           &nbsp<a href={`${site.srcRepo}/wiki/Sources`} class="font-sans text-sm text-black hover:text-white">resources</a>&nbsp
         </div>
-        <div class="text-center md:text-left md:justify-center">
+        <div class="text-center px-4 sm:px-8 md:px-0 md:text-left md:justify-center">
           &nbsp<a href={`${site.srcRepo}#features`} class="font-sans text-sm text-black hover:text-white">features</a>&nbsp
         </div>
-        <div class="text-center md:text-left md:justify-center">
+        <div class="text-center px-4 sm:px-8 md:px-0 md:text-left md:justify-center">
           &nbsp<a href={`${site.srcRepo}/wiki/Development-Notes`} class="font-sans text-sm text-black hover:text-white">notes</a>&nbsp
         </div>
       </div>
 
-      <div class="mb-4 text-center">
+      <div class="mb-4 pt-1 sm:pt-2 md:pt-0 text-center">
         <div class="text-center">
           <a href={site.repo} class="inline-block my-auto text-sm text-black hover:text-white">
             <span>
