@@ -24,6 +24,7 @@ pnpm-debug.log*
 public/*
 
 # Re-include specific files
+!public/comment.svg
 !public/favicon.svg
 !public/favicon-centered-bluee.svg
 !public/new_output.gif
