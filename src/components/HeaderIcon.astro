@@ -1,9 +1,12 @@
 ---
 import "tw-base"
 import {Icon} from 'astro-icon/components';
+import * as Astro from 'astro';
+
 
 let {
   name,
+  label,
 } = Astro.props
 
 let href = '#'
@@ -17,13 +20,16 @@ switch (name) {
   case 'vscode':
     href = "https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp"
     break;
+  case 'playground-terminal':
+    href = "https://fish-lsp-playground.fly.dev/"
+    break;
   default:
     break;
 }
 
 ---
 
-<a title={name} href={href} class="flex text-center sm:flex-col hover:text-purple-500"> 
+<a title={name} href={href} class="flex text-center sm:flex-col hover:text-purple-500 stroke-0"> 
   <Icon name={name} class="mx-auto" />
-  <p class="text-sm">{name} </p>
+  <p class="text-sm">{label || name} </p>
 </a>

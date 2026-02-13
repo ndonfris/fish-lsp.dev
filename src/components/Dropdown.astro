@@ -15,6 +15,11 @@ import { Icon } from 'astro-icon/components';
   <div x-show="dropdownOpen" @click="dropdownOpen = false" class="fixed z-10 w-full h-full ring-[#5f5fd7]"></div>
 
   <div x-show="dropdownOpen" class="absolute right-0 z-20 w-48 py-2 mt-2 bg-[#282a36] shadow-lg shadow-black/50 rounded-md ring-[#5f5fd7]">
+    <a href="/playground" class="block px-3 py-2 transition-colors hover:bg-gray-800/40 hover:text-purple-600 active:text-purple-600 focused:text-purple-600">
+      <Icon name="playground-terminal" class="inline-block text-purple-400"/>
+      playground
+    </a>
+    <hr class="opacity-5"/>
     <a href="https://github.com/ndonfris/fish-lsp" class="block px-3 py-2 transition-colors hover:bg-gray-800/40 hover:text-purple-600 active:text-purple-600 focused:text-purple-600">
       <Icon name="github" class="inline-block text-purple-400"/>
       github

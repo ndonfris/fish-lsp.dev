@@ -1,0 +1,70 @@
+---
+import "tw-base"
+import Layout from '../layouts/Layout.astro';
+import Header from 'components/Header.astro';
+import Footer from 'components/Footer.astro';
+import Ocean from 'components/Ocean.astro';
+
+const playgroundUrl = import.meta.env.DEV
+  ? 'http://localhost:3000'
+  : 'https://fish-lsp-playground.fly.dev';
+---
+
+<Layout title="fish-lsp Playground">
+  <div class="relative flex flex-col justify-between min-h-screen overflow-y-hidden">
+    <main class="mb-auto content-wrapper">
+      <Header />
+      <div class="pt-2 pb-4 px-4">
+        <p class="py-2 text-purple-300 underline text-md underline-offset-1 text-gradient">
+          interactive playground:
+        </p>
+        <p class="text-sm text-gray-400 pb-4">
+          Try <strong class="text-gradient">fish-lsp</strong> directly in your browser — powered by Monaco Editor and a live language server.
+        </p>
+      </div>
+      <div class="playground-container">
+        <iframe
+          src={playgroundUrl}
+          allow="clipboard-read; clipboard-write"
+          title="fish-lsp playground"
+          class="playground-iframe"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </main>
+    <Ocean>
+      <Footer />
+    </Ocean>
+  </div>
+</Layout>
+
+<style>
+main {
+  margin: auto;
+  padding: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  color: white;
+  font-size: 20px;
+  line-height: 1.6;
+}
+.text-gradient {
+  background-image: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 400%;
+  background-position: 0%;
+}
+.playground-container {
+  width: 100%;
+  padding: 0 1rem;
+}
+.playground-iframe {
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 500px;
+  border: 1px solid rgba(136, 58, 234, 0.3);
+  border-radius: 8px;
+  background: #1e1e1e;
+}
+</style>

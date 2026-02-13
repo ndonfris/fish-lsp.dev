@@ -14,5 +14,5 @@ export default defineConfig({
     tailwind({nesting: true}),
     robotsTxt(robotsConfig),
     sitemap(),
-  ]
+  ],
 });
