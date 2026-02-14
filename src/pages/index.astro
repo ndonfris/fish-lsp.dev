@@ -6,6 +6,8 @@ import Footer from 'components/Footer.astro';
 import Header from 'components/Header.astro';
 // import {Image} from "astro:assets"
 import Ocean from 'components/Ocean.astro';
+import PlaygroundBanner from 'components/PlaygroundBanner.astro';
+import HeroSection from '../components/HeroSection.astro';
 
 
 const {
@@ -21,21 +23,16 @@ const {
     <main class="max-h-full mb-auto content-wrapper">
       <Header />
       <div class="pt-2 pb-2">
-        <p id="description" class="px-4 py-4">
-          <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-gradient">fish-lsp</strong></a> is a <a href="https://lsif.dev/">language server protocol (LSP)</a>
-          implementation for the  <a href="https://fishshell.com/">fish shell</a>. It aims to provide a rich set of features
-          including: <i>auto-completion</i>, <i>hover</i>, <i>go-to references</i>, and <i>many others</i>.
-        </p>
+        <HeroSection />
+        <!-- <p id="description" class="px-4 py-4"> -->
+        <!--   <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-gradient">fish-lsp</strong></a> is a <a href="https://lsif.dev/">language server protocol (LSP)</a> -->
+        <!--   implementation for the  <a href="https://fishshell.com/">fish shell</a>. It aims to provide a rich set of features -->
+        <!--   including: <i>auto-completion</i>, <i>hover documentation</i>, <i>go-to references</i>, <i>diagnostics</i>, <i>code-actions</i>, <i>quick-fixes</i>, <i>semantic highlighting</i> and <i>many others</i>. -->
+        <!-- </p> -->
 
-      <div class="py-5 text-purple-300 underline text-md underline-offset-1 text-gradient">
-          <a href="/playground"> Check out the playground here </a>
-      </div>
-        <!-- <br class="h-2 y-2" /> -->
-        <!-- <p class="py-2">items</p> -->
-        <!-- <ul class="list-disc pl-14"> -->
-        <!--   <li>a</li> -->
-        <!--   <li>b</li> -->
-        <!-- </ul> -->
+        <div class="px-4 py-4">
+          <PlaygroundBanner />
+        </div>
 
         <p class="py-5 text-purple-300 underline text-md underline-offset-1 text-gradient"> client usage demo: </p>
         <img class="px-4" src="new_output.gif" />
@@ -95,7 +92,7 @@ const {
 main {
   margin: auto;
   padding: 1rem;
-  width: 800px;
+  width: 1100px;
   max-width: calc(100% - 2rem);
   color: white;
   font-size: 20px;
@@ -144,9 +141,14 @@ h1 {
 }
 .link-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
   padding: 0;
+}
+@media (min-width: 640px) {
+  .link-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 #description a {
   color: rgba(156,92, 238, 0.9);
