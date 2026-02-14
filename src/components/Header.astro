@@ -8,24 +8,24 @@ import Dropdown from 'components/Dropdown.astro';
 
 ---
 
-<header class="max-w-4xl mx-auto max-h-min">
-  <div class="container flex justify-between align-center w-auto my-auto flex-grow">
-    <div class="invisible w-0 my-auto sm:tracking-tightest sm:w-fit sm:visible">
+<header class="max-w-full mx-auto max-h-min">
+  <div class="relative flex items-center justify-between w-full px-4 py-2">
+    <div class="hidden sm:block">
       <MiniFish />
     </div>
-    <div class="my-auto mr-auto text-sm sm:ml-auto text-nowrap w-auto flex">
-      <!-- <span class="hidden sm:visible">  welcome to the </span> -->
-      <span class="px-auto sm:mx-[50%] w-auto ml-auto py-2">
-        <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-2xl underline text-gradient">fish-lsp</strong></a>
-      </span>
-      <!-- <a href="https://github.com/ndonfris/fish-lsp" class="float-left my-auto text-gradient sm:float-none">fish-lsp</a> -->
+    <div class="sm:hidden">
+      <a href="https://github.com/ndonfris/fish-lsp"><strong class="text-2xl underline text-gradient">fish-lsp</strong></a>
     </div>
-    <div class="hidden sm:flex sm:w-min relative sm:right-0">
+    <div class="absolute inset-0 items-center justify-center hidden pointer-events-none sm:flex">
+      <a href="https://github.com/ndonfris/fish-lsp" class="pointer-events-auto"><strong class="text-2xl underline text-gradient">fish-lsp</strong></a>
+    </div>
+    <div class="items-center hidden md:inline-flex">
       <div class=""><HeaderIcon name="github" /></div>
-      <div class="sm:px-4"><HeaderIcon name="npm" />   </div> 
-      <div class="sm:mr-0 relative right-0"><HeaderIcon name="vscode" /></div> 
+      <div class="px-4"><HeaderIcon name="npm" /></div>
+      <div class=""><HeaderIcon name="vscode" /></div>
+      <div class="pl-2 text-white"><HeaderIcon name="playground-terminal" label="playground" /></div>
     </div>
-    <div class="visible sm:hidden">
+    <div class="block md:hidden">
       <Dropdown />
     </div>
   </div>
