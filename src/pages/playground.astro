@@ -1,7 +1,10 @@
 ---
-const playgroundUrl = import.meta.env.DEV
+const base = import.meta.env.DEV
   ? 'http://localhost:3000'
   : 'https://playground.fish-lsp.dev';
+
+const code = Astro.url.searchParams.get('code');
+const playgroundUrl = code ? `${base}?code=${encodeURIComponent(code)}` : base;
 ---
 
 <html lang="en">
