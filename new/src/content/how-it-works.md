@@ -1,0 +1,72 @@
+---
+title: How It Works
+description: Architecture overview — tree-sitter, workspace analysis, and the LSP lifecycle
+slug: how-it-works
+order: 6
+section: Reference
+---
+
+# How It Works
+
+`fish-lsp` is a TypeScript implementation of the Language Server Protocol that
+uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse fish
+scripts into concrete syntax trees.
+
+## Parsing
+
+The server uses [web-tree-sitter](https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_web)
+via a compiled `tree-sitter-fish.wasm` module. Each document is parsed into a CST
+on open and re-parsed incrementally on change.
+
+> **Note:** A migration to [node-tree-sitter](https://github.com/tree-sitter/node-tree-sitter)
+> is planned to improve performance over the `.wasm` binding.
+
+## Workspace Analysis
+
+On startup, `initiateBackgroundAnalysis()` crawls all autoloaded fish paths
+(`~/.config/fish`, `/usr/share/fish`) and caches symbol tables — without blocking
+the connection handshake.
+
+## Symbol Resolution
+
+```fish
+set x 1        # x defined here
+function foo
+  set x 2      # x shadowed inside foo
+end
+echo $x        # resolves to outer x
+```
+
+References queries strip locally-redefined symbols from global matches.
+
+## LSP Lifecycle
+
+```plaintext
+editor                 fish-lsp
+  │── initialize ──────────► │
+  │◄────── capabilities ─── │
+  │                          │  (background analysis starts)
+  │── textDocument/open ───► │
+  │── textDocument/hover ──► │
+  │◄────── hover result ──── │
+```
+
+The server speaks JSON-RPC 2.0 over stdio. Connect with: `fish-lsp start`.
+
+## Configuration
+
+Override workspace paths via client initialization options:
+
+```json
+{
+  "initializationOptions": {
+    "workspaces": {
+      "paths": {
+        "defaults": ["~/.config/fish", "/usr/share/fish"]
+      }
+    }
+  }
+}
+```
+
+See [Client Configurations](/page/client-configurations) for per-editor examples.

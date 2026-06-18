@@ -1,0 +1,110 @@
+---
+import { DOCS_ORIGIN } from '../config';
+
+interface Props {
+  /** Docs pages set this to add an "Edit this page on GitHub" line. */
+  editPage?: boolean;
+  /** Repo-relative path of the page source, e.g. "src/content/installation.md". */
+  editPath?: string;
+}
+const { editPage = false, editPath } = Astro.props;
+
+const DOCS_URL  = `${DOCS_ORIGIN}/page/installation`;
+const GITHUB    = 'https://github.com/ndonfris/fish-lsp';
+/** This website's own repo (where the page sources live) and its default branch. */
+const SITE_REPO   = 'https://github.com/ndonfris/fish-lsp.dev';
+const SITE_BRANCH = 'master';
+
+const editHref = editPath
+  ? `${SITE_REPO}/blob/${SITE_BRANCH}/${editPath}`
+  : `${GITHUB}/wiki`;
+---
+
+<footer class="site-footer">
+  <!-- Wave transition -->
+  <div class="site-footer__waves">
+    <svg viewBox="0 -10 700 90" preserveAspectRatio="none" aria-hidden="true">
+      <path class="wave wave--1" d="M0,30 c150,-35 300,35 500,0 c200,-35 400,35 600,0 v60 h-1100z" fill="var(--fish-blue)" opacity="0.3"/>
+      <path class="wave wave--2" d="M0,40 c120,-25 280,25 450,0 c170,-25 330,25 500,0 v50 h-950z"  fill="var(--fish-blue)" opacity="0.5"/>
+      <path class="wave wave--3" d="M0,50 c100,-18 260,18 400,0 c140,-18 280,18 420,0 v40 h-820z"  fill="var(--fish-blue)"/>
+    </svg>
+  </div>
+
+  <div class="site-footer__body">
+    <nav class="site-footer__links" aria-label="Footer navigation">
+      <a href={`${GITHUB}/wiki`}         target="_blank" rel="noopener noreferrer">wiki</a>
+      <a href={GITHUB}                    target="_blank" rel="noopener noreferrer">github</a>
+      <a href="https://www.npmjs.com/package/fish-lsp" target="_blank" rel="noopener noreferrer">npm</a>
+      <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" rel="noopener noreferrer">vscode</a>
+      <a href={`${GITHUB}/discussions`}   target="_blank" rel="noopener noreferrer">discussions</a>
+      <a href={DOCS_URL}                  target="_blank" rel="noopener noreferrer">docs</a>
+    </nav>
+    {editPage && (
+      <a href={editHref} target="_blank" rel="noopener noreferrer" class="site-footer__edit">
+        Edit this page on GitHub ↗
+      </a>
+    )}
+    <p class="site-footer__copy">🐟 fish-lsp.dev · MIT License · 2026</p>
+  </div>
+</footer>
+
+<style>
+.site-footer__waves {
+  overflow: hidden;
+  height: 80px;
+}
+
+.site-footer__waves svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wave {
+  animation: wave-anim 10s linear infinite;
+  transform-origin: left center;
+}
+.wave--1 { animation-duration: 12s; }
+.wave--2 { animation-duration: 10s; }
+.wave--3 { animation-duration:  8s; }
+
+@keyframes wave-anim {
+  0%,100% { transform: translateX(0);   }
+  50%     { transform: translateX(-18%); }
+}
+
+.site-footer__body {
+  background: var(--fish-blue);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.site-footer__links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.site-footer__links a {
+  color: rgba(255,255,255,0.7);
+  transition: color 0.12s;
+}
+.site-footer__links a:hover { color: white; }
+
+/* Docs-only edit link, sits above the copy line with vertical spacing */
+.site-footer__edit {
+  display: block;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 0.6rem;
+  transition: color 0.12s;
+}
+.site-footer__edit:hover { color: white; }
+
+.site-footer__copy {
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+</style>

@@ -1,0 +1,100 @@
+---
+/**
+ * Reusable terminal window. Each command renders a `~ ❯ <input>` prompt line
+ * followed by its output line(s). `input` and `output` accept inline HTML so
+ * callers can colour tokens with the `t-*` classes (t-cmd, t-flag, t-str,
+ * t-green). `emptyFinalPrompt` appends a trailing prompt with a blinking
+ * cursor and no input/output.
+ *
+ * Styles are `is:global` because `set:html` content isn't scope-hashed by
+ * Astro — keeping every terminal style in this one file regardless.
+ */
+export interface TerminalCommand {
+  /** Path shown before the chevron (default "~"). */
+  prompt?: string;
+  /** The typed command; inline HTML allowed for token colouring. */
+  input: string;
+  /** Output line(s) below the command; inline HTML allowed. */
+  output?: string | string[];
+}
+
+interface Props {
+  title?: string;
+  commands: TerminalCommand[];
+  emptyFinalPrompt?: boolean;
+}
+
+const { title, commands, emptyFinalPrompt = false } = Astro.props;
+
+const toLines = (o?: string | string[]): string[] =>
+  o == null ? [] : Array.isArray(o) ? o : [o];
+---
+
+<div class="terminal" role="img" aria-label={title ?? 'terminal'}>
+  <div class="terminal__bar">
+    <span class="dot dot--r" aria-hidden="true"></span>
+    <span class="dot dot--y" aria-hidden="true"></span>
+    <span class="dot dot--g" aria-hidden="true"></span>
+    {title && <span class="terminal__title">{title}</span>}
+  </div>
+  <div class="terminal__body">
+    {commands.map((cmd, i) => (
+      <Fragment>
+        <div class="terminal__line" style={i > 0 ? 'margin-top:0.5rem' : undefined}>
+          <span class="t-prompt">{cmd.prompt ?? '~'}</span><span class="t-chevron">❯</span>
+          <span set:html={cmd.input} />
+        </div>
+        {toLines(cmd.output).map(line => (
+          <div class="terminal__line terminal__line--out" set:html={line} />
+        ))}
+      </Fragment>
+    ))}
+    {emptyFinalPrompt && (
+      <div class="terminal__line" style={commands.length ? 'margin-top:0.5rem' : undefined}>
+        <span class="t-prompt">~</span><span class="t-chevron">❯</span>
+        <span class="t-cursor" aria-hidden="true"></span>
+      </div>
+    )}
+  </div>
+</div>
+
+<style is:global>
+.terminal {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  font-family: var(--font-mono);
+  /* Fluid: shrinks on narrow/mobile viewports, caps at 0.875rem on desktop */
+  font-size: clamp(0.66rem, 2.7vw, 0.875rem);
+  line-height: 1.7;
+  max-width: 600px; margin: 0 auto; text-align: left;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(78,108,250,0.1);
+}
+.terminal__bar {
+  background: var(--bg-2); padding: 0.6rem 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.terminal .dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal .dot--r { background: #ff6b6b; }
+.terminal .dot--y { background: #ffd166; }
+.terminal .dot--g { background: #32d583; }
+.terminal__title {
+  flex: 1; text-align: center; font-size: 0.82em; color: var(--text-dim); letter-spacing: 0.04em;
+}
+.terminal__body { padding: clamp(0.9rem, 3vw, 1.25rem) clamp(1rem, 3.5vw, 1.5rem); }
+.terminal__line { display: flex; align-items: baseline; gap: 0.5rem; margin: 0.1rem 0; }
+/* em-relative so they scale with the terminal's fluid base font-size */
+.terminal__line--out { color: var(--text-muted); padding-left: 1.1rem; font-size: 0.94em; }
+.t-prompt { color: var(--fish-blue); user-select: none; }
+.t-chevron { color: var(--text-dim); }
+.t-cmd    { color: var(--fish-cyan); }
+.t-flag   { color: var(--fish-yellow); }
+.t-str    { color: #a8ff78; }
+.t-green  { color: var(--fish-green); }
+.t-cursor {
+  display: inline-block; width: 8px; height: 1em;
+  background: var(--fish-blue); vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>

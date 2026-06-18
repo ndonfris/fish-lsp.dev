@@ -1,0 +1,333 @@
+---
+import Layout   from '@layouts/Layout.astro';
+import Header   from '@components/Header.astro';
+import Footer   from '@components/Footer.astro';
+import Terminal from '@components/Terminal.astro';
+import PlaygroundBanner from '@components/PlaygroundBanner.astro';
+import '@theme/global.css';
+import { getCollection } from 'astro:content';
+import type { NavSection } from '@typedefs/content';
+import { DOCS_ORIGIN } from '../config';
+import { getFishInfo } from '../lib/fish-info';
+
+const allPages = await getCollection('pages');
+const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
+const grouped = new Map<string, typeof allPages>();
+
+for (const page of allPages) {
+  const sec = page.data.section ?? 'Other';
+  if (!grouped.has(sec)) grouped.set(sec, []);
+  grouped.get(sec)!.push(page);
+}
+for (const pages of grouped.values()) {
+  pages.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+}
+
+const navSections: NavSection[] = [
+  ...sectionOrder.filter(s => grouped.has(s)),
+  ...[...grouped.keys()].filter(s => !sectionOrder.includes(s)),
+].map(label => ({
+  label,
+  pages: (grouped.get(label) ?? []).map(p => ({
+    title: p.data.title,
+    slug:  p.data.slug,
+  })),
+}));
+
+// `fish-lsp info --version --build-time` output, fetched (and cached 6h) from
+// the playground container so the website host never needs the binary.
+const fishInfo = await getFishInfo();
+---
+
+<Layout>
+  <Header variant="home" />
+
+  <!-- ── Hero ─────────────────────────────────────────────────── -->
+  <div class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <span class="hero__pill">🐟 Language Server Protocol</span>
+    <h1 class="hero__title">
+      <span class="hero__title-accent">fish-lsp</span>
+    </h1>
+    <p class="hero__sub">
+      Full LSP support for the <strong>fish shell</strong> —
+      completions, hover docs, go&#x2011;to&#x2011;definition, rename, and workspace analysis.
+    </p>
+    <div class="hero__actions">
+      <a href={`${DOCS_ORIGIN}/page/installation`} class="btn-primary">Get Started →</a>
+      <a href="https://github.com/ndonfris/fish-lsp" target="_blank" rel="noopener noreferrer" class="btn-ghost">View Source</a>
+    </div>
+
+    <!-- Terminal -->
+    <Terminal
+      title="fish — ~/.config/fish/config.fish"
+      emptyFinalPrompt
+      commands={[
+        {
+          input: '<span class="t-cmd">pnpm</span> add <span class="t-flag">-g</span> <span class="t-str">fish-lsp@latest</span>',
+          output: 'added 1 package in 1.8s',
+        },
+        {
+          input: '<span class="t-cmd">fish-lsp</span> <span class="t-flag">info</span> <span class="t-flag">--version</span> <span class="t-flag">--build-time</span>',
+          output: fishInfo
+            ? [
+                `Build Version: <span class="t-green">${fishInfo.version}</span>`,
+                `Build Time:  &nbsp;&nbsp;<span class="t-green">${fishInfo.buildTime}</span>`,
+              ]
+            : 'fish-lsp version unavailable',
+        },
+      ]}
+    />
+  </div>
+
+  <!-- ── Features ─────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="section__eyebrow">Capabilities</div>
+    <h2 class="section__heading">What fish-lsp provides</h2>
+    <div class="feature-grid">
+      {[
+        { icon:"⚡", name:"Completions",       desc:"Context-aware completions with chained flag support and local symbol lookup." },
+        { icon:"📖", name:"Hover Docs",         desc:"Inline docs for commands, flags, and functions from ~/.config/fish." },
+        { icon:"🔍", name:"Go-to Definition",   desc:"Jump to any symbol definition across your entire workspace." },
+        { icon:"🔗", name:"Find References",    desc:"Scope-aware search — locally-shadowed symbols excluded." },
+        { icon:"✏️", name:"Rename",            desc:"Safe workspace-wide rename respecting fish scoping rules." },
+        { icon:"🎨", name:"Formatting",         desc:"Full document and range formatting. Works with format-on-save." },
+        { icon:"🗂️", name:"Symbols & Folding", desc:"Document/workspace symbol search and code folding." },
+        { icon:"🧠", name:"Background Analysis",desc:"Non-blocking startup analysis warms the symbol cache." },
+        { icon:"🎨", name:"Semantic Highlighting", desc:"Context-aware syntax highlighting (in supported editors)." },
+        { icon:"💡", name:"Code Actions & Diagnostics", desc:"Linting diagnostics and quick fixes from the language server." },
+        { icon:"👻", name:"Inlay hints", desc:"Virtual hint documentation for special commands."},
+      ].map(f => (
+        <div class="feature-card">
+          <div class="feature-card__icon">{f.icon}</div>
+          <div class="feature-card__name">{f.name}</div>
+          <div class="feature-card__desc">{f.desc}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Playground (try it live, before asking them to install) ── -->
+  <section class="section section--flush">
+    <PlaygroundBanner />
+  </section>
+
+  <!-- ── Install ───────────────────────────────────────────────── -->
+  <section class="section section--flush" id="install">
+    <div class="section__eyebrow">Install</div>
+    <h2 class="section__heading">Get running in seconds</h2>
+    <div class="tabs" id="pkg-tabs">
+      <button class="tab-btn tab-btn--active" data-tab="pnpm">pnpm</button>
+      <button class="tab-btn" data-tab="npm">npm</button>
+      <button class="tab-btn" data-tab="yarn">yarn</button>
+      <button class="tab-btn" data-tab="brew">brew</button>
+      <button class="tab-btn" data-tab="pacman">pacman</button>
+    </div>
+    <div class="install-block" id="tab-pnpm">
+      <div><span class="t-comment"># install globally</span></div>
+      <div><span class="t-cmd-txt">pnpm add -g fish-lsp</span></div>
+      <div style="margin-top:0.5rem"><span class="t-comment"># verify</span></div>
+      <div><span class="t-cmd-txt">fish-lsp info</span></div>
+    </div>
+    <div class="hidden install-block" id="tab-npm">
+      <div><span class="t-cmd-txt">npm install -g fish-lsp</span></div>
+      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
+    </div>
+    <div class="hidden install-block" id="tab-yarn">
+      <div><span class="t-cmd-txt">yarn global add fish-lsp</span></div>
+      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
+    </div>
+    <div class="hidden install-block" id="tab-brew">
+      <div><span class="t-cmd-txt">brew install fish-lsp</span></div>
+      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
+    </div>
+    <div class="hidden install-block" id="tab-pacman">
+      <div><span class="t-cmd-txt">pacman -S fish-lsp</span></div>
+      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
+    </div>
+    <p class="install-hint">
+      Need more detail?
+      <a href={`${DOCS_ORIGIN}/page/installation`}>See the full installation guide →</a>
+    </p>
+  </section>
+
+  <!-- ── Doc cards ────────────────────────────────────────────── -->
+  <section class="section section--flush">
+    <div class="section__eyebrow">Documentation</div>
+    <h2 class="section__heading">Everything you need</h2>
+    <div class="doc-grid">
+      {navSections.map(section =>
+        section.pages.map(page => (
+          <a href={`${DOCS_ORIGIN}/page/${page.slug}`} class="doc-card">
+            <div class="doc-card__section">{section.label}</div>
+            <div class="doc-card__title">{page.title}</div>
+            <div class="doc-card__desc">
+              {allPages.find(p => p.data.slug === page.slug)?.data.description ?? ''}
+            </div>
+          </a>
+        ))
+      )}
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  const tabs   = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+  const panels = document.querySelectorAll<HTMLDivElement>('.install-block');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset['tab'] ?? '';
+      tabs.forEach(b  => b.classList.toggle('tab-btn--active', b === btn));
+      panels.forEach(p => p.classList.toggle('hidden', p.id !== `tab-${id}`));
+    });
+  });
+</script>
+
+<style>
+/* Header/nav + logo styles now live in src/components/Header.astro */
+
+/* ── Hero ───────────────────────────────────────────────────────── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 2.5rem 3.5rem 3.5rem; text-align: center;
+  background: linear-gradient(180deg, var(--bg-0) 0%, rgba(15,19,32,0.5) 100%);
+}
+/* Tighten the gap between the header and the hero pill at ≤ lg (1024px) */
+@media (max-width: 1024px) {
+  .hero { padding: 1.5rem; }
+}
+.hero__glow {
+  position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 350px;
+  background: radial-gradient(ellipse, rgba(78,108,250,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero__pill {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.7rem;
+  color: var(--fish-blue); letter-spacing: 0.12em; text-transform: uppercase;
+  background: rgba(78,108,250,0.08); border: 1px solid rgba(78,108,250,0.25);
+  border-radius: 100px; padding: 0.3rem 0.9rem; margin-bottom: 1.5rem;
+}
+.hero__title {
+  font-family: var(--font-mono);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-weight: 700; margin: 0 0 1rem; letter-spacing: -0.03em;
+}
+.hero__title-plain  { color: var(--text-primary); }
+.hero__title-accent { color: var(--fish-blue); }
+.hero__sub {
+  font-size: 1.05rem; color: var(--text-muted);
+  max-width: 460px; margin: 0 auto 2rem; line-height: 1.6;
+}
+.hero__sub strong { color: var(--text-primary); }
+.hero__actions {
+  display: flex; gap: 0.75rem;
+  justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;
+}
+.btn-primary {
+  font-family: var(--font-mono); font-size: 0.875rem;
+  background: var(--fish-blue); color: white;
+  padding: 0.65rem 1.4rem; border-radius: 6px; text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--fish-blue-dim); color: white; }
+.btn-ghost {
+  font-family: var(--font-mono); font-size: 0.875rem;
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.65rem 1.4rem; border-radius: 6px; text-decoration: none;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { border-color: var(--fish-blue); color: var(--fish-blue); }
+
+/* Terminal styles now live in src/components/Terminal.astro */
+
+/* ── Sections ───────────────────────────────────────────────────── */
+.section { padding: 4rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+.section--flush { padding-top: 0; }
+.section__eyebrow {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fish-blue); margin-bottom: 0.5rem;
+}
+.section__heading {
+  font-family: var(--font-mono); font-size: 1.5rem;
+  margin: 0 0 1.75rem; color: var(--text-primary); font-weight: 700;
+}
+
+/* ── Feature grid ───────────────────────────────────────────────── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+}
+.feature-card {
+  background: var(--bg-1); padding: 1.5rem;
+  transition: background 0.15s; text-decoration: none; display: block;
+}
+.feature-card:hover { background: var(--bg-2); }
+.feature-card__icon { font-size: 1.35rem; margin-bottom: 0.5rem; }
+.feature-card__name {
+  font-family: var(--font-mono); font-size: 0.875rem; font-weight: 600;
+  color: var(--fish-cyan); margin-bottom: 0.3rem;
+}
+.feature-card__desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── Install tabs ───────────────────────────────────────────────── */
+.tabs { display: flex; }
+.tab-btn {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  padding: 0.4rem 0.9rem;
+  background: var(--bg-2); border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer; transition: all 0.12s;
+}
+.tab-btn:first-child { border-radius: 6px 0 0 0; border-bottom: none; }
+.tab-btn:not(:first-child) { border-left: none; border-radius: 0; border-bottom: none; }
+.tab-btn:last-child  { border-radius: 0 6px 0 0; }
+.tab-btn--active,
+.tab-btn:hover { background: var(--fish-blue); color: white; border-color: var(--fish-blue); }
+.install-block {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: 0 6px 6px 6px; padding: 1rem 1.25rem;
+  font-family: var(--font-mono); font-size: 0.875rem; color: var(--text-primary);
+}
+.hidden { display: none !important; }
+.t-cmd-txt { color: var(--fish-cyan); }
+.t-comment { color: var(--text-dim); font-style: italic; }
+.install-hint { margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); }
+
+/* ── Doc cards ──────────────────────────────────────────────────── */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;
+}
+.doc-card {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.1rem 1.25rem;
+  text-decoration: none; display: block; transition: all 0.15s;
+}
+.doc-card:hover {
+  border-color: var(--fish-blue);
+  background: rgba(78,108,250,0.07); transform: translateY(-1px);
+}
+.doc-card__section {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--fish-blue); margin-bottom: 0.3rem;
+}
+.doc-card__title {
+  font-family: var(--font-mono); font-size: 0.88rem;
+  font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;
+}
+.doc-card__desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .section { padding: 3rem 1.25rem; }
+  .feature-grid, .doc-grid { grid-template-columns: 1fr; }
+}
+</style>

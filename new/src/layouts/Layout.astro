@@ -1,0 +1,28 @@
+---
+import '@theme/global.css';
+import BaseHead from '@components/BaseHead.astro';
+
+interface Props {
+  title?:       string;
+  description?: string;
+}
+
+const {
+  title       = 'fish-lsp — Language Server for Fish Shell',
+  description = 'Full LSP support for the fish shell. Completions, hover docs, go-to-definition, rename, and workspace analysis.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <BaseHead title={title} description={description} />
+</head>
+<body>
+  <slot />
+</body>
+</html>
+
+<style is:global>
+html, body { margin: 0; width: 100%; }
+</style>

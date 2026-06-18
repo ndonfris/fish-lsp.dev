@@ -1,0 +1,81 @@
+---
+/**
+ * "Try the playground" call-to-action banner for the homepage.
+ * Self-contained: centered, own styling, links to the live playground.
+ */
+const PLAYGROUND_URL = 'https://fish-lsp.dev/playground';
+---
+<a href={PLAYGROUND_URL} target="_blank" rel="noopener noreferrer" class="pg-banner">
+  <span class="pg-banner__icon" aria-hidden="true">▶</span>
+
+  <div class="pg-banner__text">
+    <span class="pg-banner__badge">New</span>
+    <p class="pg-banner__title">
+      Try out the <strong>fish-lsp playground</strong> in your browser
+    </p>
+    <p class="pg-banner__sub">
+      Powered by Monaco Editor and a live language server — no install required.
+    </p>
+  </div>
+
+  <span class="pg-banner__cta">Open Playground ↗</span>
+</a>
+
+<style>
+.pg-banner {
+  display: flex; align-items: center; gap: 1.25rem;
+  max-width: 800px; margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(90deg, var(--bg-1), var(--bg-2) 50%, var(--bg-1));
+  border: 1px solid rgba(100,210,255,0.25);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pg-banner:hover {
+  border-color: var(--fish-cyan);
+  background: rgba(100,210,255,0.06);
+}
+
+.pg-banner__icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(100,210,255,0.12); color: var(--fish-cyan);
+  font-size: 1.05rem;
+}
+
+.pg-banner__text { flex: 1; min-width: 0; text-align: left; }
+
+.pg-banner__badge {
+  display: inline-block; margin-bottom: 0.35rem;
+  background: var(--fish-cyan); color: var(--bg-0);
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.1rem 0.5rem; border-radius: 999px;
+}
+
+.pg-banner__title { margin: 0; color: var(--text-primary); font-size: 1rem; line-height: 1.4; }
+.pg-banner__title strong { color: var(--fish-cyan); font-weight: 600; }
+.pg-banner__sub { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.8rem; }
+
+.pg-banner__cta {
+  flex-shrink: 0;
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--fish-cyan);
+  border: 1px solid rgba(100,210,255,0.3);
+  padding: 0.45rem 0.85rem; border-radius: 6px; white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pg-banner:hover .pg-banner__cta {
+  background: rgba(100,210,255,0.1);
+  border-color: var(--fish-cyan);
+}
+
+@media (max-width: 640px) {
+  .pg-banner { flex-direction: column; text-align: center; gap: 0.85rem; padding: 1.25rem; }
+  .pg-banner__text { text-align: center; }
+  .pg-banner__sub  { display: none; }
+  .pg-banner__icon { display: none; }
+}
+</style>

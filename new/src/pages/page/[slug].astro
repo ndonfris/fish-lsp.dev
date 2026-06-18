@@ -1,0 +1,30 @@
+---
+import '@theme/global.css';
+import { getCollection, render } from 'astro:content';
+import DocsLayout from '@layouts/DocsLayout.astro';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const pages = await getCollection('pages');
+  return pages.map(page => ({
+    params: { slug: page.data.slug },
+    props:  { page },
+  }));
+};
+
+type Props = {
+  page: Awaited<ReturnType<typeof getCollection<'pages'>>>[number];
+};
+
+const { page }   = Astro.props;
+const { Content } = await render(page);
+
+// Repo-relative source path, e.g. "src/content/installation.md".
+// `filePath` is reported relative to the Astro project root (currently new/,
+// soon the git root), so the path stays valid after the move to repo root.
+const editPath = page.filePath ?? `src/content/${page.id}.md`;
+---
+
+<DocsLayout frontmatter={page.data} editPath={editPath}>
+  <Content />
+</DocsLayout>

@@ -1,0 +1,3 @@
+# Cloudflare Pages _redirects
+# Astro copies public/ to dist/ automatically
+/page   /page/installation   302

@@ -1,0 +1,208 @@
+@import 'tailwindcss';
+
+/* ─── Design tokens ───────────────────────────────────────────── */
+@layer base {
+  :root {
+    --fish-blue:     #4e6cfa;
+    --fish-blue-dim: #3a55e0;
+    --fish-blue-glow: rgba(78, 108, 250, 0.2);
+    --fish-cyan:     #64d2ff;
+    --fish-green:    #32d583;
+    --fish-yellow:   #ffd166;
+    --fish-red:      #ff6b6b;
+
+    --bg-0:  #0a0d14;
+    --bg-1:  #0f1320;
+    --bg-2:  #141829;
+    --bg-3:  #1c2236;
+
+    --border:       rgba(78, 108, 250, 0.2);
+    --text-primary: #e8ecf8;
+    --text-muted:   #7a8ab4;
+    --text-dim:     #4a5578;
+
+    --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code',
+                 'Source Code Pro', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* ─── Base reset ──────────────────────────────────────────────── */
+html, body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background: var(--bg-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+a             { color: var(--fish-blue); text-decoration: none; }
+a:hover       { color: var(--fish-cyan); }
+code, pre     { font-family: var(--font-mono); }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fish-blue-dim); }
+
+/* ─── Prose (rendered markdown) ──────────────────────────────── */
+/* Width is governed by the centered <Container> (max-w-3xl); prose fills it. */
+.prose {
+  max-width: 100%;
+  color: var(--text-primary);
+}
+
+.prose h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--fish-blue);
+  letter-spacing: -0.02em;
+}
+
+.prose h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2.5rem 0 0.75rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.5rem;
+  color: var(--fish-cyan);
+}
+
+.prose p   { margin: 0 0 1rem; }
+.prose ul,
+.prose ol  { margin: 0.5rem 0 1rem 1.5rem; }
+.prose li  { margin: 0.25rem 0; }
+
+.prose a {
+  color: var(--fish-blue);
+  border-bottom: 1px solid rgba(78,108,250,0.3);
+  transition: color 0.15s, border-color 0.15s;
+}
+.prose a:hover {
+  color: var(--fish-cyan);
+  border-color: rgba(100,210,255,0.5);
+}
+
+.prose code {
+  background: var(--bg-3);
+  color: var(--fish-cyan);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  border: 1px solid var(--border);
+}
+
+.prose pre {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  position: relative;
+}
+
+.prose pre::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.5rem; right: 0.75rem;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--fish-blue);
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-2);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin: 1.25rem 0;
+}
+
+.prose th,
+.prose td {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.prose th {
+  background: var(--bg-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.prose img {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  max-width: 100%;
+  margin: 1.5rem 0;
+}
+
+.prose strong { color: var(--fish-yellow); font-weight: 600; }
+.prose hr     { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+/* ─── Callouts ────────────────────────────────────────────────── */
+.callout {
+  padding: 0.875rem 1.25rem;
+  border-radius: 6px;
+  border: 1px solid;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+.callout-note {
+  background: rgba(78,108,250,0.08);
+  border-color: rgba(78,108,250,0.3);
+  color: var(--fish-blue);
+}
+.callout-warn {
+  background: rgba(255,209,102,0.08);
+  border-color: rgba(255,209,102,0.3);
+  color: var(--fish-yellow);
+}
+
+/* ─── Syntax token colours (used in terminal demos) ──────────── */
+.token-cmd     { color: #64d2ff; }
+.token-flag    { color: #ffd166; }
+.token-str     { color: #a8ff78; }
+.token-var     { color: #f78fb3; }
+.token-comment { color: #4a5578; font-style: italic; }
