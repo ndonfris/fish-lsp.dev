@@ -1,3 +1,7 @@
 # Cloudflare Pages _redirects
 # Astro copies public/ to dist/ automatically
-/page   /page/installation   302
+/docs   /docs/installation   302
+
+# Legacy /page/* paths (renamed to /docs/*)
+/page   /docs/installation   301
+/page/* /docs/:splat         301

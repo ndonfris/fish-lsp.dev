@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+/* GitHub-style alerts (`> [!NOTE]` …) — structural styles from the plugin.
+   Colors + theming live in the "GitHub alerts" block lower in this file. */
+@import 'remark-github-alerts/styles/github-base.css';
 
 /* ─── Tailwind theme tokens ───────────────────────────────────────
    Registers the brand palette as utilities:
@@ -60,6 +63,7 @@
     --fish-red:      #ff6b6b;
     --fish-white:    #e8ecf8;
     --fish-alt-white: #afafff;
+    --fish-primary: #e8ecf8; /* text-primary */
 
     --bg-0:  #0a0d14;
     --bg-1:  #0f1320;
@@ -278,24 +282,38 @@
 .prose em     { font-style: italic; font-weight: 400; opacity: 95%;  }
 .prose hr     { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
-/* ─── Callouts ────────────────────────────────────────────────── */
-.callout {
-  padding: 0.875rem 1.25rem;
-  border-radius: 6px;
-  border: 1px solid;
+/* ─── GitHub alerts (remark-github-alerts) ───────────────────────
+   Base structure comes from `github-base.css` (imported at top). Here we
+   define the accent colors (unconditionally dark — the site has no light
+   mode) and add a tinted, rounded surface to match the site's blockquotes. */
+:root {
+  --color-note:      var(--fish-blue);
+  --color-tip:       var(--fish-green);
+  --color-important: #a371f7;
+  --color-warning:   var(--fish-yellow);
+  --color-caution:   var(--fish-red);
+}
+.prose .markdown-alert {
   margin: 1.5rem 0;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0 6px 6px 0;
   font-size: 0.9rem;
+  color: var(--text-muted);
+  background: var(--bg-2);
 }
-.callout-note {
-  background: rgba(78,108,250,0.08);
-  border-color: rgba(78,108,250,0.3);
-  color: var(--fish-blue);
+.prose .markdown-alert .markdown-alert-title {
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.callout-warn {
-  background: rgba(255,209,102,0.08);
-  border-color: rgba(255,209,102,0.3);
-  color: var(--fish-yellow);
-}
+/* Faint accent wash per kind (border-left + title color come from base CSS) */
+.prose .markdown-alert-note      { background: color-mix(in srgb, var(--color-note)      8%, var(--bg-2)); }
+.prose .markdown-alert-tip       { background: color-mix(in srgb, var(--color-tip)       8%, var(--bg-2)); }
+.prose .markdown-alert-important { background: color-mix(in srgb, var(--color-important) 8%, var(--bg-2)); }
+.prose .markdown-alert-warning   { background: color-mix(in srgb, var(--color-warning)   8%, var(--bg-2)); }
+.prose .markdown-alert-caution   { background: color-mix(in srgb, var(--color-caution)   8%, var(--bg-2)); }
 
 /* ─── Lists ───────────────────────────────────────────────────── */
 ul {

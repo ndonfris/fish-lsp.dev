@@ -40,9 +40,9 @@ const navSections: NavSection[] = [
   })),
 }));
 
-// Derive the active slug from the current URL (e.g. /page/installation).
+// Derive the active slug from the current URL (e.g. /docs/installation).
 const path = Astro.url.pathname.replace(/\/$/, '');
-const currentSlug = path.match(/^\/page\/(.+)$/)?.[1] ?? '';
+const currentSlug = path.match(/^\/docs\/(.+)$/)?.[1] ?? '';
 ---
 
 <button
@@ -70,7 +70,7 @@ const currentSlug = path.match(/^\/page\/(.+)$/)?.[1] ?? '';
           return (
             <li>
               <a
-                href={`/page/${page.slug}`}
+                href={`/docs/${page.slug}`}
                 class={`nav-drawer__link ${active ? 'nav-drawer__link--active' : ''}`}
               >
                 {page.title}
@@ -82,18 +82,20 @@ const currentSlug = path.match(/^\/page\/(.+)$/)?.[1] ?? '';
     </div>
   ))}
 
-  <div class="nav-drawer__external">
+  <div class="nav-drawer__group">
     <p class="nav-drawer__label">Links</p>
-    <a href="https://github.com/ndonfris/fish-lsp"                                  target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://www.npmjs.com/package/fish-lsp"                                target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> NPM package <Icon name="npm" class="my-auto ml-2" /></p></a> 
-    <a href="https://github.com/ndonfris/vscode-fish-lsp"                           target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> vscode-fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://github.com/ndonfris/fish-lsp.dev"                              target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> fish-lsp.dev <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://github.com/ndonfris/fish-lsp/issues"                           target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Issues <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://github.com/ndonfris/fish-lsp/wiki"                             target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Wiki <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://github.com/ndonfris/fish-lsp/discussions"                      target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Discussion <Icon name="github" class="my-auto ml-2" /></p></a>
-    <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> VSCode <Icon name="vscode" class="my-auto ml-2" /></p></a>
-    <a href="https://open-vsx.org/extension/ndonfris/fish-lsp"                      target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> VSCodium <Icon name="vscode" class="my-auto ml-2" /></p></a> 
-    <a href="https://fish-lsp.dev/playground"                                       target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> web playground <Icon name="browser-editor" class="my-auto ml-2" /></p></a>  
+    <div class="pl-2 nav-drawer__list">
+      <a href="https://github.com/ndonfris/fish-lsp"                                  target="_blank" class="flex pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://www.npmjs.com/package/fish-lsp"                                target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">npm package <Icon name="npm" class="my-auto ml-2" /></p></a> 
+      <a href="https://github.com/ndonfris/vscode-fish-lsp"                           target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">vscode-fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://github.com/ndonfris/fish-lsp.dev"                              target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">fish-lsp.dev <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://github.com/ndonfris/fish-lsp/issues"                           target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">Issues <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://github.com/ndonfris/fish-lsp/wiki"                             target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">Wiki <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://github.com/ndonfris/fish-lsp/discussions"                      target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">Discussion <Icon name="github" class="my-auto ml-2" /></p></a>
+      <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">VSCode <Icon name="vscode" class="my-auto ml-2" /></p></a>
+      <a href="https://open-vsx.org/extension/ndonfris/fish-lsp"                      target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">VSCodium <Icon name="vscode" class="my-auto ml-2" /></p></a> 
+      <a href="https://fish-lsp.dev/playground"                                       target="_blank" class="flex pt-2 pl-5 nav-drawer__link"><p class="inline-flex justify-center text-center align-middle py-auto">web playground <Icon name="browser-editor" class="my-auto ml-2" /></p></a>  
+    </div>
   </div>
 </aside>
 

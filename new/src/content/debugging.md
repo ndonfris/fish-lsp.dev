@@ -76,7 +76,7 @@ Verify your client config passes `start` as the argument:
 }
 ```
 
-See [Client Configurations](/page/client-configurations) for editor-specific examples.
+See [Client Configurations](/docs/client-configurations) for editor-specific examples.
 
 ## Logging
 

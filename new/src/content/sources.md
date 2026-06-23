@@ -8,6 +8,7 @@ section: Reference
 
 ## Sources
 
+> [!NOTE]
 > The following sources were major influences on the project's overall design and structure.
 
 - __Official Documentation__ 
@@ -39,9 +40,11 @@ section: Reference
 
 ## [VSCODE EXTENSION EXAMPLES](https://github.com/microsoft/vscode-extension-samples/tree/main)
 
-> _helpful guides provided by the vscode-languge-server package, as guides._ __Typically__ these are
-> very helpful for getting an initial understanding of how the language-service could be used in the
-> client.  
+> [!NOTE]
+>
+> _Helpful guides provided by the vscode-languge-server package, as guides._ 
+>
+> ___Typically___ _these are very helpful for getting an initial understanding of how the language-service could be used in the client._  
 
 - [Diagnostic](https://github.com/microsoft/vscode-extension-samples/blob/main/diagnostic-related-information-sample/src/extension.ts)
 - [Code Actions](https://github.com/microsoft/vscode-extension-samples/tree/main/code-actions-sample)
