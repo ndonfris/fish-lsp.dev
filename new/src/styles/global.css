@@ -97,6 +97,12 @@
     line-height: 1.7;
   }
 
+  /* The mobile header is `position: fixed` (see Header.astro) — reserve its
+     height so page content isn't hidden underneath it. */
+  @media (max-width: 640px) {
+    body { padding-top: 56px; }
+  }
+
   a             { color: var(--fish-blue); text-decoration: none; }
   a:hover       { color: var(--fish-cyan); }
   code, pre     { font-family: var(--font-mono); }

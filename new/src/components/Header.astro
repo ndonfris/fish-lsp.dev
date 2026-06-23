@@ -74,9 +74,9 @@ const isDocs = variant === 'docs';
 }
 
 /* On mobile, `position: sticky` is unreliable (the bar drifts / its top edge
-   clips during scroll). Pin it with `position: fixed` instead — the page gets
-   a matching `padding-top` in global.css so content isn't hidden underneath.
-   Opaque background (no blur) so it always repaints cleanly. */
+   clips during scroll), so pin it with `position: fixed`. The page reserves its
+   height via `body { padding-top }` in global.css so content isn't hidden
+   underneath. Opaque background (no blur) so it always repaints cleanly. */
 @media (max-width: 640px) {
   .site-header {
     position: fixed; top: 0; left: 0; right: 0;
