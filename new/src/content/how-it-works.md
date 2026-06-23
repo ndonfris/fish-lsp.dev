@@ -2,7 +2,7 @@
 title: How It Works
 description: Architecture overview — tree-sitter, workspace analysis, and the LSP lifecycle
 slug: how-it-works
-order: 6
+order: 8
 section: Reference
 ---
 
@@ -70,3 +70,14 @@ Override workspace paths via client initialization options:
 ```
 
 See [Client Configurations](/page/client-configurations) for per-editor examples.
+
+## Request flow
+
+```mermaid
+flowchart LR
+    Editor -->|LSP request| Server
+    Server --> Parser[tree-sitter-fish]
+    Parser --> Analyzer
+    Analyzer -->|symbols, diagnostics| Server
+    Server -->|LSP response| Editor
+```

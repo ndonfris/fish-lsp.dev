@@ -1,0 +1,51 @@
+---
+title: Installation
+description: Install fish-lsp via npm, yarn, pnpm, system packages, or from source
+slug: installation
+order: 2
+section: Getting Started
+---
+import CodeTabs from '@components/CodeTabs.astro';
+
+# Installation
+
+`fish-lsp` can be installed through several package managers. Some language
+clients (e.g., [VSCode](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp))
+will automatically install the language server for you. For manual installation,
+pick your package manager below.
+
+<CodeTabs
+  id="install-docs"
+  tabs={[
+    { label: 'npm',    lines: ['# global installation', 'npm install -g fish-lsp', '', 'fish-lsp info'] },
+    { label: 'yarn',   lines: ['# global installation', 'yarn global add fish-lsp', '', 'fish-lsp info'] },
+    { label: 'pnpm',   lines: ['# global installation', 'pnpm add -g fish-lsp', '', 'fish-lsp info'] },
+    { label: 'brew',   lines: ['# macOS / Linux', 'brew install fish-lsp', '', 'fish-lsp info'] },
+    { label: 'pacman', lines: ['# Arch Linux', 'pacman -S fish-lsp', '', 'fish-lsp info'] },
+    { label: 'nix',    lines: ['# NixOS installation', 'nix-env -iA nixpkgs.fish-lsp', '', 'fish-lsp info'] },
+    { label: 'conda',  lines: ['conda install -c conda-forge fish-lsp', '', 'fish-lsp info'] },
+    { label: 'mamba',  lines: ['mamba install -c conda-forge fish-lsp', '', 'fish-lsp info'] },
+  ]}
+/>
+
+> **Note:** System package availability varies by distro.
+
+## Verify the Installation
+
+```fish
+fish-lsp --help
+fish-lsp info
+```
+
+## Install Shell Completions
+
+```fish
+fish-lsp complete > ~/.config/fish/completions/fish-lsp.fish
+```
+
+> **Note:** Required for node-based installs. Source builds write completions automatically.
+
+## Building from Source
+
+See [Building from Source](/page/building-from-source) for full instructions.
+

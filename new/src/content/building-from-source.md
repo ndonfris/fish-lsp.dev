@@ -2,7 +2,7 @@
 title: Building from Source
 description: Clone the repo and build fish-lsp locally with yarn or pnpm
 slug: building-from-source
-order: 2
+order: 3
 section: Getting Started
 ---
 

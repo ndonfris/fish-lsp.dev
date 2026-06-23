@@ -4,6 +4,7 @@ import Header   from '@components/Header.astro';
 import Footer   from '@components/Footer.astro';
 import Terminal from '@components/Terminal.astro';
 import PlaygroundBanner from '@components/PlaygroundBanner.astro';
+import CodeTabs from '@components/CodeTabs.astro';
 import '@theme/global.css';
 import { getCollection } from 'astro:content';
 import type { NavSection } from '@typedefs/content';
@@ -81,34 +82,36 @@ const fishInfo = await getFishInfo();
   </div>
 
   <!-- ── Features ─────────────────────────────────────────────── -->
-  <section class="section">
+  <section class="section" id="Capabilities">
     <div class="section__eyebrow">Capabilities</div>
     <h2 class="section__heading">What fish-lsp provides</h2>
-    <div class="feature-grid">
+    <div class="flex flex-wrap justify-center gap-4">
       {[
         { icon:"⚡", name:"Completions",       desc:"Context-aware completions with chained flag support and local symbol lookup." },
         { icon:"📖", name:"Hover Docs",         desc:"Inline docs for commands, flags, and functions from ~/.config/fish." },
         { icon:"🔍", name:"Go-to Definition",   desc:"Jump to any symbol definition across your entire workspace." },
         { icon:"🔗", name:"Find References",    desc:"Scope-aware search — locally-shadowed symbols excluded." },
-        { icon:"✏️", name:"Rename",            desc:"Safe workspace-wide rename respecting fish scoping rules." },
-        { icon:"🎨", name:"Formatting",         desc:"Full document and range formatting. Works with format-on-save." },
-        { icon:"🗂️", name:"Symbols & Folding", desc:"Document/workspace symbol search and code folding." },
-        { icon:"🧠", name:"Background Analysis",desc:"Non-blocking startup analysis warms the symbol cache." },
-        { icon:"🎨", name:"Semantic Highlighting", desc:"Context-aware syntax highlighting (in supported editors)." },
+        { icon:"✏️", name:"Rename",            desc:"Safe workspace-wide rename respecting fish scoping rules, contextually infering valid rename ranges preventing incorrect matches" },
+        { icon:"🎨", name:"Formatting & Folding",         desc:"Full document and range formatting. Formatting on input typing and folding elements supported as well" },
+        { icon:"🎨", name:"Semantic Highlighting", desc:"Context-aware syntax highlighting (in supported editors) of semantic tokens." },
+        { icon:"🧠", name:"Background Analysis",desc:"Non-blocking startup analysis to process entire workspace wide documents during server initialization." },
+        { icon:"🗂️", name:"Document/Workspace Symbols", desc:"Symbol recognition infered via definition context, allowing for both local document & full workspace querying"},
         { icon:"💡", name:"Code Actions & Diagnostics", desc:"Linting diagnostics and quick fixes from the language server." },
         { icon:"👻", name:"Inlay hints", desc:"Virtual hint documentation for special commands."},
       ].map(f => (
-        <div class="feature-card">
-          <div class="feature-card__icon">{f.icon}</div>
-          <div class="feature-card__name">{f.name}</div>
-          <div class="feature-card__desc">{f.desc}</div>
+        <div class="flex-[1_1_200px] max-w-70 rounded-[10px] border border-line bg-surface-1 p-6 transition-colors hover:bg-surface-2 max-sm:max-w-none">
+          <div class="mb-2 text-[1.35rem]">{f.icon}</div>
+          <div class="mb-[0.3rem] font-mono text-[0.875rem] font-semibold text-fish-cyan">{f.name}</div>
+          <div class="text-[0.8rem] leading-normal text-ink-muted">{f.desc}</div>
         </div>
       ))}
     </div>
   </section>
 
-  <!-- ── Playground (try it live, before asking them to install) ── -->
-  <section class="section section--flush">
+  <!-- ── playground ────────────────────────────────────────────── -->
+  <section class="section section--flush" id="playground">
+    <div class="section__eyebrow">Playground</div>
+    <h2 class="section__heading">Test directly in your web browser</h2>
     <PlaygroundBanner />
   </section>
 
@@ -116,35 +119,20 @@ const fishInfo = await getFishInfo();
   <section class="section section--flush" id="install">
     <div class="section__eyebrow">Install</div>
     <h2 class="section__heading">Get running in seconds</h2>
-    <div class="tabs" id="pkg-tabs">
-      <button class="tab-btn tab-btn--active" data-tab="pnpm">pnpm</button>
-      <button class="tab-btn" data-tab="npm">npm</button>
-      <button class="tab-btn" data-tab="yarn">yarn</button>
-      <button class="tab-btn" data-tab="brew">brew</button>
-      <button class="tab-btn" data-tab="pacman">pacman</button>
-    </div>
-    <div class="install-block" id="tab-pnpm">
-      <div><span class="t-comment"># install globally</span></div>
-      <div><span class="t-cmd-txt">pnpm add -g fish-lsp</span></div>
-      <div style="margin-top:0.5rem"><span class="t-comment"># verify</span></div>
-      <div><span class="t-cmd-txt">fish-lsp info</span></div>
-    </div>
-    <div class="hidden install-block" id="tab-npm">
-      <div><span class="t-cmd-txt">npm install -g fish-lsp</span></div>
-      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
-    </div>
-    <div class="hidden install-block" id="tab-yarn">
-      <div><span class="t-cmd-txt">yarn global add fish-lsp</span></div>
-      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
-    </div>
-    <div class="hidden install-block" id="tab-brew">
-      <div><span class="t-cmd-txt">brew install fish-lsp</span></div>
-      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
-    </div>
-    <div class="hidden install-block" id="tab-pacman">
-      <div><span class="t-cmd-txt">pacman -S fish-lsp</span></div>
-      <div style="margin-top:0.5rem"><span class="t-cmd-txt">fish-lsp info</span></div>
-    </div>
+    <CodeTabs
+      id="install-pkg"
+      tabs={[
+        { label: 'npm',    lines: ['# install globally', 'npm install -g fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'yarn',   lines: ['# install globally', 'yarn global add fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'pnpm',   lines: ['# install globally', 'pnpm add -g fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'brew',   lines: ['# install globally', 'brew install fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'pacman', lines: ['# install globally', 'pacman -S fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'nix',    lines: ['# install globally', 'nix profile install nixpkgs#fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'conda',  lines: ['# install globally', 'conda install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'mamba',  lines: ['# install globally', 'mamba install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'curl',   lines: ['# install globally', 'curl -fsSL https://fish-lsp.dev/install.sh | fish', '', '# verify', 'fish-lsp info'] },
+      ]}
+    />
     <p class="install-hint">
       Need more detail?
       <a href={`${DOCS_ORIGIN}/page/installation`}>See the full installation guide →</a>
@@ -173,19 +161,7 @@ const fishInfo = await getFishInfo();
   <Footer />
 </Layout>
 
-<script>
-  const tabs   = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
-  const panels = document.querySelectorAll<HTMLDivElement>('.install-block');
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset['tab'] ?? '';
-      tabs.forEach(b  => b.classList.toggle('tab-btn--active', b === btn));
-      panels.forEach(p => p.classList.toggle('hidden', p.id !== `tab-${id}`));
-    });
-  });
-</script>
-
-<style>
+<style is:global>
 /* Header/nav + logo styles now live in src/components/Header.astro */
 
 /* ── Hero ───────────────────────────────────────────────────────── */
@@ -259,45 +235,11 @@ const fishInfo = await getFishInfo();
 }
 
 /* ── Feature grid ───────────────────────────────────────────────── */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1px; background: var(--border);
-  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
-}
-.feature-card {
-  background: var(--bg-1); padding: 1.5rem;
-  transition: background 0.15s; text-decoration: none; display: block;
-}
-.feature-card:hover { background: var(--bg-2); }
-.feature-card__icon { font-size: 1.35rem; margin-bottom: 0.5rem; }
-.feature-card__name {
-  font-family: var(--font-mono); font-size: 0.875rem; font-weight: 600;
-  color: var(--fish-cyan); margin-bottom: 0.3rem;
-}
-.feature-card__desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+/* Feature grid + cards now use Tailwind utilities (flex-wrap + justify-center
+   so an incomplete last row centers; cards grow to a max-width cap so full
+   rows still fill). */
 
-/* ── Install tabs ───────────────────────────────────────────────── */
-.tabs { display: flex; }
-.tab-btn {
-  font-family: var(--font-mono); font-size: 0.78rem;
-  padding: 0.4rem 0.9rem;
-  background: var(--bg-2); border: 1px solid var(--border);
-  color: var(--text-muted); cursor: pointer; transition: all 0.12s;
-}
-.tab-btn:first-child { border-radius: 6px 0 0 0; border-bottom: none; }
-.tab-btn:not(:first-child) { border-left: none; border-radius: 0; border-bottom: none; }
-.tab-btn:last-child  { border-radius: 0 6px 0 0; }
-.tab-btn--active,
-.tab-btn:hover { background: var(--fish-blue); color: white; border-color: var(--fish-blue); }
-.install-block {
-  background: var(--bg-1); border: 1px solid var(--border);
-  border-radius: 0 6px 6px 6px; padding: 1rem 1.25rem;
-  font-family: var(--font-mono); font-size: 0.875rem; color: var(--text-primary);
-}
-.hidden { display: none !important; }
-.t-cmd-txt { color: var(--fish-cyan); }
-.t-comment { color: var(--text-dim); font-style: italic; }
+/* ── Install (tabs now live in src/components/CodeTabs.astro) ─────── */
 .install-hint { margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); }
 
 /* ── Doc cards ──────────────────────────────────────────────────── */

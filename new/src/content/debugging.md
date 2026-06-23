@@ -2,7 +2,7 @@
 title: Debugging
 description: Troubleshoot fish-lsp installation and editor connection issues
 slug: debugging
-order: 5
+order: 7
 section: Reference
 ---
 

@@ -10,7 +10,10 @@
  *
  * The header spans full width (it is NOT wrapped in the centered Container).
  */
-import { DOCS_ORIGIN } from '../config';
+import { Icon } from 'astro-icon/components';
+import HeaderIcon from '@components/HeaderIcon.astro';
+import HamburgerMenu from '@components/HamburgerMenu.astro';
+// import { DOCS_ORIGIN } from '../config';
 
 interface Props {
   variant?: 'home' | 'docs';
@@ -18,43 +21,41 @@ interface Props {
 const { variant = 'home' } = Astro.props;
 const isDocs = variant === 'docs';
 
-const logoHref    = isDocs ? 'https://fish-lsp.dev' : '/';
-const docsHref    = `${DOCS_ORIGIN}/page/installation`;
-const installHref = isDocs ? 'https://www.npmjs.com/package/fish-lsp' : '#install';
+// const logoHref    = isDocs ? DOCS_ORIGIN : '/';
+//const docsHref    = `${DOCS_ORIGIN}/page/installation`;
+//const installHref = isDocs ? 'https://www.npmjs.com/package/fish-lsp' : '#install';
 ---
 <header class="site-header">
   <div class="site-header__left">
-    {isDocs && (
-      <button
-        type="button"
-        class="site-header__menu"
-        aria-label="Toggle documentation menu"
-        @click="sidebarOpen = !sidebarOpen"
-        :aria-expanded="sidebarOpen ? 'true' : 'false'"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                d="M4 7h16M4 12h16M4 17h16"/>
-        </svg>
-      </button>
-    )}
-    <a href={logoHref} class="site-header__logo" aria-label="fish-lsp home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-           class="logo-icon" aria-hidden="true">
-        <path fill="currentColor" d="M19.11 5H21V3H3v2h1.89A9.93 9.93 0 0 0 2 12c0 3.97 2.31 7.39 5.66 9h8.68A9.973 9.973 0 0 0 22 12c0-2.73-1.11-5.2-2.89-7m-5.86 12c-1.16 0-2.19-.36-2.92-.83c-.66.83-2 .83-3.33.83c1.1 0 1.5-1.12 1.5-2.5S8.1 12 7 12c1.33 0 2.67 0 3.37.91c.69-.55 1.72-.91 2.88-.91c2.07 0 3.75 1.12 3.75 2.5S15.32 17 13.25 17M16 7c-2.44 1.71-5.56 1.71-8 0c-.94.66-2 1.09-3.05 1.25c.36-.67.82-1.29 1.37-1.84L7.7 5h8.6l1.38 1.41a7.87 7.87 0 0 1 1.37 1.84A7.272 7.272 0 0 1 16 7"/>
-      </svg>
+    <HamburgerMenu />
+
+    <a href='/' class="flex items-center max-sm:gap-x-1.5 sm:gap-x-2.5 shrink" aria-label="fish-lsp home">
+      <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" -->
+      <!--      class="logo-icon" aria-hidden="true"> -->
+      <!--   <path fill="currentColor" d="M19.11 5H21V3H3v2h1.89A9.93 9.93 0 0 0 2 12c0 3.97 2.31 7.39 5.66 9h8.68A9.973 9.973 0 0 0 22 12c0-2.73-1.11-5.2-2.89-7m-5.86 12c-1.16 0-2.19-.36-2.92-.83c-.66.83-2 .83-3.33.83c1.1 0 1.5-1.12 1.5-2.5S8.1 12 7 12c1.33 0 2.67 0 3.37.91c.69-.55 1.72-.91 2.88-.91c2.07 0 3.75 1.12 3.75 2.5S15.32 17 13.25 17M16 7c-2.44 1.71-5.56 1.71-8 0c-.94.66-2 1.09-3.05 1.25c.36-.67.82-1.29 1.37-1.84L7.7 5h8.6l1.38 1.41a7.87 7.87 0 0 1 1.37 1.84A7.272 7.272 0 0 1 16 7"/> -->
+      <!-- </svg> -->
+      <Icon name="fish-bowl" class="logo-icon" />
       <span class="logo-wordmark"><span class="logo-accent">fish-lsp</span></span>
     </a>
     {isDocs && <span class="site-header__badge">docs</span>}
   </div>
 
-  <nav class="site-header__right">
-    {!isDocs && <a href={docsHref} class="site-header__link">Docs</a>}
-    <a href="https://fish-lsp.dev/playground" target="_blank" rel="noopener noreferrer"
-       class="site-header__playground">▶ Playground</a>
-    <a href="https://github.com/ndonfris/fish-lsp" target="_blank" rel="noopener noreferrer"
-       class="site-header__link site-header__link--hide-xs">GitHub</a>
-    <a href={installHref} class="site-header__cta">Install →</a>
+  <nav class="flex items-center gap-4 shrink-0">
+  <!-- <nav class="site-header__right"> -->
+    <!-- {!isDocs && <a href={docsHref} class="ssite-header__link>Docs</a>} -->
+    <!-- <a href="https://fish-lsp.dev/playground" target="_blank" rel="noopener noreferrer" -->
+    <!--    class="ssite-header__playground>▶ Playground</a> -->
+    <!-- <a href="https://github.com/ndonfris/fish-lsp" target="_blank" rel="noopener noreferrer" -->
+    <!--    class="ssite-header__link site-header__link--hide-xs>GitHub</a> -->
+    <!-- <a href={installHref} class="ssite-header__cta>Install →</a> -->
+    <HeaderIcon name="github" />
+    <HeaderIcon name="npm" />
+    <HeaderIcon name="vscode" />
+    <HeaderIcon name="playground" />
+    <!-- <a href="https://github.com/ndonfris/fish-lsp" target="_blank" rel="noopener noreferrer" class=""><Icon name="github" /></a> -->
+    <!-- <a href="https://www.npmjs.com/package/fish-lsp" target="_blank" rel="noopener noreferrer" class=""><Icon name="npm" /></a> -->
+    <!-- <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" rel="noopener noreferrer" class=""><Icon name="vscode" /></a>  -->
+    <!-- <a href="https://fish-lsp.dev/playground" target="_blank" rel="noopener noreferrer" class="my-auto text-xs"><Icon name="playground-terminal" /></a> -->
   </nav>
 </header>
 
@@ -68,16 +69,7 @@ const installHref = isDocs ? 'https://www.npmjs.com/package/fish-lsp' : '#instal
 .site-header__left  { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
 .site-header__right { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
 
-/* Hamburger: shown only while the sidebar is a collapsible drawer (≤1240px) */
-.site-header__menu {
-  display: none;
-  align-items: center; justify-content: center;
-  background: none; border: none; cursor: pointer;
-  color: var(--text-muted); padding: 0.25rem; border-radius: 4px;
-  transition: color 0.12s;
-}
-.site-header__menu:hover { color: var(--fish-blue); }
-@media (max-width: 1240px) { .site-header__menu { display: inline-flex; } }
+/* Hamburger button + drawer now live in src/components/HamburgerMenu.astro */
 
 /* LogoMark */
 .site-header__logo {

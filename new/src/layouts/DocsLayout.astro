@@ -4,8 +4,9 @@ import BaseHead   from '@components/BaseHead.astro';
 import Header     from '@components/Header.astro';
 import Container  from '@components/Container.astro';
 import Footer     from '@components/Footer.astro';
-import { getCollection } from 'astro:content';
-import type { NavSection, PageFrontmatter } from '@typedefs/content';
+import DocsPager  from '@components/DocsPager.astro';
+import { Icon } from 'astro-icon/components';
+import type { PageFrontmatter } from '@typedefs/content';
 
 interface Props {
   frontmatter: PageFrontmatter;
@@ -14,32 +15,6 @@ interface Props {
 }
 
 const { frontmatter, editPath } = Astro.props;
-
-const allPages = await getCollection('pages');
-const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
-const grouped = new Map<string, typeof allPages>();
-
-for (const page of allPages) {
-  const sec = page.data.section ?? 'Other';
-  if (!grouped.has(sec)) grouped.set(sec, []);
-  grouped.get(sec)!.push(page);
-}
-for (const pages of grouped.values()) {
-  pages.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
-}
-
-const navSections: NavSection[] = [
-  ...sectionOrder.filter(s => grouped.has(s)),
-  ...[...grouped.keys()].filter(s => !sectionOrder.includes(s)),
-].map(label => ({
-  label,
-  pages: (grouped.get(label) ?? []).map(p => ({
-    title: p.data.title,
-    slug:  p.data.slug,
-  })),
-}));
-
-const currentSlug = frontmatter.slug;
 ---
 
 <!doctype html>
@@ -47,165 +22,90 @@ const currentSlug = frontmatter.slug;
 <head>
   <BaseHead title={`${frontmatter.title} — fish-lsp`} description={frontmatter.description} />
 </head>
-<body x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+<body>
 
   <Header variant="docs" />
 
   <div class="docs-body">
 
-    <!-- Backdrop: only interactive in drawer mode (small screens) -->
-    <div
-      class="docs-backdrop"
-      :class="{ 'docs-backdrop--open': sidebarOpen }"
-      @click="sidebarOpen = false"
-      aria-hidden="true"
-    ></div>
+    <!-- Sidebar nav + hamburger drawer now live in HamburgerMenu.astro (in the Header) -->
 
-    <!-- ── Sidebar (floats above content; collapsible drawer when narrow) ── -->
-    <aside class="docs-sidebar" id="sidebar" :class="{ open: sidebarOpen }">
-      {navSections.map(section => (
-        <div class="docs-sidebar__group">
-          <p class="docs-sidebar__label">{section.label}</p>
-          <ul class="docs-sidebar__list">
-            {section.pages.map(page => {
-              const active = page.slug === currentSlug;
-              return (
-                <li>
-                  <a
-                    href={`/page/${page.slug}`}
-                    class={`docs-sidebar__link ${active ? 'docs-sidebar__link--active' : ''}`}
-                  >
-                    {page.title}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-
-      <div class="docs-sidebar__external">
-        <p class="docs-sidebar__label">Links</p>
-        <a href="https://github.com/ndonfris/fish-lsp/wiki"        target="_blank" class="docs-sidebar__ext-link">→ Wiki</a>
-        <a href="https://github.com/ndonfris/fish-lsp/discussions"  target="_blank" class="docs-sidebar__ext-link">→ Discussions</a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" class="docs-sidebar__ext-link">→ VSCode Extension</a>
-      </div>
-    </aside>
-
-    <!-- ── Main content: centered container; sidebar floats over the margin ── -->
+    <!-- ── Main content: centered container; drawer floats over the margin ── -->
     <main class="docs-main">
       <Container>
         <article class="prose">
           <slot />
         </article>
+
+        <DocsPager currentSlug={frontmatter.slug} />
       </Container>
     </main>
   </div>
 
   <Footer editPage editPath={editPath} />
 
+  <!-- Server-rendered copy icon, cloned into each code block by the script below -->
+  <template id="copy-icon-tmpl"><Icon name="copy" /></template>
+
 </body>
 </html>
+
+<script>
+  // ── Mermaid diagrams (```mermaid fences → <pre class="mermaid">) ──
+  import mermaid from 'mermaid';
+  if (document.querySelector('.prose .mermaid')) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose',
+      fontFamily: "'JetBrains Mono', monospace",
+    });
+    mermaid.run({ querySelector: '.prose .mermaid' });
+  }
+</script>
+
+<script>
+  // Wrap each Shiki code block and add an icon copy-to-clipboard button.
+  const iconTmpl = document.getElementById('copy-icon-tmpl') as HTMLTemplateElement | null;
+  const copyIcon = iconTmpl?.innerHTML ?? '';
+
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre:not(.mermaid)')) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+    pre.replaceWith(wrapper);
+    wrapper.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.innerHTML = copyIcon;
+    btn.setAttribute('aria-label', 'Copy code to clipboard');
+    wrapper.appendChild(btn);
+
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code');
+      const text = (code?.textContent ?? pre.textContent ?? '').replace(/\n$/, '');
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add('is-copied');
+        window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+      } catch { /* clipboard unavailable */ }
+    });
+  }
+</script>
 
 <style>
 /* ── Layout shell ─────────────────────────────────────────────── */
 /* The sticky header lives in src/components/Header.astro */
 html, body { margin: 0; width: 100%; }
 
-/* ── Body (sidebar + main share one scroll container) ─────────── */
+/* ── Body (drawer + main share one scroll container) ──────────── */
 .docs-body { position: relative; min-height: calc(100vh - 56px); }
 
-/* ── Floating / collapsible sidebar ───────────────────────────── */
-/*
-  Above 1240px there is room for the centered max-w-3xl content AND the
-  220px sidebar in the left margin, so the sidebar floats always-visible.
-  At/below 1240px the two would overlap, so the sidebar collapses into an
-  off-canvas drawer toggled by the header hamburger (Alpine `sidebarOpen`).
-*/
-.docs-sidebar {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 220px;
-  background: rgba(15,19,32,0.86);
-  backdrop-filter: blur(8px);
-  border-right: 1px solid var(--border);
-  padding: 1.5rem 0 2rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  z-index: 20;
-}
-
-@media (max-width: 1240px) {
-  /* Collapsible off-canvas drawer */
-  .docs-sidebar {
-    position: fixed;
-    top: 56px; bottom: 0;
-    transform: translateX(-222px);
-    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
-    background: var(--bg-1);
-    backdrop-filter: none;
-    z-index: 30;
-  }
-  .docs-sidebar.open { transform: translateX(0); }
-}
-
-/* ── Drawer backdrop ──────────────────────────────────────────── */
-.docs-backdrop {
-  position: fixed;
-  inset: 56px 0 0 0;
-  background: rgba(5,7,12,0.6);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  z-index: 25;
-}
-.docs-backdrop--open { opacity: 1; pointer-events: auto; }
-/* No backdrop once the sidebar is permanently docked */
-@media (min-width: 1241px) {
-  .docs-backdrop { display: none; }
-}
-
-.docs-sidebar__group  { margin-bottom: 1.5rem; }
-.docs-sidebar__label {
-  font-family: var(--font-mono); font-size: 0.62rem;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-dim); padding: 0 1.25rem;
-  margin: 0 0 0.4rem;
-}
-.docs-sidebar__list { list-style: none; margin: 0; padding: 0; }
-
-.docs-sidebar__link {
-  display: block; padding: 0.4rem 1.25rem;
-  font-family: var(--font-mono); font-size: 0.82rem;
-  text-decoration: none; transition: all 0.12s;
-  border-left: 2px solid transparent;
-  color: var(--text-muted);
-}
-.docs-sidebar__link:hover {
-  color: var(--text-primary); background: var(--bg-2);
-}
-.docs-sidebar__link--active {
-  border-left-color: var(--fish-blue);
-  color: var(--fish-blue);
-  background: rgba(78,108,250,0.08);
-}
-
-.docs-sidebar__external {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid var(--border);
-  margin-top: 1rem;
-}
-.docs-sidebar__ext-link {
-  display: block; font-size: 0.8rem;
-  color: var(--text-muted); font-family: var(--font-mono);
-  padding: 0.25rem 0; text-decoration: none;
-  transition: color 0.12s;
-}
-.docs-sidebar__ext-link:hover { color: var(--fish-blue); }
+/* The nav drawer + backdrop now live in src/components/HamburgerMenu.astro */
 
 /* ── Main: full width; inner content is centered by <Container> ──
-   (mx-auto max-w-3xl). The sidebar floats over the left margin and is
-   intentionally NOT inside the container, so it bleeds to the full width. */
+   (mx-auto max-w-3xl). The drawer floats over the left margin. */
 .docs-main {
   width: 100%;
   box-sizing: border-box;

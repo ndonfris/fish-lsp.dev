@@ -1,0 +1,188 @@
+---
+/**
+ * Tabbed code-snippet component (e.g. the homepage "Get running in seconds"
+ * install picker: pnpm | npm | yarn | brew | pacman).
+ *
+ * - Tabs and their content are fully data-driven via the `tabs` prop.
+ * - Each panel renders a copy-to-clipboard button (always visible — no hover
+ *   needed) using the shared `copy` icon.
+ * - The tab bar scrolls horizontally on narrow / mobile viewports so a long
+ *   list of tabs never overflows the page.
+ *
+ * Styled with Tailwind utilities + brand tokens from @theme in global.css.
+ */
+import { Icon } from 'astro-icon/components';
+
+export interface CodeTab {
+  /** Tab label, e.g. "pnpm". Also used to derive the panel id. */
+  label: string;
+  /**
+   * Snippet lines. Convention:
+   *   "# ..."  → rendered as a dimmed comment
+   *   ""       → blank spacer line
+   *   anything → rendered as a command
+   */
+  lines: string[];
+  /**
+   * Text copied to the clipboard. Defaults to the command lines only
+   * (comments and blank lines stripped).
+   */
+  copy?: string;
+}
+
+interface Props {
+  tabs: CodeTab[];
+  /** Unique base id so multiple instances on one page never collide. */
+  id?: string;
+}
+
+const { tabs, id = 'codetabs' } = Astro.props;
+
+const isComment = (l: string) => l.trimStart().startsWith('#');
+const copyText = (t: CodeTab) =>
+  t.copy ?? t.lines.filter((l) => l.trim() && !isComment(l)).join('\n');
+const panelId = (i: number) => `${id}-panel-${i}`;
+---
+
+<div data-codetabs>
+  <!-- Tab bar: scrolls horizontally when the tabs outgrow the viewport -->
+  <div class="relative">
+    <div
+      role="tablist"
+      aria-label="Install commands"
+      class="codetabs-bar flex overflow-x-auto"
+    >
+      {tabs.map((t, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${id}-tab-${i}`}
+          aria-controls={panelId(i)}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          class="flex-shrink-0 cursor-pointer whitespace-nowrap border border-line bg-surface-2
+                 px-[0.9rem] py-[0.4rem] font-mono text-[0.78rem] text-ink-muted transition-colors
+                 first:rounded-tl-md last:rounded-tr-md [&:not(:first-child)]:-ml-px
+                 hover:bg-fish-blue hover:text-white hover:border-fish-blue
+                 aria-selected:bg-fish-blue aria-selected:text-white aria-selected:border-fish-blue
+                 aria-selected:relative aria-selected:z-[1]"
+        >{t.label}</button>
+      ))}
+    </div>
+
+    <!-- Overflow affordance: a → arrow shown at the right edge only when the
+         tabs overflow and aren't scrolled to the end. Tapping scrolls right. -->
+    <button
+      type="button"
+      data-scroll-hint
+      aria-label="Show more tabs"
+      class="codetabs-hint absolute bottom-0 right-0 top-0 z-[2] items-center justify-end
+             bg-linear-to-r from-transparent to-surface-0 pl-8 pr-1"
+    >
+      <span
+        class="flex h-6 w-6 items-center justify-center rounded-full border border-line
+               bg-surface-2 text-[0.7rem] text-fish-cyan shadow-sm"
+        aria-hidden="true"
+      >→</span>
+    </button>
+  </div>
+
+  {tabs.map((t, i) => (
+    <div
+      role="tabpanel"
+      id={panelId(i)}
+      aria-labelledby={`${id}-tab-${i}`}
+      class:list={[
+        'relative rounded-b-md rounded-tr-md border border-line bg-surface-1 p-4 px-5',
+        'font-mono text-[0.875rem] leading-relaxed text-ink',
+        { hidden: i !== 0 },
+      ]}
+    >
+      <button
+        type="button"
+        data-copy={copyText(t)}
+        aria-label="Copy to clipboard"
+        class="copy-btn absolute right-2 top-2 z-10 inline-flex cursor-pointer items-center
+               justify-center rounded-[5px] border border-line bg-surface-3 p-[0.3rem]
+               text-ink-muted transition-colors hover:border-fish-cyan hover:bg-surface-2
+               hover:text-fish-cyan"
+      >
+        <Icon name="copy" class="block h-[15px] w-[15px]" />
+      </button>
+
+      {/* pad the right so long commands don't slide under the copy button */}
+      <div class="pr-8">
+        {t.lines.map((l) =>
+          l.trim() === '' ? (
+            <div class="h-2" aria-hidden="true"></div>
+          ) : isComment(l) ? (
+            <div class="italic text-ink-dim">{l}</div>
+          ) : (
+            <div class="text-fish-cyan">{l}</div>
+          ),
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  /* The tab bar scrolls horizontally; hide its scrollbar since the → arrow
+     (below) is the overflow affordance. Swipe still works on touch. */
+  .codetabs-bar { scrollbar-width: none; }
+  .codetabs-bar::-webkit-scrollbar { display: none; }
+
+  /* Overflow arrow: hidden until the script detects horizontal overflow. */
+  .codetabs-hint { display: none; cursor: pointer; }
+  .codetabs-hint.is-visible { display: flex; }
+
+  /* Copied feedback (toggled by the script below) */
+  .copy-btn.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-codetabs]').forEach((root) => {
+    const tabs = root.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    const panels = root.querySelectorAll<HTMLElement>('[role="tabpanel"]');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('aria-controls');
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        panels.forEach((p) => p.classList.toggle('hidden', p.id !== target));
+      });
+    });
+
+    // ── Horizontal-overflow arrow ──────────────────────────────────
+    const bar = root.querySelector<HTMLElement>('.codetabs-bar');
+    const hint = root.querySelector<HTMLElement>('[data-scroll-hint]');
+    if (bar && hint) {
+      const update = () => {
+        const overflowing = bar.scrollWidth - bar.clientWidth > 1;
+        const atEnd = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 1;
+        hint.classList.toggle('is-visible', overflowing && !atEnd);
+      };
+      hint.addEventListener('click', () =>
+        bar.scrollBy({ left: bar.clientWidth * 0.7, behavior: 'smooth' }),
+      );
+      bar.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      window.addEventListener('load', update);
+      update();
+    }
+
+    root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') ?? '');
+          btn.classList.add('is-copied');
+          window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    });
+  });
+</script>

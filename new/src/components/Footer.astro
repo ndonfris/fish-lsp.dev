@@ -18,93 +18,49 @@ const SITE_BRANCH = 'master';
 const editHref = editPath
   ? `${SITE_REPO}/blob/${SITE_BRANCH}/${editPath}`
   : `${GITHUB}/wiki`;
+
+const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
+<footer>
   <!-- Wave transition -->
-  <div class="site-footer__waves">
-    <svg viewBox="0 -10 700 90" preserveAspectRatio="none" aria-hidden="true">
-      <path class="wave wave--1" d="M0,30 c150,-35 300,35 500,0 c200,-35 400,35 600,0 v60 h-1100z" fill="var(--fish-blue)" opacity="0.3"/>
-      <path class="wave wave--2" d="M0,40 c120,-25 280,25 450,0 c170,-25 330,25 500,0 v50 h-950z"  fill="var(--fish-blue)" opacity="0.5"/>
-      <path class="wave wave--3" d="M0,50 c100,-18 260,18 400,0 c140,-18 280,18 420,0 v40 h-820z"  fill="var(--fish-blue)"/>
+  <div class="h-22 overflow-hidden sm:h-20!">
+    <!-- svg is wider than the container (clipped by overflow-hidden) so the
+         deepest wave still covers the right edge while it drifts left. -->
+    <svg class="h-full w-[112%] max-w-none" viewBox="0 -10 700 90" preserveAspectRatio="none" aria-hidden="true">
+      <path class="origin-left animate-wave [animation-duration:12s]" d="M0,30 c150,-35 300,35 500,0 c200,-35 400,35 600,0 v60 h-1100z" fill="var(--fish-blue)" opacity="0.3"/>
+      <path class="origin-left animate-wave [animation-duration:10s]" d="M0,40 c120,-25 280,25 450,0 c170,-25 330,25 500,0 v50 h-950z"  fill="var(--fish-blue)" opacity="0.5"/>
+      <path class="origin-left animate-wave [animation-duration:8s]"  d="M0,50 c100,-18 260,18 400,0 c140,-18 280,18 420,0 v40 h-820z"  fill="var(--fish-blue)"/>
     </svg>
   </div>
 
-  <div class="site-footer__body">
-    <nav class="site-footer__links" aria-label="Footer navigation">
-      <a href={`${GITHUB}/wiki`}         target="_blank" rel="noopener noreferrer">wiki</a>
+  <div class="bg-fish-blue px-8 pt-5 pb-6 sm:pt-2 text-center font-mono text-[0.8rem] max-sm:text-left">
+    <nav
+      class="mb-3 flex flex-wrap justify-center gap-x-4 gap-y-2 [&_a]:text-white/70 [&_a]:transition-colors [&_a]:hover:text-white sm:[&>a:not(:first-child)]:before:mr-4 sm:[&>a:not(:first-child)]:before:text-white/30 sm:[&>a:not(:first-child)]:before:content-['|'] max-sm:flex-col max-sm:flex-nowrap max-sm:items-start max-sm:gap-y-2"
+      aria-label="Footer navigation"
+    >
+      <!-- <a href={`${GITHUB}/wiki`}         target="_blank" rel="noopener noreferrer">wiki</a> -->
       <a href={GITHUB}                    target="_blank" rel="noopener noreferrer">github</a>
       <a href="https://www.npmjs.com/package/fish-lsp" target="_blank" rel="noopener noreferrer">npm</a>
       <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" rel="noopener noreferrer">vscode</a>
       <a href={`${GITHUB}/discussions`}   target="_blank" rel="noopener noreferrer">discussions</a>
       <a href={DOCS_URL}                  target="_blank" rel="noopener noreferrer">docs</a>
     </nav>
+
+    <!-- mobile-only divider between links and the meta line -->
+    <hr class="my-4 border-t border-white/20 sm:hidden" />
+
     {editPage && (
-      <a href={editHref} target="_blank" rel="noopener noreferrer" class="site-footer__edit">
+      <a href={editHref} target="_blank" rel="noopener noreferrer"
+         class="mb-[0.6rem] block text-white/50 transition-colors hover:text-white">
         Edit this page on GitHub ↗
       </a>
     )}
-    <p class="site-footer__copy">🐟 fish-lsp.dev · MIT License · 2026</p>
+    <a class="block mb-0 underline sm:mb-0 text-white/50 transition-colors hover:text-white" href="fish-lsp.dev" target="_blank" rel="noopener noreferrer">
+       <span class="text-white-50!">fish-lsp.dev</span>
+       <!-- <span class="text-white! text-center justify-center text-sm">🐟</span> -->
+       <span class="text-white! text-center justify-center text-sm">@</span>
+       <span class="text-white/50">{year}</span>
+    </a>
   </div>
 </footer>
-
-<style>
-.site-footer__waves {
-  overflow: hidden;
-  height: 80px;
-}
-
-.site-footer__waves svg {
-  width: 100%;
-  height: 100%;
-}
-
-.wave {
-  animation: wave-anim 10s linear infinite;
-  transform-origin: left center;
-}
-.wave--1 { animation-duration: 12s; }
-.wave--2 { animation-duration: 10s; }
-.wave--3 { animation-duration:  8s; }
-
-@keyframes wave-anim {
-  0%,100% { transform: translateX(0);   }
-  50%     { transform: translateX(-18%); }
-}
-
-.site-footer__body {
-  background: var(--fish-blue);
-  padding: 1.5rem 2rem;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-}
-
-.site-footer__links {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.site-footer__links a {
-  color: rgba(255,255,255,0.7);
-  transition: color 0.12s;
-}
-.site-footer__links a:hover { color: white; }
-
-/* Docs-only edit link, sits above the copy line with vertical spacing */
-.site-footer__edit {
-  display: block;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 0.6rem;
-  transition: color 0.12s;
-}
-.site-footer__edit:hover { color: white; }
-
-.site-footer__copy {
-  color: rgba(255,255,255,0.5);
-  margin: 0;
-}
-</style>

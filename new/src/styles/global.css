@@ -1,5 +1,53 @@
 @import 'tailwindcss';
 
+/* ─── Tailwind theme tokens ───────────────────────────────────────
+   Registers the brand palette as utilities:
+     accents  → bg-fish-blue, text-fish-cyan, border-fish-cyan/30 …
+     surfaces → bg-surface-1 (0–3)
+     text     → text-ink, text-ink-muted, text-ink-dim
+     border   → border-line
+   Prefer these utilities over hand-written scoped CSS. The :root vars
+   below remain for the scoped styles not yet migrated.                */
+@theme {
+  --color-fish-blue:     rgb(78, 108, 250);   /* #4e6cfa */
+  --color-fish-blue-dim: rgb(58, 85, 224);    /* #3a55e0 */
+  --color-fish-cyan:     rgb(100, 210, 255);  /* #64d2ff */
+  --color-fish-green:    rgb(50, 213, 131);   /* #32d583 */
+  --color-fish-yellow:   rgb(255, 209, 102);  /* #ffd166 */
+  --color-fish-red:      rgb(255, 107, 107);  /* #ff6b6b */
+  --color-fish-white:    rgb(232, 236, 248);  /* #e8ecf8 */
+  --color-fish-alt-white: rgb(175, 175, 255); /* #afafff */
+
+  --color-surface-0: rgb(10, 13, 20);         /* #0a0d14 */
+  --color-surface-1: rgb(15, 19, 32);         /* #0f1320 */
+  --color-surface-2: rgb(20, 24, 41);         /* #141829 */
+  --color-surface-3: rgb(28, 34, 54);         /* #1c2236 */
+
+  --color-ink:       rgb(232, 236, 248);      /* #e8ecf8; */
+  --color-ink-muted: rgb(122, 138, 180);      /* #7a8ab4; */
+  --color-ink-dim:   rgb(74, 85, 120);        /* #4a5578; */
+
+  --color-line: rgba(78, 108, 250, 0.2);
+
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code',
+               'Source Code Pro', ui-monospace, monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* terminal cursor blink → `animate-blink` */
+  --animate-blink: blink 1s step-end infinite;
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+
+  /* footer wave drift → `animate-wave` (override duration per layer) */
+  --animate-wave: wave-anim 10s linear infinite;
+  @keyframes wave-anim {
+    0%, 100% { transform: translateX(0);   }
+    50%      { transform: translateX(-18%); }
+  }
+}
+
 /* ─── Design tokens ───────────────────────────────────────────── */
 @layer base {
   :root {
@@ -10,6 +58,8 @@
     --fish-green:    #32d583;
     --fish-yellow:   #ffd166;
     --fish-red:      #ff6b6b;
+    --fish-white:    #e8ecf8;
+    --fish-alt-white: #afafff;
 
     --bg-0:  #0a0d14;
     --bg-1:  #0f1320;
@@ -27,33 +77,38 @@
   }
 }
 
-/* ─── Base reset ──────────────────────────────────────────────── */
-html, body {
-  margin: 0;
-  width: 100%;
-  min-height: 100%;
-  background: var(--bg-0);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.7;
+/* ─── Base reset ──────────────────────────────────────────────────
+   In @layer base so Tailwind utilities (a later cascade layer) can override
+   element defaults — e.g. `text-white` on an <a> beats `a { color: … }`.
+   Without this the unlayered `a {…}` rule wins over utilities. */
+@layer base {
+  html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg-0);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  a             { color: var(--fish-blue); text-decoration: none; }
+  a:hover       { color: var(--fish-cyan); }
+  code, pre     { font-family: var(--font-mono); }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--fish-blue-dim); }
 }
-
-a             { color: var(--fish-blue); text-decoration: none; }
-a:hover       { color: var(--fish-cyan); }
-code, pre     { font-family: var(--font-mono); }
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-mono);
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-
-/* ─── Scrollbar ───────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-1); }
-::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--fish-blue-dim); }
 
 /* ─── Prose (rendered markdown) ──────────────────────────────── */
 /* Width is governed by the centered <Container> (max-w-3xl); prose fills it. */
@@ -139,6 +194,47 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.875rem;
 }
 
+/* ─── Mermaid diagrams ───────────────────────────────────────── */
+.prose .mermaid {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.prose .mermaid::before { content: none; }
+.prose .mermaid svg { max-width: 100%; height: auto; }
+
+/* ─── Code block + copy button (wrapper added by DocsLayout script) ── */
+.prose .code-block { position: relative; margin: 1.25rem 0; }
+.prose .code-block > pre { margin: 0; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.4rem; right: 0.4rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.3rem;
+  cursor: pointer;
+  opacity: 0.35; /* low so the code behind stays visible; full on hover */
+  transition: opacity 0.12s, color 0.12s, border-color 0.12s, background 0.12s;
+}
+.copy-btn svg { display: block; width: 15px; height: 15px; }
+.prose .code-block:hover .copy-btn,
+.copy-btn:focus-visible,
+.copy-btn:hover { opacity: 1; }
+.copy-btn:hover { color: var(--fish-cyan); border-color: var(--fish-cyan); background: var(--bg-2); }
+.copy-btn.is-copied { color: var(--fish-green); border-color: var(--fish-green); opacity: 1; }
+/* Touch devices have no hover — keep it partly visible */
+@media (hover: none) { .copy-btn { opacity: 0.55; } }
+
 .prose blockquote {
   border-left: 3px solid var(--fish-blue);
   margin: 1.5rem 0;
@@ -178,7 +274,8 @@ h1, h2, h3, h4, h5, h6 {
   margin: 1.5rem 0;
 }
 
-.prose strong { color: var(--fish-yellow); font-weight: 600; }
+.prose strong { font-weight: 900; }
+.prose em     { font-style: italic; font-weight: 400; opacity: 95%;  }
 .prose hr     { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
 /* ─── Callouts ────────────────────────────────────────────────── */
@@ -198,6 +295,26 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255,209,102,0.08);
   border-color: rgba(255,209,102,0.3);
   color: var(--fish-yellow);
+}
+
+/* ─── Lists ───────────────────────────────────────────────────── */
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+/** ─── List marker colour ───────────────────────────────────── */
+ul li::marker {
+  color: color-mix(in srgb, rgba(175, 175, 255, .8), rgb(232, 236, 248, .9));
+}
+
+ol li::marker {
+  color: color-mix(in srgb, rgba(175, 175, 255, .8), rgb(232, 236, 248, .9));
+  text-shadow: 0 0 1px rgba(175, 175, 255, .8);
+  font-weight: 800;
 }
 
 /* ─── Syntax token colours (used in terminal demos) ──────────── */

@@ -1,0 +1,208 @@
+---
+/**
+ * Self-contained hamburger menu: the toggle button + the off-canvas navigation
+ * drawer + its backdrop + the open/close behavior.
+ *
+ * Rendered from the shared Header, so it appears on every page (homepage and
+ * docs). The drawer lists the documentation pages (same order as before) and a
+ * few external links.
+ *
+ * The drawer/backdrop are `position: fixed`. Because the Header uses
+ * `backdrop-filter` (which establishes a containing block for fixed-positioned
+ * descendants), the script relocates them to <body> on load so they stay
+ * viewport-relative regardless of where the component is rendered.
+ */
+import { Icon } from 'astro-icon/components';
+import { getCollection } from 'astro:content';
+import type { NavSection } from '@typedefs/content';
+
+const allPages = await getCollection('pages');
+const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
+const grouped = new Map<string, typeof allPages>();
+
+for (const page of allPages) {
+  const sec = page.data.section ?? 'Other';
+  if (!grouped.has(sec)) grouped.set(sec, []);
+  grouped.get(sec)!.push(page);
+}
+for (const pages of grouped.values()) {
+  pages.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+}
+
+const navSections: NavSection[] = [
+  ...sectionOrder.filter(s => grouped.has(s)),
+  ...[...grouped.keys()].filter(s => !sectionOrder.includes(s)),
+].map(label => ({
+  label,
+  pages: (grouped.get(label) ?? []).map(p => ({
+    title: p.data.title,
+    slug:  p.data.slug,
+  })),
+}));
+
+// Derive the active slug from the current URL (e.g. /page/installation).
+const path = Astro.url.pathname.replace(/\/$/, '');
+const currentSlug = path.match(/^\/page\/(.+)$/)?.[1] ?? '';
+---
+
+<button
+  type="button"
+  id="sidebar-toggle"
+  class="hamburger"
+  aria-label="Toggle navigation menu"
+  aria-controls="sidebar"
+  aria-expanded="false"
+>
+  <Icon name="hamburger2" />
+</button>
+
+<!-- Backdrop: only interactive when the drawer is open -->
+<div class="nav-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+<!-- Off-canvas navigation drawer -->
+<aside class="nav-drawer" id="sidebar">
+  {navSections.map(section => (
+    <div class="nav-drawer__group">
+      <p class="nav-drawer__label">{section.label}</p>
+      <ul class="nav-drawer__list">
+        {section.pages.map(page => {
+          const active = page.slug === currentSlug;
+          return (
+            <li>
+              <a
+                href={`/page/${page.slug}`}
+                class={`nav-drawer__link ${active ? 'nav-drawer__link--active' : ''}`}
+              >
+                {page.title}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ))}
+
+  <div class="nav-drawer__external">
+    <p class="nav-drawer__label">Links</p>
+    <a href="https://github.com/ndonfris/fish-lsp"                                  target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://www.npmjs.com/package/fish-lsp"                                target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> NPM package <Icon name="npm" class="my-auto ml-2" /></p></a> 
+    <a href="https://github.com/ndonfris/vscode-fish-lsp"                           target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> vscode-fish-lsp <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://github.com/ndonfris/fish-lsp.dev"                              target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> fish-lsp.dev <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://github.com/ndonfris/fish-lsp/issues"                           target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Issues <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://github.com/ndonfris/fish-lsp/wiki"                             target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Wiki <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://github.com/ndonfris/fish-lsp/discussions"                      target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> Discussion <Icon name="github" class="my-auto ml-2" /></p></a>
+    <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> VSCode <Icon name="vscode" class="my-auto ml-2" /></p></a>
+    <a href="https://open-vsx.org/extension/ndonfris/fish-lsp"                      target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> VSCodium <Icon name="vscode" class="my-auto ml-2" /></p></a> 
+    <a href="https://fish-lsp.dev/playground"                                       target="_blank" class="flex docs-sidebar__ext-link"><p class="inline-flex justify-center text-center align-middle py-auto"><span class="mx-1 pr-1.5">→</span> web playground <Icon name="browser-editor" class="my-auto ml-2" /></p></a>  
+  </div>
+</aside>
+
+<style>
+/* ── Hamburger toggle button ──────────────────────────────────── */
+.hamburger {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 0.25rem; border-radius: 4px;
+  transition: color 0.12s;
+}
+.hamburger:hover { color: var(--fish-blue); }
+
+/* ── Off-canvas drawer ────────────────────────────────────────── */
+/* Always an off-canvas drawer (every width) — opened by the hamburger.
+   Full display height; sits below the sticky header (z-40) so the hamburger
+   stays reachable to close it, with padding-top clearing the header. */
+.nav-drawer {
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  width: 220px;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  padding: calc(56px + 1.5rem) 0 2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(-222px);
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+  z-index: 30;
+}
+.nav-drawer.open { transform: translateX(0); }
+
+/* ── Backdrop ─────────────────────────────────────────────────── */
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,7,12,0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 25;
+}
+.nav-backdrop--open { opacity: 1; pointer-events: auto; }
+
+.nav-drawer__group  { margin-bottom: 1.5rem; }
+.nav-drawer__label {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-dim); padding: 0 1.25rem;
+  margin: 0 0 0.4rem;
+}
+.nav-drawer__list { list-style: none; margin: 0; padding: 0; }
+
+.nav-drawer__link {
+  display: block; padding: 0.4rem 1.25rem;
+  font-family: var(--font-mono); font-size: 0.82rem;
+  text-decoration: none; transition: all 0.12s;
+  border-left: 2px solid transparent;
+  color: var(--text-muted);
+}
+.nav-drawer__link:hover {
+  color: var(--text-primary); background: var(--bg-2);
+}
+.nav-drawer__link--active {
+  border-left-color: var(--fish-blue);
+  color: var(--fish-blue);
+  background: rgba(78,108,250,0.08);
+}
+
+.nav-drawer__external {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+.nav-drawer__ext-link {
+  display: block; font-size: 0.8rem;
+  color: var(--text-muted); font-family: var(--font-mono);
+  padding: 0.25rem 0; text-decoration: none;
+  transition: color 0.12s;
+}
+.nav-drawer__ext-link:hover { color: var(--fish-blue); }
+</style>
+
+<script>
+  const toggle   = document.getElementById('sidebar-toggle');
+  const drawer   = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  // Escape the header's containing block (it has backdrop-filter) so the
+  // fixed-positioned drawer/backdrop are viewport-relative.
+  if (drawer) document.body.appendChild(drawer);
+  if (backdrop) document.body.appendChild(backdrop);
+
+  const setOpen = (open: boolean) => {
+    drawer?.classList.toggle('open', open);
+    backdrop?.classList.toggle('nav-backdrop--open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle?.addEventListener('click', () =>
+    setOpen(!drawer?.classList.contains('open')),
+  );
+  backdrop?.addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+  // Close the drawer after following a link.
+  drawer?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => setOpen(false)),
+  );
+</script>

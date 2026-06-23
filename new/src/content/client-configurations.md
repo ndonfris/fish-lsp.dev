@@ -2,7 +2,7 @@
 title: Client Configurations
 description: Configure fish-lsp with Neovim, VSCode, coc.nvim, and other LSP clients
 slug: client-configurations
-order: 3
+order: 4
 section: Configuration
 ---
 

@@ -2,7 +2,7 @@
 title: Features
 description: Complete list of fish-lsp LSP handler status and planned work
 slug: features
-order: 4
+order: 6
 section: Reference
 ---
 
