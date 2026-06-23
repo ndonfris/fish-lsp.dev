@@ -1,0 +1,217 @@
+---
+/**
+ * Docs search: a header trigger button (Ctrl/⌘-K) that opens a modal querying
+ * the Pagefind index built from the docs HTML.
+ *
+ * Index: Pagefind runs as a postbuild step (`pagefind --site dist`). In `astro
+ * dev` the dev-only middleware in astro.config.ts serves the last build's
+ * `dist/pagefind/` — so run `pnpm build` once, then search works in dev too.
+ *
+ * Results use Pagefind `sub_results`, so each row links to the nearest heading
+ * anchor (e.g. /docs/building-from-source#manual-linking).
+ *
+ * The modal is `position: fixed`; like the nav drawer it is relocated to <body>
+ * so the Header's `backdrop-filter` containing block doesn't trap it.
+ *
+ * Styled entirely with Tailwind utilities (brand tokens from @theme).
+ */
+import { Icon } from 'astro-icon/components';
+---
+
+<button
+  type="button"
+  id="search-trigger"
+  class="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-2 px-2 py-1.5
+         font-mono text-[0.78rem] text-ink-muted transition-colors hover:border-fish-cyan
+         hover:text-fish-cyan max-sm:px-1.5"
+  aria-label="Search documentation"
+  aria-keyshortcuts="Control+K"
+>
+  <Icon name="search" class="w-4 h-4" />
+  <span class="inline-flex gap-0.5 max-sm:hidden" aria-hidden="true">
+    <kbd class="rounded border border-line bg-surface-3 px-1 font-mono text-[0.62rem] leading-[1.4]">Ctrl</kbd>
+    <kbd class="rounded border border-line bg-surface-3 px-1 font-mono text-[0.62rem] leading-[1.4]">K</kbd>
+  </span>
+</button>
+
+<div id="search-modal" class="fixed inset-0 z-[60] hidden">
+  <div data-search-close class="absolute inset-0 bg-[rgba(5,7,12,0.6)] backdrop-blur-[2px]"></div>
+
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-label="Search documentation"
+    class="relative mx-auto mt-[10vh] flex max-h-[70vh] w-[min(640px,92vw)] flex-col overflow-hidden
+           rounded-[10px] border border-line bg-surface-1 shadow-[0_20px_60px_rgba(0,0,0,0.5)]
+           max-sm:mt-0 max-sm:h-full max-sm:max-h-none max-sm:w-full max-sm:rounded-none max-sm:border-0"
+  >
+    <div class="flex items-center gap-2.5 border-b border-line p-4">
+      <Icon name="search" class="h-[18px] w-[18px] shrink-0 text-ink-dim" />
+      <input
+        id="search-input"
+        type="search"
+        class="flex-1 min-w-0 text-base bg-transparent outline-none text-ink placeholder:text-ink-dim"
+        placeholder="Search the docs…"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-controls="search-results"
+      />
+      <button
+        type="button"
+        data-search-close
+        aria-label="Close search"
+        class="shrink-0 cursor-pointer rounded border border-line bg-surface-3 px-1.5 py-0.5
+               font-mono text-[0.65rem] text-ink-muted hover:border-fish-cyan hover:text-fish-cyan"
+      >Esc</button>
+    </div>
+
+    <div id="search-results" class="flex-1 overflow-y-auto p-1.5" role="listbox" aria-label="Search results"></div>
+
+    <div class="flex items-center justify-between border-t border-line px-3.5 py-2 font-mono
+                text-[0.62rem] text-ink-dim max-sm:hidden">
+      <span>↑ ↓ to navigate · ↵ to open · Esc to close</span>
+      <span class="opacity-70">Pagefind</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const trigger = document.getElementById('search-trigger');
+  const modal   = document.getElementById('search-modal');
+  const input   = document.getElementById('search-input') as HTMLInputElement | null;
+  const results = document.getElementById('search-results');
+
+  // Guard against double-init (e.g. Vite HMR re-running this module), which would
+  // otherwise stack global keydown listeners and cancel the ⌘/Ctrl-K toggle out.
+  const w = window as any;
+  if (trigger && modal && input && results && !w.__fishSearchInit) {
+    w.__fishSearchInit = true;
+    // Escape the Header's backdrop-filter containing block.
+    document.body.appendChild(modal);
+
+    type Item = { url: string; page: string; title: string; excerpt: string };
+    let items: Item[] = [];
+    let activeIndex = -1;
+
+    // ── Lazy-load the Pagefind runtime (built site / dev middleware only) ──
+    let pagefind: any = null;
+    let loadPromise: Promise<any> | null = null;
+    const loadPagefind = () => {
+      if (pagefind) return Promise.resolve(pagefind);
+      if (!loadPromise) {
+        // Built at runtime so the bundler can't statically resolve it.
+        const path = '/' + 'pagefind' + '/pagefind.js';
+        loadPromise = import(/* @vite-ignore */ path)
+          .then(async (mod: any) => { await mod.init(); pagefind = mod; return mod; })
+          .catch(() => null);
+      }
+      return loadPromise;
+    };
+
+    const msg = (text: string) =>
+      `<p class="px-4 py-6 text-center text-[0.85rem] text-ink-dim">${text}</p>`;
+
+    const open = () => {
+      modal.classList.remove('hidden');
+      document.documentElement.classList.add('overflow-hidden');
+      input.focus();
+      void loadPagefind();
+    };
+    const close = () => {
+      modal.classList.add('hidden');
+      document.documentElement.classList.remove('overflow-hidden');
+      input.value = '';
+      results.innerHTML = '';
+      items = [];
+      activeIndex = -1;
+    };
+    const isOpen = () => !modal.classList.contains('hidden');
+
+    trigger.addEventListener('click', open);
+    modal.querySelectorAll('[data-search-close]').forEach((el) =>
+      el.addEventListener('click', close),
+    );
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        isOpen() ? close() : open();
+      } else if (e.key === 'Escape' && isOpen()) {
+        close();
+      }
+    });
+
+    const render = () => {
+      if (!items.length) { results.innerHTML = msg('No results'); return; }
+      results.innerHTML = items
+        .map((it, i) => {
+          const active = i === activeIndex ? ' border-line bg-fish-blue/[0.08]' : '';
+          const label =
+            it.page && it.page !== it.title
+              ? `<span class="font-mono text-[0.62rem] uppercase tracking-wide text-ink-dim">${it.page}</span>`
+              : '';
+          return (
+            `<a class="block rounded-md border border-transparent px-3 py-2.5 no-underline transition-colors hover:border-line hover:bg-fish-blue/[0.08]${active}" href="${it.url}" role="option" data-idx="${i}">` +
+            `<span class="mb-0.5 flex items-baseline gap-2"><span class="font-mono text-[0.85rem] font-semibold text-fish-cyan">${it.title}</span>${label}</span>` +
+            `<span class="block text-[0.78rem] leading-relaxed text-ink-muted [&_mark]:rounded-sm [&_mark]:bg-fish-blue/20 [&_mark]:px-0.5 [&_mark]:text-fish-blue">${it.excerpt}</span>` +
+            `</a>`
+          );
+        })
+        .join('');
+    };
+
+    const scrollActive = () =>
+      results.querySelector('[data-idx].border-line')?.scrollIntoView({ block: 'nearest' });
+
+    let debounce = 0;
+    const runSearch = async () => {
+      const q = input.value.trim();
+      if (!q) { results.innerHTML = ''; items = []; activeIndex = -1; return; }
+      const pf = await loadPagefind();
+      if (!pf) {
+        results.innerHTML = msg('Search index unavailable — run a build to enable search.');
+        return;
+      }
+      const search = await pf.search(q);
+      const pages = await Promise.all(search.results.slice(0, 6).map((r: any) => r.data()));
+      items = [];
+      for (const p of pages) {
+        const pageTitle = p.meta?.title ?? p.url;
+        // sub_results link to the nearest heading anchor; fall back to the page.
+        const subs =
+          p.sub_results?.length
+            ? p.sub_results
+            : [{ title: pageTitle, url: p.url, excerpt: p.excerpt }];
+        for (const s of subs) {
+          items.push({ url: s.url, page: pageTitle, title: s.title || pageTitle, excerpt: s.excerpt });
+          if (items.length >= 12) break;
+        }
+        if (items.length >= 12) break;
+      }
+      activeIndex = items.length ? 0 : -1;
+      render();
+    };
+
+    input.addEventListener('input', () => {
+      window.clearTimeout(debounce);
+      debounce = window.setTimeout(runSearch, 160);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+        render(); scrollActive();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        render(); scrollActive();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const it = items[activeIndex];
+        if (it) window.location.href = it.url;
+      }
+    });
+  }
+</script>

@@ -1,84 +1,106 @@
 ---
 title: Debugging
-description: Troubleshoot fish-lsp installation and editor connection issues
+description: Troubleshoot fish-lsp installation, startup, and editor connection issues
 slug: debugging
-order: 7
+order: 9
 section: Reference
 ---
 
 # Debugging
 
-## `yarn install` Fails
+The `fish-lsp` binary ships several built-in diagnostics. Most problems can be
+identified with the commands below.
 
-Check which scripts run during install via `package.json`:
-
-```json
-{
-  "scripts": {
-    "postinstall": "..."
-  }
-}
-```
-
-Run each script in [`scripts/`](https://github.com/ndonfris/fish-lsp/tree/master/scripts)
-individually:
+## First Checks
 
 ```fish
-fish scripts/<script-name>.fish
+# every available sub-command and flag
+fish-lsp --help-all
+
+# build version, paths, capabilities, health
+fish-lsp info
+
+# confirm the resolved binary is the one you expect, and on your $PATH
+fish-lsp info --bin
+which fish-lsp
 ```
 
-## `yarn compile` Throws an Error
-
-Usually a missing or misplaced `tree-sitter-fish.wasm`:
+## Startup & Health
 
 ```fish
-# Option 1 — tree-sitter-cli
-tree-sitter build-wasm /path/to/tree-sitter-fish/
+# run health diagnostics
+fish-lsp info --check-health
 
-# Option 2 — bundled script
-fish scripts/build-fish-wasm.fish
+# time the startup while indexing $fish_lsp_all_indexed_paths
+fish-lsp info --time-startup
+
+# briefer timing summary, optionally scoped to one folder
+fish-lsp info --time-only --use-workspace ~/.config/fish
 ```
 
-Place the `.wasm` file in the **project root** before retrying.
+## Logging
 
-## `fish-lsp` Not Found
-
-Verify the binary was built:
-
-```fish
-~/path/to/fish-lsp/bin/fish-lsp --help
-```
-
-Link it if missing from `$PATH`:
+Logging is **disabled by default**. Enable it by pointing
+`fish_lsp_log_file` at a writable path, then tail it while a server is running:
 
 ```fish
-cd ~/path/to/fish-lsp
-yarn link
-```
+set -gx fish_lsp_log_file /tmp/fish_lsp.log
+set -gx fish_lsp_log_level debug   # debug | info | warning | error | log
 
-Or alias it directly:
-
-```fish
-alias fish-lsp ~/path/to/fish-lsp/out/cli.js
+tail -f (fish-lsp info --log-file)
+# now reproduce the issue from your editor
 ```
 
 ## Server Connects But Nothing Works
 
-Check `fish-lsp info` — confirm you're on the expected version.
-
-Verify your client config passes `start` as the argument:
+Confirm your client passes `start` as the argument and targets `fish` files:
 
 ```json
 {
-  "command":   "fish-lsp",
-  "arguments": ["start"],
+  "command": "fish-lsp",
+  "args": ["start"],
   "filetypes": ["fish"]
 }
 ```
 
-See [Client Configurations](/docs/client-configurations) for editor-specific examples.
+Then check `fish-lsp info` to confirm you're running the expected version. See
+[Client Configurations](/docs/client-configurations) for editor-specific examples.
 
-## Logging
+## Inspecting Parse Output
 
-The server writes to `./logs.txt` by default. Point your client's `rootDir` or
-`workspaceFolder` accordingly, or pass a custom log path via startup options.
+```fish
+# tree-sitter parse tree for a file
+fish-lsp info --dump-parse-tree path/to/file.fish
+
+# the fish-lsp symbol tree
+fish-lsp info --dump-symbol-tree path/to/file.fish
+
+# semantic tokens
+fish-lsp info --dump-semantic-tokens path/to/file.fish
+```
+
+## Source Maps
+
+To debug the bundled server code with readable stack traces:
+
+```fish
+set -gx NODE_OPTIONS '--enable-source-maps --inspect'
+$EDITOR ~/.config/fish/config.fish
+```
+
+## Build Issues (from source)
+
+If `yarn install` / `yarn build` fails, it's usually a missing or misplaced
+`tree-sitter-fish.wasm`. Rebuild the assets or point at an existing `.wasm`:
+
+```fish
+fish scripts/build-assets.fish
+# or
+set -gx fish_lsp_tree_sitter_wasm_path ~/path/to/tree-sitter-fish.wasm
+```
+
+See [Building from Source](/docs/building-from-source) for the full build flow.
+
+> [!TIP]
+> Short abbreviations for many of these commands are available — see
+> [Abbreviations](/docs/abbreviations).

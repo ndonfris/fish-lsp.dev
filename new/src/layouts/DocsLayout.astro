@@ -33,7 +33,9 @@ const { frontmatter, editPath } = Astro.props;
     <!-- ── Main content: centered container; drawer floats over the margin ── -->
     <main class="docs-main">
       <Container>
-        <article class="prose">
+        {/* data-pagefind-body scopes the search index to docs content only
+            (the homepage and chrome are excluded). */}
+        <article class="prose" data-pagefind-body data-pagefind-meta={`title:${frontmatter.title}`}>
           <slot />
         </article>
 

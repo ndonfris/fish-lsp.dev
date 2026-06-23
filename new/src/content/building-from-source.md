@@ -1,6 +1,6 @@
 ---
 title: Building from Source
-description: Clone the repo and build fish-lsp locally with yarn or pnpm
+description: Clone the repo and build fish-lsp locally with yarn
 slug: building-from-source
 order: 3
 section: Getting Started
@@ -8,16 +8,21 @@ section: Getting Started
 
 # Building from Source
 
+Building from source is the most portable installation method.
+
+**Recommended toolchain:** `yarn@1.22.22`, `node@22.14.0`, `fish@4.0.8`
+(Node.js `>= 20` is required).
+
 ```fish
 git clone https://github.com/ndonfris/fish-lsp
 cd fish-lsp
+
 yarn install
-yarn dev
+yarn build
 ```
 
-`yarn dev` compiles the source and attempts to globally link the language server.
-
-Confirm which binary is active:
+`yarn build` compiles the source and links `./dist/fish-lsp` into your
+`yarn global bin` `$PATH`. Confirm which binary is active:
 
 ```fish
 fish-lsp info
@@ -25,16 +30,15 @@ fish-lsp info
 
 ## Manual Linking
 
-If `yarn dev` fails to link but compilation succeeds, test the local binary first:
+If `yarn build` compiles but fails to link, test the local binary first:
 
 ```fish
-./bin/fish-lsp info
+./dist/fish-lsp info
 ```
 
-Then manually link:
+Then link it manually from the repo root:
 
 ```fish
-# from the fish-lsp repo root
 yarn unlink -g fish-lsp
 yarn link -g .
 ```
@@ -48,14 +52,27 @@ yarn unlink fish-lsp && yarn link fish-lsp
 
 ## tree-sitter WASM
 
-If compilation fails due to a missing `.wasm` file:
+The build needs `tree-sitter-fish.wasm`. The asset build script fetches/links it:
 
 ```fish
-# using tree-sitter-cli
-tree-sitter build-wasm /path/to/tree-sitter-fish/
-
-# or use the bundled script
-fish scripts/build-fish-wasm.fish
+fish scripts/build-assets.fish
 ```
 
-Place `tree-sitter-fish.wasm` in the project root before re-running the build.
+If you already have a `.wasm` elsewhere (or built your own from
+[tree-sitter-fish](https://github.com/ram02z/tree-sitter-fish)), point the server
+at it instead of rebuilding:
+
+```fish
+set -gx fish_lsp_tree_sitter_wasm_path ~/path/to/tree-sitter-fish.wasm
+```
+
+## Development
+
+```fish
+yarn dev      # watch + rebuild while developing
+yarn test     # run the test suite
+yarn typecheck
+```
+
+See the [Contributing guide](https://github.com/ndonfris/fish-lsp/blob/master/docs/CONTRIBUTING.md)
+for the full development workflow.

@@ -13,6 +13,7 @@
 import { Icon } from 'astro-icon/components';
 import HeaderIcon from '@components/HeaderIcon.astro';
 import HamburgerMenu from '@components/HamburgerMenu.astro';
+import Search from '@components/Search.astro';
 // import { DOCS_ORIGIN } from '../config';
 
 interface Props {
@@ -41,6 +42,7 @@ const isDocs = variant === 'docs';
   </div>
 
   <nav class="flex items-center gap-4 shrink-0">
+    <Search />
   <!-- <nav class="site-header__right"> -->
     <!-- {!isDocs && <a href={docsHref} class="ssite-header__link>Docs</a>} -->
     <!-- <a href="https://fish-lsp.dev/playground" target="_blank" rel="noopener noreferrer" -->

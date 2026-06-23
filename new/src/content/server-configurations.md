@@ -696,7 +696,7 @@ Fish allows for using configuration snippets in `~/.config/fish/conf.d/` to set 
 To generate a configuration file with the default global settings:
 
 ```fish
-fish-lsp env --show-defaults --confd > ~/.config/fish/conf.d/fish-lsp.fish
+fish-lsp env --show-default --confd > ~/.config/fish/conf.d/fish-lsp.fish
 fish-lsp complete --abbreviations >> ~/.config/fish/conf.d/fish-lsp.fish
 ```
 

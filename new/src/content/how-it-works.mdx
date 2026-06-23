@@ -42,8 +42,6 @@ References queries strip locally-redefined symbols from global matches.
 
 ## LSP Lifecycle
 
-<div align="center px-[50%]">
-
 ```mermaid
 sequenceDiagram
     participant E as editor
@@ -55,8 +53,6 @@ sequenceDiagram
     E->>S: textDocument/hover
     S-->>E: hover result
 ```
-
-</div>
 
 The server speaks JSON-RPC 2.0 over stdio. Connect with: `fish-lsp start`.
 

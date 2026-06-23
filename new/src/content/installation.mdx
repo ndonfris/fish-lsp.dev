@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install fish-lsp via npm, yarn, pnpm, system packages, or from source
+description: Install fish-lsp via a package manager, a standalone binary, or from source
 slug: installation
 order: 2
 section: Getting Started
@@ -9,45 +9,97 @@ import CodeTabs from '@components/CodeTabs.astro';
 
 # Installation
 
-`fish-lsp` can be installed through several package managers. Some language
-clients (e.g., [VSCode](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp))
-will automatically install the language server for you. For manual installation,
-pick your package manager below.
+`fish-lsp` requires **Node.js `>= 20`** (the project is developed against
+`node@22.14.0`). Some language clients — e.g. the
+[VSCode](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp) /
+[VSCodium](https://open-vsx.org/extension/ndonfris/fish-lsp) extension — bundle
+the server for you, so manual installation isn't always required.
+
+For everyone else, pick one of the methods below.
+
+## Package Manager
+
+Pick your package manager. Stability across package managers can vary — if one
+gives you trouble, try another method.
 
 <CodeTabs
   id="install-docs"
   tabs={[
-    { label: 'npm',    lines: ['# global installation', 'npm install -g fish-lsp', '', 'fish-lsp info'] },
-    { label: 'yarn',   lines: ['# global installation', 'yarn global add fish-lsp', '', 'fish-lsp info'] },
-    { label: 'pnpm',   lines: ['# global installation', 'pnpm add -g fish-lsp', '', 'fish-lsp info'] },
-    { label: 'brew',   lines: ['# macOS / Linux', 'brew install fish-lsp', '', 'fish-lsp info'] },
-    { label: 'pacman', lines: ['# Arch Linux', 'pacman -S fish-lsp', '', 'fish-lsp info'] },
-    { label: 'nix',    lines: ['# NixOS installation', 'nix-env -iA nixpkgs.fish-lsp', '', 'fish-lsp info'] },
-    { label: 'conda',  lines: ['conda install -c conda-forge fish-lsp', '', 'fish-lsp info'] },
-    { label: 'mamba',  lines: ['mamba install -c conda-forge fish-lsp', '', 'fish-lsp info'] },
+    { label: 'npm',    lines: ['# global installation', 'npm install -g fish-lsp', '', '# verify', 'fish-lsp --help'] },
+    { label: 'yarn',   lines: ['# global installation', 'yarn global add fish-lsp', '', '# verify', 'fish-lsp --help'] },
+    { label: 'pnpm',   lines: ['# global installation', 'pnpm install -g fish-lsp', '', '# verify', 'fish-lsp --help'] },
+    { label: 'nix',    lines: ['nix-shell -p fish-lsp'] },
+    { label: 'brew',   lines: ['# macOS / Linux', 'brew install fish-lsp'] },
+    { label: 'conda',  lines: ['conda install fish-lsp'] },
+    { label: 'mamba',  lines: ['mamba install fish-lsp'] },
   ]}
 />
 
-> [!Note]
-> System package availability varies by distro.
+> [!NOTE]
+> Package availability and freshness vary by ecosystem. The npm registry always
+> has the latest release.
 
-## Verify the Installation
+## Standalone Binary
+
+Download the prebuilt standalone binary directly from the GitHub releases — no
+Node.js or package manager required.
 
 ```fish
-fish-lsp --help
-fish-lsp info
+# Download the latest standalone binary
+curl -L https://github.com/ndonfris/fish-lsp/releases/latest/download/fish-lsp.standalone \
+  -o ~/.local/bin/fish-lsp
+
+# Make it executable
+chmod +x ~/.local/bin/fish-lsp
 ```
 
-## Install Shell Completions
+> [!IMPORTANT]
+> Ensure `~/.local/bin` is in your `$PATH` so the `fish-lsp` command is found.
+
+## Build from Source
+
+The most portable method. Recommended toolchain: `yarn@1.22.22`,
+`node@22.14.0`, `fish@4.0.8`.
+
+```fish
+git clone https://github.com/ndonfris/fish-lsp
+cd fish-lsp
+
+yarn install
+yarn build   # links ./dist/fish-lsp into your `yarn global bin` $PATH
+```
+
+See [Building from Source](/docs/building-from-source) for troubleshooting
+(manual linking, the tree-sitter `.wasm`, and re-linking for VSCode).
+
+## Shell Completions
+
+Generate fish completions for the `fish-lsp` command itself:
 
 ```fish
 fish-lsp complete > ~/.config/fish/completions/fish-lsp.fish
 ```
 
 > [!NOTE]
-> Required for node-based installs. Source builds write completions automatically.
+> Completions are needed for package-manager installs. Source builds write them
+> automatically during `yarn build`.
 
-## Building from Source
+## Verify the Installation
 
-See [Building from Source](/docs/building-from-source) for full instructions.
+```fish
+# show the help output
+fish-lsp --help
 
+# show build version, paths, and health
+fish-lsp info
+```
+
+If `fish-lsp` isn't found afterwards, confirm the install location is on your
+`$PATH` (`fish-lsp info --bin` prints the resolved binary path). See
+[Debugging](/docs/debugging) for more.
+
+## Next Steps
+
+After installing, [configure your editor](/docs/client-configurations) to launch
+`fish-lsp start` for `fish` files, and optionally tune the
+[server settings](/docs/server-configurations).

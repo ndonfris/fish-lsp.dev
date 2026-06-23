@@ -2,7 +2,7 @@
 title: Abbreviations
 description: fish-lsp `abbr` commands to simplify commonly used commands
 slug: abbreviations
-order: 9
+order: 11
 section: Reference
 ---
 

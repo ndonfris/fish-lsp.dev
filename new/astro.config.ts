@@ -6,6 +6,38 @@ import icon     from 'astro-icon';
 import mdx      from '@astrojs/mdx';
 import remarkGithubAlerts from 'remark-github-alerts';
 import tailwindcss from '@tailwindcss/vite';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+/**
+ * Dev-only: serve the built Pagefind index (`dist/pagefind/`) at `/pagefind/*`
+ * so search works under `astro dev`. Pagefind can only index built HTML, so run
+ * `pnpm build` once to generate the index; the dev server then serves it.
+ */
+function pagefindDev() {
+  const MIME: Record<string, string> = {
+    '.js': 'text/javascript', '.css': 'text/css',
+    '.json': 'application/json', '.wasm': 'application/wasm',
+  };
+  return {
+    name: 'pagefind-dev',
+    hooks: {
+      'astro:server:setup': ({ server }: any) => {
+        server.middlewares.use(async (req: any, res: any, next: any) => {
+          const url = (req.url ?? '').split('?')[0];
+          if (!url.startsWith('/pagefind/')) return next();
+          try {
+            const data = await readFile(join(process.cwd(), 'dist', url));
+            res.setHeader('Content-Type', MIME[url.slice(url.lastIndexOf('.'))] ?? 'application/octet-stream');
+            res.end(data);
+          } catch {
+            next();
+          }
+        });
+      },
+    },
+  };
+}
 
 /**
  * Turn ```mermaid fences into `<pre class="mermaid">…</pre>` before Shiki runs,
@@ -22,7 +54,7 @@ function remarkMermaid() {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
           child.type = 'html';
-          child.value = `<pre class="mermaid">${escaped}</pre>`;
+          child.value = `<pre class="mermaid" data-pagefind-ignore>${escaped}</pre>`;
           delete child.lang;
           delete child.meta;
         } else {
@@ -42,7 +74,7 @@ export default defineConfig({
   // pnpm astro build writes to dist/ (gitignored)
   outDir: 'dist',
 
-  integrations: [react(), alpinejs(), icon(), mdx()],
+  integrations: [react(), alpinejs(), icon(), mdx(), pagefindDev()],
 
   vite: {
     plugins: [tailwindcss()],
