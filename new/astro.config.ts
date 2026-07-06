@@ -74,6 +74,12 @@ export default defineConfig({
   // pnpm astro build writes to dist/ (gitignored)
   outDir: 'dist',
 
+  // Alias `/docs/man` → `/docs/commands` (the CLI reference doubles as the
+  // man-page docs). Works in dev and static build, unlike a vercel.json-only rule.
+  redirects: {
+    '/docs/man': '/docs/commands',
+  },
+
   integrations: [react(), alpinejs(), icon(), mdx(), pagefindDev()],
 
   vite: {
