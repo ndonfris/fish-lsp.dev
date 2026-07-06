@@ -6,6 +6,8 @@ order: 4
 section: Configuration
 ---
 
+import '@theme/global.css';
+
 # Client Configurations
 
 `fish-lsp` works with any LSP-compatible editor. In almost every client the
@@ -15,10 +17,34 @@ configuration boils down to translating one shell command for `fish` files:
 2. **arguments** → `start`
 3. **filetype** → `fish`
 
-> [!NOTE]
+> [!IMPORTANT]
 > Editors like VSCode/VSCodium install and wire up the server automatically via
 > their extension — no client configuration required. A
 > [server configuration](/docs/server-configurations) can still be applied.
+---
+
+<small>
+
+> #### <div class="text-fish-alt-white/70"> **All Clients** </div>
+> 
+> - [Vim/Neovim](#neovim)
+>   - [mason.nvim](#mason.nvim)
+>   - [coc.nvim](#coc.nvim)
+>   - [YouCompleteMe](#youcompleteme)
+>   - [vim-lsp](#vim-lsp)
+> - [Emacs](#emacs)
+>   - [lsp-mode](#lsp-mode)
+>   - [eglot](#eglot)
+> - [Helix](#helix)
+> - [Kakoune](#kakoune)
+> - [Kate](#kate)
+> - [VSCode or VSCodium](#vscode-or-vscodium)
+> - [Zed](#zed)
+> - [IntelliJ](#intellij)
+> - [BBEdit](#bbedit)
+
+</small>
+
 
 ## Pre-Built Examples
 
@@ -30,7 +56,7 @@ repo has ready-to-use, testable configs:
 - [coc.nvim (complete)](https://github.com/ndonfris/fish-lsp-language-clients/tree/coc_example)
 - [coc.nvim (minimal)](https://github.com/ndonfris/fish-lsp-language-clients/tree/coc_minimal)
 
-## Neovim (native LSP, `>= 0.8`)
+## [Neovim](https://neovim.io/) (native LSP, `>= 0.8`)
 
 ```lua
 vim.api.nvim_create_autocmd('FileType', {
@@ -50,13 +76,13 @@ Or use [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc
 require('lspconfig').fish_lsp.setup({})
 ```
 
-## mason.nvim
+## [mason.nvim](https://github.com/mason-org/mason.nvim)
 
 ```vim
 :MasonInstall fish-lsp
 ```
 
-## coc.nvim
+## [coc.nvim](https://github.com/neoclide/coc.nvim)
 
 Minimal `coc-settings.json`:
 
@@ -94,7 +120,7 @@ Full config with workspace paths:
 }
 ```
 
-## YouCompleteMe
+## [YouCompleteMe](https://github.com/ycm-core/youcompleteme)
 
 ```vim
 let g:ycm_language_server =
@@ -107,7 +133,7 @@ let g:ycm_language_server =
       \ ]
 ```
 
-## vim-lsp
+## [vim-lsp](https://github.com/prabirshrestha/vim-lsp)
 
 ```vim
 if executable('fish-lsp')
@@ -119,7 +145,7 @@ if executable('fish-lsp')
 endif
 ```
 
-## Helix
+## [Helix](https://docs.helix-editor.com/title-page.html)
 
 In `~/.config/helix/languages.toml`:
 
@@ -131,10 +157,11 @@ language-servers = [ "fish-lsp" ]
 [language-server.fish-lsp]
 command = "fish-lsp"
 args = ["start"]
-environment = { "fish_lsp_show_client_popups" = "false" }
+## (Optional)
+# environment = { "fish_lsp_show_client_popups" = "false" }
 ```
 
-## Kakoune
+## [Kakoune](https://kakoune.org/)
 
 For [kakoune-lsp](https://github.com/kakoune-lsp/kakoune-lsp), in `~/.config/kak-lsp/kak-lsp.toml`:
 
@@ -145,7 +172,7 @@ command = "fish-lsp"
 args = ["start"]
 ```
 
-## Kate
+## [Kate](https://kate-editor.org/)
 
 ```json
 {
@@ -159,9 +186,9 @@ args = ["start"]
 }
 ```
 
-## Emacs
+## [Emacs](https://emacsdocs.org/docs/emacs/The-Emacs-Editor)
 
-Using [eglot](https://github.com/joaotavora/eglot) (built into Emacs 29+):
+<a id="eglot"></a>Using [eglot](https://github.com/joaotavora/eglot) (built into Emacs 29+):
 
 ```elisp
 (require 'eglot)
@@ -170,7 +197,7 @@ Using [eglot](https://github.com/joaotavora/eglot) (built into Emacs 29+):
 (add-hook 'fish-mode-hook 'eglot-ensure)
 ```
 
-Using [lsp-mode](https://github.com/emacs-lsp/lsp-mode):
+<a id="lsp-mode"></a> Using [lsp-mode](https://github.com/emacs-lsp/lsp-mode):
 
 ```elisp
 (require 'lsp-mode)
@@ -182,7 +209,7 @@ Using [lsp-mode](https://github.com/emacs-lsp/lsp-mode):
 (add-hook 'fish-mode-hook #'lsp)
 ```
 
-## VSCode / VSCodium
+## [VSCode](https://code.visualstudio.com/) or [VSCodium](https://vscodium.com/)
 
 Install the extension and the server works out-of-the-box — no client config:
 
@@ -190,10 +217,19 @@ Install the extension and the server works out-of-the-box — no client config:
 - [Open VSX (VSCodium)](https://open-vsx.org/extension/ndonfris/fish-lsp)
 - [Extension source](https://github.com/ndonfris/vscode-fish-lsp)
 
-## BBEdit / IntelliJ
+## [Zed](https://zed.dev/)
 
-- **BBEdit** — follow the [`bbedit` branch instructions](https://github.com/ndonfris/fish-lsp-language-clients/blob/bbedit/BBEdit%20Install.md) (includes a `Fish.plist` for highlighting).
-- **IntelliJ** — see [jetbrains-fish](https://github.com/tox-dev/jetbrains-fish?tab=readme-ov-file#installation).
+See [zed-fish-lsp](https://github.com/alysson-souza/zed-fish-lsp)
+
+## [IntelliJ](https://www.jetbrains.com/idea/)
+
+See [jetbrains-fish](https://github.com/tox-dev/jetbrains-fish?tab=readme-ov-file#installation)
+
+## [BBEdit](https://www.barebones.com/products/bbedit/)
+
+Follow the [`bbedit` branch instructions](https://github.com/ndonfris/fish-lsp-language-clients/blob/bbedit/BBEdit%20Install.md) 
+> [!Important]
+> Includes a `Fish.plist` for syntax highlighting.
 
 ## Testing in Isolation
 

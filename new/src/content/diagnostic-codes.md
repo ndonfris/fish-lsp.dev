@@ -14,7 +14,8 @@ The error codes are used to identify specific diagnostics and can be used to dis
 
 ![](/comment.png)
 
-This page provides a reference table for all the diagnostic error codes that `fish-lsp` can produce.
+> [!Important]
+> This page provides a reference table for all the diagnostic error codes that `fish-lsp` can produce.
 
 ## Error Code Table
 
@@ -100,6 +101,9 @@ alias ls_problem 'exa --color=always --icons -1' # diagnostic 2002 will be enabl
 
 echo 'all diagnostics will be disabled again'
 ```
+
+> [!TIP]
+> Try this out directly in the [playground!](https://playground.fish-lsp.dev/?preview=IyBAZmlzaC1sc3AtZW5hYmxlCmVjaG8gJ2VuYWJsZXMgYWxsIHByZXZpb3VzbHkgZGlzYWJsZWQgZGlhZ25vc3RpY3MnCgojIEBmaXNoLWxzcC1kaXNhYmxlLW5leHQtbGluZSAyMDAxIDIwMDIKYWxpYXMgbD0nbHMgJFBXRCcgIyBubyB3YXJuaW5ncyBmb3IgYWxpYXMgdXNhZ2Ugb3Igbm9uLWVzY2FwZWQgZXhwYW5zaW9uIHZhcmlhYmxlcwphbGlhcyBsPSdscyAkUFdEJyAjIHdhcm5pbmdzIDIwMDEsIDIwMDIgd2lsbCBiZSBzaG93bgoKIyMgZGlhZ25vc3RpY3MgY2FuIGJlIGRpc2FibGVkIGZvciBhIHJhbmdlIG9mIGxpbmVzCiMgQGZpc2gtbHNwLWRpc2FibGUgMjAwMgphbGlhcyBscyAgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0xJw%3D%3D&uri=file%3A%2F%2F%2Fworkspace%2Fexample.fish#code=IyBAZmlzaC1sc3AtZW5hYmxlCmVjaG8gJ2VuYWJsZXMgYWxsIHByZXZpb3VzbHkgZGlzYWJsZWQgZGlhZ25vc3RpY3MnCgojIEBmaXNoLWxzcC1kaXNhYmxlLW5leHQtbGluZSAyMDAxIDIwMDIKYWxpYXMgbD0nbHMgJFBXRCcgIyBubyB3YXJuaW5ncyBmb3IgYWxpYXMgdXNhZ2Ugb3Igbm9uLWVzY2FwZWQgZXhwYW5zaW9uIHZhcmlhYmxlcwphbGlhcyBsPSdscyAkUFdEJyAjIHdhcm5pbmdzIDIwMDEsIDIwMDIgd2lsbCBiZSBzaG93bgoKIyMgZGlhZ25vc3RpY3MgY2FuIGJlIGRpc2FibGVkIGZvciBhIHJhbmdlIG9mIGxpbmVzCiMgQGZpc2gtbHNwLWRpc2FibGUgMjAwMgphbGlhcyBscyAgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0xJwphbGlhcyBsc2QgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zJwphbGlhcyBsc3QgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0tdHJlZScKIyBAZmlzaC1sc3AtZW5hYmxlIDIwMDIKIyMjIG9ubHkgZGlhZ25vc3RpYyAyMDAyIHdpbGwgYmUgZGlzYWJsZWQgaW4gdGhlIHJhbmdlIG9mIGxpbmVzIGFib3ZlLAojIyMgb3RoZXIgZGlhZ25vc3RpY3Mgd29udCBiZSBhZmZlY3RlZAoKIyBAZmlzaC1sc3AtZGlzYWJsZQplY2hvICdhbGwgZGlhZ25vc3RpY3Mgd2lsbCBiZSBkaXNhYmxlZCB0aWxsIEVPRiB1bmxlc3Mgb3RoZXJ3aXNlIGVuYWJsZWQnCiMgQGZpc2gtbHNwLWVuYWJsZS1uZXh0LWxpbmUgMjAwMgphbGlhcyBsc19wcm9ibGVtICdleGEgLS1jb2xvcj1hbHdheXMgLS1pY29ucyAtMScgIyBkaWFnbm9zdGljIDIwMDIgd2lsbCBiZSBlbmFibGVkCgplY2hvICdhbGwgZGlhZ25vc3RpY3Mgd2lsbCBiZSBkaXNhYmxlZCBhZ2Fpbic%3D&uri=file%3A%2F%2F%2Fworkspace%2Fexample.fish)
 
 > [!NOTE]
 > The `fish-lsp` will provide __code-actions__, __quickfixes__ and __completions__ for using these comments in your fish scripts.
@@ -194,6 +198,8 @@ Depending on the situation, my personal preference for using aliases is as follo
     ```fish
     $EDITOR ~/.config/fish/conf.d/aliases.fish
     ```
+
+   > [!NOTE]
    > the `~/.config/fish/conf.d/` directory is auto-loaded before fish reads your `config.fish` file during startup, so placing your aliases in here will ensure they are loaded before your interactive shell starts.
 
 2. Put all your existing aliases in this file, and add a function to edit the aliases file without alias warnings
