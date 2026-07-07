@@ -25,18 +25,55 @@ fish-lsp info --bin
 which fish-lsp
 ```
 
-## Startup & Health
+## Startup Verification
+
+The server ships with a built-in headless startup test, to verify that the server can perform analysis on a given workspace without requiring a working client connection.
+
+This is useful for debugging issues with the server itself, or with your client configuration. 
+
+In general, a working output from the following command indicates that the server is functioning correctly:
+
+```fish
+fish-lsp info --time-startup
+```
+
+Profiling is offered, to measure the duration of each phase in the startup process, and to help identify any bottlenecks in the server's initialization.
+
+```fish
+# Depending on your configuration, you may need to limit the indexed startup paths to a single workspace, e.g.:
+# set -lx fish_lsp_all_indexed_paths ~/.config/fish
+fish-lsp  info --time-startup --profile --no-warning --use-workspace ~/.config/fish 
+```
+
+Successful output will look like this: 
+
+<img src="/startup-profiling.svg" alt="fish-lsp  info --time-startup --profile --no-warning --use-workspace ~/.config/fish output" />
+
+The `--time-only` flag can be used as an alias to essentially behave like `--time-startup --no-warning`, and will produce a more concise output:
+
+```fish
+fish-lsp info --time-only
+```
+
+<img src="/time-only.svg" alt="fish-lsp info --time-only" />
+
+
+> [!IMPORTANT]
+> For user's who are experiencing issues with successfully configuring their editor to connect to the server, the startup verification commands above are likely the most straightforward way to confirm that the server is functioning correctly.
+>
+> Typically, this indicates that a language client configuration issue is the probable cause of initial installation issues, rather than a problem with the server itself.
+
+
+## Checking Server Health
+
+The server comes equipped with a built-in health check, which verifies that the minimum requirements for the server runtime are met, and also checks for out of date `fish-lsp` manpages + completions.
 
 ```fish
 # run health diagnostics
 fish-lsp info --check-health
-
-# time the startup while indexing $fish_lsp_all_indexed_paths
-fish-lsp info --time-startup
-
-# briefer timing summary, optionally scoped to one folder
-fish-lsp info --time-only --use-workspace ~/.config/fish
 ```
+
+<img src="/check-health.svg" alt="fish-lsp info --check-health output" />
 
 ## Logging
 
@@ -122,9 +159,22 @@ set -gx NODE_OPTIONS '--enable-source-maps --inspect'
 $EDITOR ~/.config/fish/config.fish
 ```
 
+> [!NOTE]
+> Source maps might not be included in the build you are using (decided by the package manager or installation method used)
+> 
+> You can confirm if source maps are included by checking the output of: 
+>
+> ```fish
+> fish-lsp info --source-maps --check
+> ```
+> 
+> <img src="/source-maps.svg" alt="fish-lsp info --source-maps --check output" />
+> 
+> If you are seeing bundled js locations in the stack traces, then try testing with a build that includes source maps instead (i.e., building from source with `yarn build:bin` or `yarn build:npm`, or downloading a [standalone release](https://github.com/ndonfris/fish-lsp/releases/tag/v1.1.4))
+
 ## Build Issues (from source)
 
-If `yarn install` / `yarn build` fails, it's usually a missing or misplaced
+If `yarn install && yarn build` fails, it's usually a missing or misplaced
 `tree-sitter-fish.wasm`. Rebuild the assets or point at an existing `.wasm`:
 
 ```fish
@@ -136,5 +186,4 @@ set -gx fish_lsp_tree_sitter_wasm_path ~/path/to/tree-sitter-fish.wasm
 See [Building from Source](/docs/building-from-source) for the full build flow.
 
 > [!TIP]
-> Short abbreviations for many of these commands are available — see
-> [Abbreviations](/docs/abbreviations).
+> Short abbreviations for many of these commands are available — see [Abbreviations](/docs/abbreviations).
