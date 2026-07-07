@@ -32,3 +32,6 @@ public/*
 !public/help-msg-new.png
 !public/sitemap-index.xml
 !public/fish-lsp-info.svg
+!public/dump-parse-tree.svg
+!public/dump-symbol-tree.svg
+!public/dump-semantic-tokens.svg

@@ -68,16 +68,50 @@ Then check `fish-lsp info` to confirm you're running the expected version. See
 
 ## Inspecting Parse Output
 
+Given a file like:
+
 ```fish
-# tree-sitter parse tree for a file
+function greet --argument-names name
+    set -l greeting "Hello"
+    echo "$greeting, $name!"
+end
+
+greet World
+```
+
+### Parse Tree
+
+```fish
 fish-lsp info --dump-parse-tree path/to/file.fish
+```
 
-# the fish-lsp symbol tree
+<img src="/dump-parse-tree.svg" alt="fish-lsp info --dump-parse-tree output" />
+
+### Symbol Tree
+
+```fish
 fish-lsp info --dump-symbol-tree path/to/file.fish
+```
 
-# semantic tokens
+<img src="/dump-symbol-tree.svg" alt="fish-lsp info --dump-symbol-tree output" />
+
+Pass `--no-icons` to swap the nerdfont glyphs for plain-text tags (`f`/`v`/`e`) if
+your terminal font doesn't render them:
+
+```fish
+fish-lsp info --dump-symbol-tree path/to/file.fish --no-icons
+```
+
+### Semantic Tokens
+
+```fish
 fish-lsp info --dump-semantic-tokens path/to/file.fish
 ```
+
+<img src="/dump-semantic-tokens.svg" alt="fish-lsp info --dump-semantic-tokens output" />
+
+Add `--no-color` to any of the three `--dump-*` flags to strip ANSI colors,
+e.g. when piping the output somewhere else.
 
 ## Source Maps
 

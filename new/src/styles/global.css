@@ -289,6 +289,19 @@
   margin: 1.5rem 0;
 }
 
+/* SVG terminal screenshots (freeze output) are vector — stretch to fill the
+   prose column instead of sitting at their small captured intrinsic size.
+   Freeze already draws its own rounded window chrome + border, so drop the
+   generic .prose img border/radius to avoid a double border. */
+.prose img[src$='.svg'] {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  /* margin: -3.5rem 0; */
+  /* padding-top: 0.25rem; */
+  /* padding-bottom: 1rem; */
+}
+
 .prose strong { font-weight: 900; }
 .prose em     { font-style: italic; font-weight: 400; opacity: 95%;  }
 .prose hr     { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
