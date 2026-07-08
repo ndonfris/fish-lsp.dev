@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="881.2" height="286" viewBox="0 0 881.2 286" role="img" aria-label="console2svg output">
+<style>
+.crt {
+  font-family: ui-monospace,"JetBrains Mono","Cascadia Mono","Segoe UI Mono","Noto Sans Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  font-size: 14px;
+}
+text {
+  dominant-baseline: alphabetic;
+}
+.bg {
+  shape-rendering: crispEdges;
+}
+</style>
+<rect x="0" y="0" width="881.2" height="286" fill="#1e1e1e"/>
+<g transform="translate(8 8)">
+<rect width="865.2" height="270" fill="#1e1e1e"/>
+<rect class="bg" x="75.6" y="36" width="226.8" height="18" fill="#e5e510"/>
+<text class="crt" x="8.4" y="50" fill="#e5e510" textLength="16.8" lengthAdjust="spacing" style="font-style:italic;">●◦</text>
+<text class="crt" x="25.2" y="50" fill="#f5f543" textLength="16.8" lengthAdjust="spacing" style="font-style:italic;">◌◦</text>
+<text class="crt" x="42" y="50" fill="#e5e5e5" textLength="16.8" lengthAdjust="spacing" style="font-style:italic;">◃◈</text>
+<text class="crt" x="67.2" y="50" fill="#e5e510" textLength="8.4" lengthAdjust="spacing"></text>
+<text class="crt" x="84" y="50" fill="#e5e5e5" textLength="8.4" lengthAdjust="spacing"></text>
+<text class="crt" x="100.8" y="50" fill="#e5e5e5" textLength="193.2" lengthAdjust="spacing">feat/complete-rewrite.2</text>
+<text class="crt" x="302.4" y="50" fill="#e5e510" textLength="8.4" lengthAdjust="spacing"></text>
+<text class="crt" x="319.2" y="50" fill="#0A8D5B" textLength="8.4" lengthAdjust="spacing" style="font-style:italic;"></text>
+<text class="crt" x="336" y="50" fill="#0A8D5B" textLength="16.8" lengthAdjust="spacing" style="font-style:italic;">52</text>
+<text class="crt" x="361.2" y="50" fill="#9A2525" textLength="8.4" lengthAdjust="spacing" style="font-style:italic;"></text>
+<text class="crt" x="378" y="50" fill="#9A2525" textLength="8.4" lengthAdjust="spacing" style="font-style:italic;">9</text>
+<rect class="bg" x="386.4" y="54" width="58.8" height="18" fill="#000000"/>
+<text class="crt" x="378" y="68" fill="#000000" textLength="8.4" lengthAdjust="spacing"></text>
+<text class="crt" x="394.8" y="68" fill="#ACACAC" textLength="42" lengthAdjust="spacing" style="font-style:italic;">18:10</text>
+<text class="crt" x="445.2" y="68" fill="#000000" textLength="8.4" lengthAdjust="spacing"></text>
+<text class="crt" x="0" y="86" fill="#2472c8" textLength="33.6" lengthAdjust="spacing" style="font-style:italic;">~/r/</text>
+<text class="crt" x="33.6" y="86" fill="#2B89F0" textLength="100.8" lengthAdjust="spacing" style="font-weight:bold;">fish-lsp.dev</text>
+<text class="crt" x="134.4" y="86" fill="#2472c8" textLength="33.6" lengthAdjust="spacing" style="font-style:italic;">/new</text>
+<text class="crt" x="176.4" y="86" fill="#10E291" textLength="8.4" lengthAdjust="spacing" style="font-weight:bold;">❯</text>
+<text class="crt" x="193.2" y="86" fill="#d4d4d4" textLength="67.2" lengthAdjust="spacing">fish-lsp</text>
+<text class="crt" x="268.8" y="86" fill="#11a8cd" textLength="33.6" lengthAdjust="spacing">info</text>
+<text class="crt" x="310.8" y="86" fill="#11a8cd" textLength="151.2" lengthAdjust="spacing">--dump-symbol-tree</text>
+<text class="crt" x="470.4" y="86" fill="#29b8db" textLength="58.8" lengthAdjust="spacing">$sample</text>
+<text class="crt" x="537.6" y="86" fill="#0dbc79" textLength="8.4" lengthAdjust="spacing">|</text>
+<text class="crt" x="554.4" y="86" fill="#d4d4d4" textLength="92.4" lengthAdjust="spacing">console2svg</text>
+<text class="crt" x="235.2" y="104" fill="#9F9F9F" textLength="25.2" lengthAdjust="spacing" style="font-style:italic;">pkg</text>
+<text class="crt" x="268.8" y="104" fill="#ACAC0C" textLength="8.4" lengthAdjust="spacing" style="font-style:italic;">◨</text>
+<text class="crt" x="285.6" y="104" fill="#ACAC0C" textLength="42" lengthAdjust="spacing" style="font-style:italic;">0.1.0</text>
+<text class="crt" x="336" y="104" fill="#d4d4d4" textLength="33.6" lengthAdjust="spacing" style="font-style:italic;">node</text>
+<text class="crt" x="378" y="104" fill="#2AFBA7" textLength="8.4" lengthAdjust="spacing" style="font-weight:bold;">◫</text>
+<text class="crt" x="394.8" y="104" fill="#2AFBA7" textLength="58.8" lengthAdjust="spacing" style="font-weight:bold;">22.14.0</text>
+</g>
+</svg>

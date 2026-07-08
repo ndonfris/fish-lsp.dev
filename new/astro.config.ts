@@ -5,6 +5,8 @@ import alpinejs from '@astrojs/alpinejs';
 import icon     from 'astro-icon';
 import mdx      from '@astrojs/mdx';
 import remarkGithubAlerts from 'remark-github-alerts';
+import remarkCodeFile from './src/plugins/remark-codefile.mjs';
+import remarkCommandPrompt from './src/plugins/remark-command-prompt.mjs';
 import tailwindcss from '@tailwindcss/vite';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -87,7 +89,7 @@ export default defineConfig({
   },
 
   markdown: {
-    remarkPlugins: [remarkMermaid, remarkGithubAlerts],
+    remarkPlugins: [remarkMermaid, remarkGithubAlerts, remarkCodeFile, remarkCommandPrompt],
     shikiConfig: {
       theme: 'material-theme-ocean',
     },

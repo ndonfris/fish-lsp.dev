@@ -1,0 +1,181 @@
+---
+title: Building from Source
+description: Clone the repo and build fish-lsp locally with yarn
+slug: building-from-source
+order: 3
+section: Getting Started
+---
+
+import CodeTabs from '@components/CodeTabs.astro';
+
+# Building from Source
+
+Building from source is the most portable installation method.
+
+> [!WARNING]
+> **Recommended toolchain:** `yarn@1.22.22`, `node@22.XX.XX`, `fish@4.0.8`
+>
+> _(Node.js `>= 20` is required)_.
+
+```fish
+git clone https://github.com/ndonfris/fish-lsp
+cd fish-lsp
+yarn install
+yarn build
+```
+
+The command `yarn build` compiles the source and links `./dist/fish-lsp` into your  
+`yarn global bin` location (which needs to be accessible in your system `$PATH`).
+
+Confirm which binary is being used by your shell:
+
+```fish
+fish-lsp info
+```
+
+### Customizing builds
+
+The command `yarn build` compiles two different target binaries that have
+different purposes.
+
+- `dist/fish-lsp` is the normal language-server binary that is typically
+    distributed to end-users. It is a smaller binary that requires the projects
+    dependencies to be accessible (`npm`/`yarn`/`pnpm` would be able to use this
+    file and its `package.json` to install the required modules for the server
+    to run).
+
+- `bin/fish-lsp` is a larger binary that is distributed as a release asset which
+   can be downloaded directly and contains all the projects dependencies
+   embedded into the binary itself. For this reason, it is typically much larger than the
+   `dist/fish-lsp` executable.
+
+> [!TIP]
+> The `yarn build:*` commands provided by the `package.json` scripts can be used
+> to only build a certain target binary, if the user does not want to build both targets.
+>
+> <CodeTabs
+> id="building-from-source-targets"
+> fullWidth
+> tabs={[
+> { label: 'normal target', lang: 'fish',  lines: ['yarn build:npm'] },
+> { label: 'single executable application',      lang: 'fish',  lines: ['yarn build:bin'] },
+> { label: 'normal target w/o sourcemaps', lang: 'fish',  lines: ['yarn build:npm:nosourcemaps'] },
+> ]}
+> />
+
+To further customize the build target, use the command included `package.json` script **`dev`**:
+
+```fish
+yarn dev # --<FLAG...> to customize the build target
+# yarn dev --help to see all available flags
+```
+
+The `build` script is essentailly a wrapper around the common combinations provided by the `dev` script.
+
+## Watching builds
+
+The `yarn watch` command can be used to watch the source files and automatically rebuild the project when changes are detected.
+
+```fish
+yarn watch # normal usage
+yarn watch --npm # watch and rebuild the normal dist/fish-lsp target
+yarn watch --bin # watch and rebuild the single executable bin/fish-lsp target
+yarn watch --mode=test # watch and rebuild and then run the test suite
+```
+
+This is useful if you are live testing the language server in a client and
+making changes to the source code. Since the language server is linked globally
+the language-client should be able to pick up the changes automatically when a
+new build is completed. Depending on which client is being used, restarting the
+client/server connection might need to be done for this to work correctly (some
+clients automatically do this though).
+
+> [!TIP]
+> In neovim, I have a small lua script that watchs my language-server binaries
+> for the current buffer and automatically restarts the connection when a binary
+> changes. This makes it very easy to test changes to the language-server
+> with real time feedback in the editor.
+
+## Manual Linking
+
+If `yarn build` compiles but fails to link, test the local binary first:
+
+```fish
+./dist/fish-lsp info
+```
+
+Then link it manually from the repo root:
+
+```fish
+yarn unlink -g fish-lsp
+yarn link -g .
+```
+
+## Re-linking for VSCode
+
+```fish
+cd ~/.vscode/extensions/ndonfris.fish-lsp-*/
+yarn unlink fish-lsp && yarn link fish-lsp
+```
+
+## tree-sitter WASM
+
+> [!NOTE]
+> It is unlikely that this info is relevant to user's of this project, and is mainly included for developers attempting to contribute to the project or build it from source with an experimental tree-sitter-fish grammar change.
+
+The build needs `tree-sitter-fish.wasm`. Normally, this is achieved directly
+using the npm package [`@esdmr/tree-sitter-fish`](https://github.com/esdmr/tree-sitter-fish), which is a fork of the [`tree-sitter-fish`](https://github.com/ram02z/tree-sitter-fish) repository
+providing a prebuilt wasm binary of the tree-sitter-fish language.
+
+This is not always the case though. Since newer versions of the server embed the
+wasm dependency directly into the executable, the server could also be using a
+custom upstream build of the tree-sitter-fish grammar. For releases where a
+separate wasm file was embedded, the wasm file is included separately in the
+[github release](https://github.com/ndonfris/fish-lsp/releases) assets (i.e., [release `1.1.4` assets](https://github.com/ndonfris/fish-lsp/releases/tag/v1.1.4))
+
+If you want to use an upstream version of the tree-sitter-fish grammar, you can build the `.wasm` yourself and point the server at it instead of rebuilding:
+
+```fish
+set -gx fish_lsp_tree_sitter_wasm_path ~/path/to/tree-sitter-fish.wasm
+```
+
+All build related commands used to compile and bundle the project into its
+target executable recognize the `fish_lsp_tree_sitter_wasm_path` environment
+variable and will use it if set to embed the wasm file directly into the
+executable.
+
+To build the executable with a custom embedded wasm file, you could use the either of following methods:
+
+<CodeTabs
+id="custom-wasm-build-usage"
+fullWidth
+tabs={[
+    { label: 'locally exported', lang: 'fish',  lines: ['set -lx fish_lsp_tree_sitter_wasm_path ~/path/to/tree-sitter-fish.wasm', 'yarn build'] },
+    { label: 'single command export',      lang: 'fish',  lines: ['fish_lsp_tree_sitter_wasm_path=~/path/to/tree-sitter-fish.wasm yarn build'] },
+]}
+/>
+
+The executable will also allow you to override the
+`fish_lsp_tree_sitter_wasm_path` environment variable at runtime, so you can use
+a different `.wasm` file without rebuilding the executable.
+
+To temporarily override the wasm file used by the executable, for a single
+server use, you can directly export it to the `fish-lsp` command:
+
+```fish
+# here we override the wasm file used by the server for a single command and 
+# display the parse tree of the config.fish file using the grammar exported
+fish_lsp_tree_sitter_wasm_path=~/path/to/tree-sitter-fish.wasm fish-lsp info --dump-parse-tree ~/.config/fish/config.fish
+```
+
+## Development
+
+```fish
+yarn watch     # watch + rebuild while developing
+yarn test      # run the test suite
+yarn typecheck # ensure valid type usage project wide
+yarn lint:fix  # fix linting issues
+```
+
+See the [Contributing guide](https://github.com/ndonfris/fish-lsp/blob/master/docs/CONTRIBUTING.md)
+for the full development workflow.

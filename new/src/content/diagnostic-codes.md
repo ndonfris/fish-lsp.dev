@@ -153,8 +153,8 @@ You can check what key is binded to this function by running the following comma
 ```fish
 bind | string match -e 'edit_command_buffer'
 # YOUR OUTPUT SHOULD LOOK SOMETHING LIKE:
-#    bind --preset \ev edit_command_buffer
-#    bind --preset \ee edit_command_buffer
+#    bind --preset alt-v edit_command_buffer
+#    bind --preset alt-e edit_command_buffer
 ```
 
 If you wanted to disable diagnostics only while using the `fish-lsp` is editing a command buffer, you can easily do this by wrapping the `edit_command_buffer` function with __locally__ __exported__ `$fish_lsp_*` variables.
@@ -181,7 +181,7 @@ end
 Now you can call the `edit_command_buffer_wrapper` function instead of the `edit_command_buffer` function to open the command buffer with the custom server configurations.
 
 ```fish
-bind \ee edit_command_buffer_wrapper
+bind alt-e edit_command_buffer_wrapper
 ```
 
 ## Disabling Alias Warnings

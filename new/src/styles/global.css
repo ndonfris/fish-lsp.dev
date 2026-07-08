@@ -3,6 +3,17 @@
    Colors + theming live in the "GitHub alerts" block lower in this file. */
 @import 'remark-github-alerts/styles/github-base.css';
 
+/* Nerd Font icon subset — only the glyphs `fish-lsp --dump-symbol-tree` emits
+   (function U+F0295, variable U+EA88, event U+F0675). `unicode-range` scopes it
+   to exactly those codepoints, so it's used ONLY as a fallback for the icons
+   (the mono font supplies everything else). ~1 KB. */
+@font-face {
+  font-family: 'Symbols Nerd Subset';
+  src: url('/fonts/symbols-nerd-subset.woff2') format('woff2');
+  font-display: swap;
+  unicode-range: U+EA88, U+F0295, U+F0675;
+}
+
 /* ─── Tailwind theme tokens ───────────────────────────────────────
    Registers the brand palette as utilities:
      accents  → bg-fish-blue, text-fish-cyan, border-fish-cyan/30 …
@@ -32,7 +43,7 @@
 
   --color-line: rgba(78, 108, 250, 0.2);
 
-  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code',
+  --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
                'Source Code Pro', ui-monospace, monospace;
   --font-sans: 'Inter', system-ui, sans-serif;
 
@@ -75,7 +86,7 @@
     --text-muted:   #7a8ab4;
     --text-dim:     #4a5578;
 
-    --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code',
+    --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
                  'Source Code Pro', ui-monospace, monospace;
     --font-sans: 'Inter', system-ui, sans-serif;
   }
@@ -173,13 +184,17 @@
   border-radius: 4px;
   font-size: 0.875em;
   border: 1px solid var(--border);
+  /* Keep an inline-code chip intact: never break it mid-word (e.g. `--check`
+     → `--`/`check`). It moves to the next line as a unit (wraps before it). */
+  white-space: nowrap;
 }
 
 .prose pre {
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 1.25rem 1.5rem;
+  /* Horizontal padding matches CommandPrompt's px-4 (1rem). */
+  padding: 1.25rem 1rem;
   overflow-x: auto;
   margin: 1.25rem 0;
   position: relative;
@@ -202,6 +217,9 @@
   padding: 0;
   color: var(--text-primary);
   font-size: 0.875rem;
+  /* Code inside a block keeps the <pre>'s whitespace handling, not the inline
+     `nowrap` above (which would collapse indentation). */
+  white-space: inherit;
 }
 
 /* ─── Mermaid diagrams ───────────────────────────────────────── */
@@ -225,6 +243,61 @@
 .prose .code-block { position: relative; margin: 1.25rem 0; }
 .prose .code-block > pre { margin: 0; }
 
+/* Copy buttons: hidden on mobile (per request). On desktop, reserve right-hand
+   space on code that carries an absolute copy button so text is never covered —
+   including at the far end of a horizontal scroll (clearance ≈ button width). */
+@media (max-width: 640px) {
+  .copy-btn,
+  .cmd-copy { display: none !important; }
+}
+@media (min-width: 641px) {
+  .prose .code-block > pre { padding-right: 2.5rem; }
+}
+
+/* CodeTabs / CodeFile / CommandPrompt / CommandOutput have no intrinsic prose
+   margin, so give them the same block spacing as code blocks — otherwise the
+   next paragraph sits flush. */
+.prose [data-codetabs],
+.prose [data-codefile],
+.prose [data-command-prompt],
+.prose [data-command-details],
+.prose [data-command-seq],
+.prose [data-xprompt] { margin: 1.25rem 0; }
+
+/* Command-component copy buttons: dim by default (like the code-block copy
+   button), full-strength on hover/focus/after copying. */
+.cmd-copy { opacity: 0.35; }
+.cmd-copy:hover,
+.cmd-copy:focus-visible,
+.cmd-copy.is-copied { opacity: 1; }
+@media (hover: none) { .cmd-copy { opacity: 0.55; } }
+
+/* Shared Shiki command block for CommandPrompt / CommandOutput: sits inline
+   with the prompt glyph and is transparent so the terminal frame background
+   shows through. The `.prose pre.cmd-code` selector beats the global
+   `.prose pre` rule (border/background/padding/lang-label) in docs prose. */
+.cmd-code,
+.prose pre.cmd-code {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.prose pre.cmd-code::before { content: none; }
+
+/* Commands never wrap — wrapping would break at hyphens (splitting shell tokens
+   like `--check` into `--` / `check`), which CSS can't cleanly prevent. Long
+   lines scroll horizontally instead. The copy button is absolute on mobile, so
+   the command gets the full width and most lines fit without scrolling. */
+.cmd-code,
+.prose pre.cmd-code {
+  white-space: pre;
+}
+
 .copy-btn {
   position: absolute;
   top: 0.4rem; right: 0.4rem;
@@ -236,12 +309,12 @@
   background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: 5px;
-  padding: 0.3rem;
+  padding: 0.25rem;
   cursor: pointer;
   opacity: 0.35; /* low so the code behind stays visible; full on hover */
   transition: opacity 0.12s, color 0.12s, border-color 0.12s, background 0.12s;
 }
-.copy-btn svg { display: block; width: 15px; height: 15px; }
+.copy-btn svg { display: block; width: 13px; height: 13px; }
 .prose .code-block:hover .copy-btn,
 .copy-btn:focus-visible,
 .copy-btn:hover { opacity: 1; }
@@ -249,6 +322,10 @@
 .copy-btn.is-copied { color: var(--fish-green); border-color: var(--fish-green); opacity: 1; }
 /* Touch devices have no hover — keep it partly visible */
 @media (hover: none) { .copy-btn { opacity: 0.55; } }
+/* GitHub-style: hide the copy button while the code scrolls horizontally,
+   restore it once scrolling stops (toggled by the scripts). `!important`
+   beats the `:hover`/`is-copied` opacity rules during the scroll. */
+.copy-btn.is-scrolling { opacity: 0 !important; pointer-events: none; }
 
 .prose blockquote {
   border-left: 3px solid var(--fish-blue);

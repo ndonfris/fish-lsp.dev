@@ -61,9 +61,14 @@ import { Icon } from 'astro-icon/components';
         type="button"
         data-search-close
         aria-label="Close search"
-        class="shrink-0 cursor-pointer rounded border border-line bg-surface-3 px-1.5 py-0.5
-               font-mono text-[0.65rem] text-ink-muted hover:border-fish-cyan hover:text-fish-cyan"
-      >Esc</button>
+        class="shrink-0 cursor-pointer rounded border border-line bg-surface-3 text-ink-muted
+               transition-colors hover:border-fish-cyan hover:text-fish-cyan
+               px-1.5 py-0.5 font-mono text-[0.65rem]
+               max-sm:px-2 max-sm:py-1 max-sm:text-[1.05rem] max-sm:leading-none"
+      >
+        <span class="max-sm:hidden">Esc</span>
+        <span class="hidden max-sm:inline" aria-hidden="true">✕</span>
+      </button>
     </div>
 
     <div id="search-results" class="flex-1 overflow-y-auto p-1.5" role="listbox" aria-label="Search results"></div>

@@ -1,0 +1,138 @@
+---
+/**
+ * A terminal command with a collapsible output section — an alternative to
+ * CommandPrompt built on a native <details> disclosure. The expand/collapse
+ * control is an explicit labeled pill ("show output ▾" / "hide output ▴"), and
+ * because it uses <details>/<summary> it toggles without any JavaScript and
+ * exposes proper open/closed semantics to assistive tech.
+ *
+ *   <CommandOutput command="fish_lsp --help">
+ *     <Fragment slot="output">usage: fish-lsp [options]</Fragment>
+ *   </CommandOutput>
+ *
+ * Command highlighted with Shiki (fish by default). Forward the output — raw
+ * stdout text, a screenshot <img>, any markup — via the `output` slot.
+ * Shares the `.cmd-code` Shiki styling (global.css) with CommandPrompt.
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+interface Props {
+  /** The shell command(s). Chain with `&&`/`;` — a single prompt is shown. */
+  command: string;
+  /** Shiki language for the command. Defaults to "fish". */
+  lang?: string;
+  /** Prompt glyph shown before the command. Defaults to "❯". */
+  prompt?: string;
+  /** Start expanded. */
+  open?: boolean;
+  /** Shiki theme; defaults to the site's markdown theme. */
+  codeTheme?: string;
+  /** Word used in the disclosure control (“show <label>”). Defaults to "output". */
+  label?: string;
+  /** Text copied by the copy button. Defaults to the command. */
+  copy?: string;
+}
+
+const {
+  command,
+  lang = 'fish',
+  prompt = '❯',
+  open = false,
+  codeTheme = 'material-theme-ocean',
+  label = 'output',
+  copy,
+} = Astro.props;
+
+const cmd = command.replace(/\n+$/, '');
+const copyText = copy ?? cmd;
+---
+
+<details
+  data-command-details
+  open={open}
+  class="overflow-hidden rounded-md border border-line bg-surface-1"
+>
+  <summary
+    class="flex w-full cursor-pointer list-none items-center gap-2.5 px-4 py-2.5 font-mono
+           transition-colors hover:bg-surface-2"
+  >
+    <span class="shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+    <Code code={cmd} lang={lang as any} theme={codeTheme as any} class="cmd-code min-w-0 flex-1" />
+
+    <span
+      class="inline-flex shrink-0 select-none items-center gap-1.5 rounded-full border
+             border-fish-cyan/30 bg-fish-cyan/10 px-2.5 py-0.5 text-[0.62rem] font-semibold
+             uppercase tracking-wider text-fish-cyan"
+    >
+      <span class="cmd-when-closed">show {label}</span>
+      <span class="cmd-when-open">hide {label}</span>
+      <span data-chevron class="text-[0.7rem] transition-transform">▾</span>
+    </span>
+
+    <button
+      type="button"
+      data-copy={copyText}
+      aria-label="Copy command"
+      class="cmd-copy inline-flex shrink-0 cursor-pointer select-none items-center justify-center
+             rounded-[5px] border border-line bg-surface-3 p-[0.25rem] text-ink-muted
+             transition-colors hover:border-fish-cyan hover:bg-surface-2 hover:text-fish-cyan"
+    >
+      <Icon name="copy" class="block h-[13px] w-[13px]" />
+    </button>
+  </summary>
+
+  <div
+    class="cmd-output border-t border-line px-4 py-3 font-mono text-[0.8rem] leading-relaxed
+           text-ink-muted whitespace-pre-wrap break-words"
+  >
+    <slot name="output" />
+  </div>
+</details>
+
+<style>
+  /* Hide the native disclosure triangle — the labeled pill is the affordance. */
+  details[data-command-details] > summary { list-style: none; }
+  details[data-command-details] > summary::-webkit-details-marker { display: none; }
+  details[data-command-details] > summary::marker { content: ''; }
+
+  /* Swap the pill label + flip the chevron based on the open state. */
+  .cmd-when-open { display: none; }
+  details[open] .cmd-when-open { display: inline; }
+  details[open] .cmd-when-closed { display: none; }
+  details[open] [data-chevron] { transform: rotate(180deg); }
+
+  /* Copied feedback (toggled by the script below) */
+  .cmd-copy.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* Screenshots / images in the output stay responsive. */
+  .cmd-output :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-command-details]').forEach((root) => {
+    // Copy the command. preventDefault stops the <details> from toggling when
+    // the copy button (which lives inside the <summary>) is clicked.
+    root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') ?? '');
+          btn.classList.add('is-copied');
+          window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    });
+  });
+</script>

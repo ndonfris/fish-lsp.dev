@@ -1,0 +1,208 @@
+---
+/**
+ * A terminal-style command: a prompt glyph followed by a Shiki-highlighted
+ * shell command (fish by default). When an `output` slot is provided the whole
+ * row becomes a toggle — clicking it expands to reveal the command's output
+ * below (raw stdout text, a screenshot <img>, or any markup you forward).
+ *
+ *   <CommandPrompt command="fish_lsp --help">
+ *     <Fragment slot="output">usage: fish-lsp [options]</Fragment>
+ *   </CommandPrompt>
+ *
+ * - Chain multiple commands (`a && b`) into one `command` — a single prompt is
+ *   shown at the start.
+ * - Without an `output` slot it renders as a plain (non-clickable) command row.
+ *
+ * The Shiki <pre> is excluded from the DocsLayout copy-button/border enhancer
+ * (see the `[data-command-prompt]` skip there) and made transparent so the
+ * terminal frame's background shows through. Tailwind + @theme tokens.
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+interface Props {
+  /** The shell command(s). Chain with `&&`/`;` — a single prompt is shown. */
+  command: string;
+  /** Shiki language for the command. Defaults to "fish" (this project's focus). */
+  lang?: string;
+  /** Prompt glyph shown before the command. Defaults to "❯". */
+  prompt?: string;
+  /** Start expanded (only meaningful when an `output` slot is provided). */
+  open?: boolean;
+  /** Shiki theme; defaults to the site's markdown theme. */
+  codeTheme?: string;
+  /**
+   * Copy button control:
+   *   - omitted / `true`  → show the button, copy the command (default)
+   *   - `false`           → hide the copy button
+   *   - a string          → show the button, copy that exact text
+   */
+  copy?: string | boolean;
+}
+
+const {
+  command,
+  lang = 'fish',
+  prompt = '❯',
+  open = false,
+  codeTheme = 'material-theme-ocean',
+  copy,
+} = Astro.props;
+
+// Split on newlines so multi-line commands render each on their own line.
+// Accept both a real newline (from an expression: command={"a\nb"}) and a
+// literal "\n" (from a quoted attribute: command="a\nb", which JSX keeps literal).
+const cmdText = command.replace(/\\n/g, '\n').replace(/\n+$/, '');
+// `copy` doubles as a show/hide flag: "true"/true keep the default (the
+// command); "false"/false hide the button; any other string overrides the text.
+const showCopy = copy !== false && copy !== 'false';
+const copyText =
+  typeof copy === 'string' && copy !== 'true' && copy !== 'false' ? copy : cmdText;
+const hasOutput = Astro.slots.has('output');
+const outId = `cmdout-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  data-command-prompt
+  class="overflow-hidden border rounded-md border-line bg-surface-1"
+>
+  <!-- Command row IS the toggle: clicking anywhere in it expands/collapses the
+       output. The copy button stops propagation so it never toggles. -->
+  <div
+    data-cmd-toggle={hasOutput ? '' : undefined}
+    role={hasOutput ? 'button' : undefined}
+    tabindex={hasOutput ? '0' : undefined}
+    aria-expanded={hasOutput ? (open ? 'true' : 'false') : undefined}
+    aria-controls={hasOutput ? outId : undefined}
+    aria-label={hasOutput ? 'Toggle output' : undefined}
+    class:list={[
+      'relative flex w-full items-start gap-2.5 px-4 py-2.5 text-left font-mono',
+      { 'cursor-pointer hover:bg-surface-2/50': hasOutput },
+    ]}
+  >
+    <span class="shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+    <Code code={cmdText} lang={lang as any} theme={codeTheme as any} class="flex-1 min-w-0 cmd-code" />
+
+    {hasOutput && (
+      <span
+        class="hidden shrink-0 select-none items-center gap-1.5 rounded-full border
+               border-fish-cyan/30 bg-fish-cyan/10 px-2.5 py-0.5 text-[0.62rem] font-semibold
+               uppercase tracking-wider text-fish-cyan sm:inline-flex"
+      >
+        <span class="cmd-when-closed">show output</span>
+        <span class="cmd-when-open">hide output</span>
+        <span data-chevron aria-hidden="true" class="text-[0.7rem] transition-transform">▾</span>
+      </span>
+    )}
+
+    {showCopy && (
+      <button
+        type="button"
+        data-copy={copyText}
+        aria-label="Copy command"
+        class="cmd-copy absolute right-2 top-2 z-10 inline-flex shrink-0 cursor-pointer select-none
+               items-center justify-center rounded-[5px] border border-line bg-surface-3 p-[0.25rem]
+               text-ink-muted transition-colors hover:border-fish-cyan hover:bg-surface-2
+               hover:text-fish-cyan sm:static sm:z-auto"
+      >
+        <Icon name="copy" class="block h-[13px] w-[13px]" />
+      </button>
+    )}
+  </div>
+
+  {hasOutput && (
+    <div
+      id={outId}
+      data-cmd-output
+      class:list={[
+        'cmd-output border-t border-line px-4 py-2.5',
+        'font-mono text-[0.72rem] leading-tight tracking-tight text-ink-muted break-words',
+        { hidden: !open },
+      ]}
+    >
+      <slot name="output" />
+    </div>
+  )}
+</div>
+
+<style>
+  /* Disclosure affordance: swap the label + flip the chevron when expanded.
+     (`.cmd-code` Shiki overrides live in global.css, shared with CommandOutput.) */
+  .cmd-when-open { display: none; }
+  [data-cmd-toggle][aria-expanded='true'] .cmd-when-open { display: inline; }
+  [data-cmd-toggle][aria-expanded='true'] .cmd-when-closed { display: none; }
+  [data-cmd-toggle][aria-expanded='true'] [data-chevron] { transform: rotate(180deg); }
+
+  /* Copied feedback (toggled by the script below) */
+  .cmd-copy.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* Screenshots / images in the output stay responsive. */
+  .cmd-output :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+  /* Collapse slotted output's outer margins (e.g. an MDX <p>) so there's no
+     stray gap at the top/bottom of the output. */
+  .cmd-output > :global(:first-child) { margin-top: 0; }
+  .cmd-output > :global(:last-child) { margin-bottom: 0; }
+
+  /* A fenced code block used as output (```text …```) renders as clean,
+     preformatted terminal text — no nested border/background/lang-label, and
+     the same small/tight sizing as plain output. */
+  .cmd-output :global(pre) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent !important;
+    overflow-x: auto;
+  }
+  .cmd-output :global(pre)::before { content: none; }
+  .cmd-output :global(pre),
+  .cmd-output :global(pre code) {
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-command-prompt]').forEach((root) => {
+    // Expand / collapse by clicking anywhere in the command row (a role=button).
+    const btn = root.querySelector<HTMLElement>('[data-cmd-toggle]');
+    const out = root.querySelector<HTMLElement>('[data-cmd-output]');
+    if (btn && out) {
+      const flip = () => {
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!isOpen));
+        out.classList.toggle('hidden', isOpen);
+      };
+      btn.addEventListener('click', flip);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          flip();
+        }
+      });
+    }
+
+    // Copy the command to the clipboard (without toggling the row).
+    const copyBtn = root.querySelector<HTMLButtonElement>('[data-copy]');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(copyBtn.getAttribute('data-copy') ?? '');
+          copyBtn.classList.add('is-copied');
+          window.setTimeout(() => copyBtn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    }
+  });
+</script>

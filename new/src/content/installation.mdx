@@ -43,7 +43,7 @@ tabs={[
 
 ## Standalone Binary
 
-Download the prebuilt standalone binary directly from the GitHub releases — no
+Download the pre-built standalone binary directly from the GitHub releases — no
 Node.js or package manager required.
 
 ```fish
@@ -96,6 +96,9 @@ fish-lsp --help
 
 # show build version, paths, and health
 fish-lsp info
+
+# verify the server indexes & parses your fish files correctly during startup
+fish-lsp info --time-only
 ```
 
 If `fish-lsp` isn't found afterwards, confirm the install location is on your

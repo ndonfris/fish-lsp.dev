@@ -18,17 +18,28 @@ The server uses [web-tree-sitter](https://github.com/tree-sitter/tree-sitter/tre
 via a compiled `tree-sitter-fish.wasm` module. Each document is parsed into a CST
 on open and re-parsed incrementally on change.
 
-> [!NOTE]
-> A migration to [node-tree-sitter](https://github.com/tree-sitter/node-tree-sitter)
-> is planned to improve performance over the `.wasm` binding.
-
 ## Workspace Analysis
 
 On startup, `initiateBackgroundAnalysis()` crawls all autoloaded fish paths
-(`~/.config/fish`, `/usr/share/fish`) and caches symbol tables — without blocking
+(by default, `~/.config/fish`, `/usr/share/fish`) and caches symbol tables — without blocking
 the connection handshake.
 
+You can change how much extra workspace analysis is done by setting the environment variables:
+
+```fish prompt
+set -gx fish_lsp_all_indexed_paths # ~/.config/fish /usr/share/fish
+```
+
+```fish prompt
+set -gx fish_lsp_single_workspace_support # true false
+```
+
+
 ## Symbol Resolution
+
+The `fish-lsp` is able to resolve symbols in the current document and across the workspace. 
+
+For example, in the following snippet, the `echo` command resolves to the outer `x` variable, not the inner one defined inside `foo()`.
 
 ```fish
 set x 1        # x defined here

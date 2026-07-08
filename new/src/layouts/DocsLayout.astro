@@ -72,6 +72,10 @@ const { frontmatter, editPath } = Astro.props;
   const copyIcon = iconTmpl?.innerHTML ?? '';
 
   for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre:not(.mermaid)')) {
+    // CodeTabs / CodeFile / CommandPrompt render their own frame around
+    // highlighted blocks; skip their Shiki <pre>s so they aren't
+    // double-wrapped/double-buttoned.
+    if (pre.closest('[data-codetabs], [data-codefile], [data-command-prompt], [data-command-details], [data-command-seq], [data-xprompt]')) continue;
     const wrapper = document.createElement('div');
     wrapper.className = 'code-block';
     pre.replaceWith(wrapper);
@@ -93,6 +97,15 @@ const { frontmatter, editPath } = Astro.props;
         window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
       } catch { /* clipboard unavailable */ }
     });
+
+    // GitHub-style: hide the copy button while scrolling the code horizontally,
+    // restore it shortly after scrolling stops.
+    let scrollTimer: number;
+    pre.addEventListener('scroll', () => {
+      btn.classList.add('is-scrolling');
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => btn.classList.remove('is-scrolling'), 350);
+    }, { passive: true });
   }
 </script>
 

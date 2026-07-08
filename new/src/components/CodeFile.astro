@@ -1,0 +1,154 @@
+---
+/**
+ * A titled code block: a header bar (filename / filepath + an optional short
+ * note) connected to the top of a Shiki-highlighted code block.
+ *
+ *   <CodeFile
+ *     file="~/.config/fish/config.fish"
+ *     info="add this once"
+ *     lang="fish"
+ *     code={`fish_lsp complete | source`}
+ *   />
+ *
+ * - `lang` is inferred from the file extension when omitted (falls back to txt).
+ * - `info` is assumed to be short (a few words); it truncates rather than wrap.
+ * - The header hosts the copy button, so it never overlaps the code.
+ *
+ * The Shiki <pre> is excluded from the DocsLayout copy-button/border enhancer
+ * (see the `[data-codefile]` skip there) and styled here instead, so the header
+ * and code read as one connected frame. Styled with Tailwind + @theme tokens.
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+interface Props {
+  /** Filename or path shown in the header, e.g. "src/server.ts". */
+  file: string;
+  /** Code source, rendered with Shiki. */
+  code: string;
+  /** Shiki language. Defaults to inferring from the file extension, then "txt". */
+  lang?: string;
+  /** Optional short note shown next to the filename (e.g. a one-line summary). */
+  info?: string;
+  /**
+   * Optional code-type icon shown before the filename. Pass an astro-icon name
+   * (from src/icons), or `true` to auto-pick one from the file extension, or
+   * `false`/omit for no icon. Auto-inference currently covers the icons the
+   * site ships (e.g. `.fish` → the fish-shell icon).
+   */
+  icon?: string | boolean;
+  /** Shiki theme; defaults to the site's markdown theme. */
+  codeTheme?: string;
+  /** Text copied by the copy button. Defaults to `code`. */
+  copy?: string;
+}
+
+// Common extensions → Shiki language ids. Extend as needed.
+const EXT_LANG: Record<string, string> = {
+  fish: 'fish', ts: 'ts', tsx: 'tsx', js: 'js', jsx: 'jsx', mjs: 'js', cjs: 'js',
+  json: 'json', jsonc: 'jsonc', md: 'md', mdx: 'mdx', sh: 'bash', bash: 'bash',
+  zsh: 'bash', lua: 'lua', toml: 'toml', yaml: 'yaml', yml: 'yaml',
+  css: 'css', scss: 'scss', html: 'html', py: 'python', rs: 'rust', go: 'go',
+};
+
+// Extensions → astro-icon names for the ones the site ships a real logo for.
+// Anything else can still be shown via an explicit `icon="<name>"`.
+const EXT_ICON: Record<string, string> = {
+  fish: 'fish-shell',
+};
+
+const { file, code, info, lang, icon, copy, codeTheme = 'material-theme-ocean' } =
+  Astro.props;
+
+const ext = file.split('.').pop()?.toLowerCase() ?? '';
+const resolvedLang = lang ?? EXT_LANG[ext] ?? 'txt';
+// A string is an explicit icon name; `true` auto-picks from the extension.
+const resolvedIcon =
+  typeof icon === 'string' ? icon : icon === true ? EXT_ICON[ext] : undefined;
+const source = code.replace(/\n+$/, ''); // drop trailing blank line
+const copyText = copy ?? source;
+---
+
+<div data-codefile>
+  <!-- Header: filename (left) · optional note · copy button (right).
+       Its bottom border is the divider between header and code. -->
+  <div class="flex items-center px-4 py-2 border gap-3 rounded-t-md border-line bg-surface-2">
+    <span class="flex shrink-0 items-center gap-2 font-mono text-[0.8rem] font-medium text-fish-cyan">
+      {resolvedIcon && (
+        <div class="px-1 py-0.5 rounded-b-sm bg-line/50" aria-hidden="true" >
+          <Icon name={resolvedIcon} class="block h-[15px] w-[15px] shrink-0" aria-hidden="true" />
+        </div>
+      )}
+      {file}
+    </span>
+
+    {info && (
+      <span class="ml-3 min-w-0 flex-1 truncate text-right font-mono text-[0.72rem] text-ink-dim">
+        {info}
+      </span>
+    )}
+
+    <button
+      type="button"
+      data-copy={copyText}
+      aria-label="Copy to clipboard"
+      class="cmd-copy ml-auto inline-flex shrink-0 cursor-pointer items-center
+             justify-center rounded-[5px] border border-line bg-surface-3 p-[0.25rem]
+             text-ink-muted transition-colors hover:border-fish-cyan hover:bg-surface-2
+             hover:text-fish-cyan"
+    >
+      <Icon name="copy" class="block h-[13px] w-[13px]" />
+    </button>
+  </div>
+
+  <Code
+    code={source}
+    lang={resolvedLang as any}
+    theme={codeTheme as any}
+    class="overflow-x-auto codefile-code"
+  />
+</div>
+
+<style>
+  /* Copied feedback (toggled by the script below) */
+  .cmd-copy.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* The Shiki <pre> is the code body: it connects to the header (no top
+     border/radius — the header's bottom border is the single divider) and
+     matches the normal `.prose pre` padding. The higher-specificity
+     `.prose pre.codefile-code` selector beats the global `.prose pre` rule
+     (border/background/radius/lang-label) when used inside docs prose. */
+  :global(.codefile-code),
+  :global(.prose pre.codefile-code) {
+    margin: 0;
+    border: 1px solid var(--color-line);
+    border-top: 0;
+    border-radius: 0 0 6px 6px;
+    /* Horizontal padding matches CommandPrompt / normal codeblocks (1rem). */
+    padding: 1.25rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  :global(.prose pre.codefile-code)::before {
+    content: none;
+  }
+</style>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-codefile] [data-copy]')
+    .forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') ?? '');
+          btn.classList.add('is-copied');
+          window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    });
+</script>
