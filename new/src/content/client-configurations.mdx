@@ -249,3 +249,52 @@ nfl
 > [!TIP]
 > Missing a client? [Open a PR](https://github.com/ndonfris/fish-lsp-language-clients/pulls)
 > with your configuration.
+
+
+## JSON Schema (editor autocomplete)
+
+Every `fish-lsp` option is published as a [JSON Schema](https://json-schema.org/),
+so a JSON-configured client can get **autocomplete, hover docs, and validation**
+while you edit its config. The schemas are served from `fish-lsp.dev`
+(CORS-enabled, so editors can fetch them directly):
+
+| Schema | Use it for |
+| --- | --- |
+| [`/schema/initialization-options.json`](/schema/initialization-options.json) | the LSP `initializationOptions` object (canonical) |
+| [`/schema/config.json`](/schema/config.json) | the raw `fish_lsp_*` config object |
+| [`/schema/vscode.json`](/schema/vscode.json) | VSCode `settings.json` (`fish-lsp.*` keys) |
+| [`/schema/vscode-contributes.json`](/schema/vscode-contributes.json) | self-contained `contributes.configuration` (extension `package.json`) |
+| [`/schema/coc.json`](/schema/coc.json) | coc.nvim `coc-settings.json` (`languageserver.fish-lsp`) |
+| [`/schema/env-defaults.json`](/schema/env-defaults.json) | the default values (`fish-lsp env --json`) |
+
+The `vscode.json` and `coc.json` schemas `$ref` the canonical
+`initialization-options.json`, so every option is defined in one place.
+
+[`/schema.json`](/schema.json) is a catalog listing all of them.
+
+**Inline `$schema`** — if your client reads config from a standalone JSON file,
+add a `$schema` key and most editors will validate/autocomplete it:
+
+```json
+{
+  "$schema": "https://fish-lsp.dev/schema/initialization-options.json",
+  "fish_lsp_log_level": "info",
+  "fish_lsp_enabled_handlers": ["complete", "hover"]
+}
+```
+
+**Editor association** — for editors that can't read an inline `$schema`, map a
+file glob to the schema URL instead. For example, in VSCode/VSCodium
+`settings.json`:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["fish-lsp.json"],
+      "url": "https://fish-lsp.dev/schema/initialization-options.json"
+    }
+  ]
+}
+```
+

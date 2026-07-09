@@ -4,6 +4,7 @@ import react    from '@astrojs/react';
 import alpinejs from '@astrojs/alpinejs';
 import icon     from 'astro-icon';
 import mdx      from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import remarkGithubAlerts from 'remark-github-alerts';
 import remarkCodeFile from './src/plugins/remark-codefile.mjs';
 import remarkCommandPrompt from './src/plugins/remark-command-prompt.mjs';
@@ -76,10 +77,14 @@ export default defineConfig({
   // pnpm astro build writes to dist/ (gitignored)
   outDir: 'dist',
 
-  // Alias `/docs/man` → `/docs/commands` (the CLI reference doubles as the
-  // man-page docs). Works in dev and static build, unlike a vercel.json-only rule.
+  // Host-agnostic redirects (work in dev + static build, unlike a host-only rule).
+  //   /docs/man → /docs/commands  (CLI reference doubles as the man-page docs)
+  //   /page     → /docs/installation  (legacy bare path; the /page/* wildcard
+  //               can't be a static redirect, so it lives in vercel.json)
+  // Note: bare `/docs` is already redirected by src/pages/docs/index.astro.
   redirects: {
     '/docs/man': '/docs/commands',
+    '/page': '/docs/installation',
   },
 
   integrations: [react(), alpinejs(), icon(), mdx(), pagefindDev()],
@@ -89,7 +94,12 @@ export default defineConfig({
   },
 
   markdown: {
-    remarkPlugins: [remarkMermaid, remarkGithubAlerts, remarkCodeFile, remarkCommandPrompt],
+    // Astro 6 deprecated top-level `markdown.remarkPlugins`; pass them to
+    // `unified({...})` instead. Everything else in `markdown` (shikiConfig,
+    // heading IDs, gfm/smartypants) is still applied by createMarkdownProcessor.
+    processor: unified({
+      remarkPlugins: [remarkMermaid, remarkGithubAlerts, remarkCodeFile, remarkCommandPrompt],
+    }),
     shikiConfig: {
       theme: 'material-theme-ocean',
     },

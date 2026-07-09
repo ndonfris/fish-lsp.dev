@@ -20,7 +20,17 @@ const catalog = {
     {
       name: 'vscode',
       url: `${SITE}/schema/vscode.json`,
-      description: 'VSCode `contributes.configuration` properties (fish-lsp.* settings).',
+      description: 'VSCode `fish-lsp.*` settings ($ref → initialization-options).',
+    },
+    {
+      name: 'vscode-contributes',
+      url: `${SITE}/schema/vscode-contributes.json`,
+      description: 'Self-contained VSCode contributes.configuration (inlined, for package.json).',
+    },
+    {
+      name: 'coc',
+      url: `${SITE}/schema/coc.json`,
+      description: "coc.nvim `languageserver.fish-lsp` entry ($ref → initialization-options).",
     },
     {
       name: 'env-defaults',

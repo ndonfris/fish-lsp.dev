@@ -1,12 +1,15 @@
 /**
  * Single source of truth for the `fish_lsp_*` configuration, transcribed from
- * the fish-lsp source (`src/config.ts` → `ConfigSchema` / `ConfigHandlerSchema`)
- * and its env-variable documentation.
+ * the fish-lsp source: `src/config.ts` (`ConfigSchema` / `ConfigHandlerSchema`
+ * → keys, types, defaults) + `src/snippets/fishlspEnvVariables.json`
+ * (descriptions, option enums, value types).
  *
  * Used to generate the JSON Schemas served under `/schema/*`:
- *   - /schema/config.json                 the fish_lsp_* config object schema
- *   - /schema/initialization-options.json  the LSP `initializationOptions` schema
- *   - /schema/vscode.json                  VSCode `contributes.configuration` schema
+ *   - /schema/config.json                  the fish_lsp_* config object schema
+ *   - /schema/initialization-options.json  the LSP `initializationOptions` schema (canonical)
+ *   - /schema/vscode.json                  VSCode `fish-lsp.*` settings ($ref → init-options)
+ *   - /schema/vscode-contributes.json      self-contained VSCode contributes.configuration
+ *   - /schema/coc.json                     coc.nvim languageserver entry ($ref → init-options)
  *   - /schema/env-defaults.json            the default values (fish-lsp env --json)
  *
  * Keep this in sync with the fish-lsp release the site documents.
@@ -169,12 +172,8 @@ export const configDefaults: Record<string, unknown> = Object.fromEntries(
   Object.entries(configProperties).map(([k, v]) => [k, v.default]),
 );
 
-/** `properties` map with the `default` key stripped (for pure schemas). */
-function propertiesWithoutDefaults(): Record<string, JSONSchema> {
-  return Object.fromEntries(
-    Object.entries(configProperties).map(([k, { default: _d, ...rest }]) => [k, rest]),
-  );
-}
+/** The canonical schema every client schema reuses via `$ref`. */
+export const INIT_OPTIONS_URL = `${SITE}/schema/initialization-options.json`;
 
 /** JSON Schema for the `fish_lsp_*` configuration object. */
 export function buildConfigSchema(opts: { id: string; title: string; description: string }): JSONSchema {
@@ -192,23 +191,89 @@ export function buildConfigSchema(opts: { id: string; title: string; description
 }
 
 /**
- * VSCode `contributes.configuration` object: the same settings, namespaced under
- * `fish-lsp.` and resource-scoped, matching how the extension exposes them.
+ * VSCode `fish-lsp.*` settings schema. Rather than re-declaring every option,
+ * each property `$ref`s the matching sub-schema in initialization-options.json,
+ * so the definitions stay in one place. (draft-2020-12 lets `$ref` sit beside
+ * the VSCode-specific `scope`/`default` keywords; the JSON language service
+ * resolves the external URL for settings.json autocomplete.)
  */
 export function buildVscodeConfiguration(): JSONSchema {
-  const props = propertiesWithoutDefaults();
   const properties = Object.fromEntries(
     Object.entries(configProperties).map(([k, v]) => [
       `fish-lsp.${k}`,
-      { ...props[k], default: v.default, scope: 'resource' },
+      { $ref: `${INIT_OPTIONS_URL}#/properties/${k}`, default: v.default, scope: 'resource' },
     ]),
   );
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     $id: `${SITE}/schema/vscode.json`,
     title: 'fish-lsp VSCode configuration',
-    description: 'VSCode `contributes.configuration` properties for the fish-lsp extension.',
+    description:
+      'VSCode `fish-lsp.*` settings. Each property $refs the shared ' +
+      'initialization-options schema so option definitions stay in one place.',
     type: 'object',
     properties,
+  };
+}
+
+/**
+ * Self-contained VSCode `contributes.configuration` — the same `fish-lsp.*`
+ * settings with every definition *inlined* (no external `$ref`). Use this when
+ * embedding in an extension's package.json, where the extension host does not
+ * resolve external `$ref`s (unlike vscode.json, which is for the JSON language
+ * service). Kept in sync automatically since both derive from configProperties.
+ */
+export function buildVscodeContributes(): JSONSchema {
+  const properties = Object.fromEntries(
+    Object.entries(configProperties).map(([k, { default: def, ...rest }]) => [
+      `fish-lsp.${k}`,
+      { ...rest, default: def, scope: 'resource' },
+    ]),
+  );
+  return {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    $id: `${SITE}/schema/vscode-contributes.json`,
+    title: 'fish-lsp VSCode contributes.configuration',
+    description:
+      'Self-contained VSCode `contributes.configuration` properties (fish-lsp.* ' +
+      'settings) for embedding in an extension package.json — no external $ref.',
+    type: 'object',
+    properties,
+  };
+}
+
+/**
+ * coc.nvim `coc-settings.json` fragment: the `languageserver.fish-lsp` entry.
+ * `initializationOptions` `$ref`s initialization-options.json whole, so coc
+ * gets the same autocomplete/validation from the single shared schema.
+ */
+export function buildCocConfiguration(): JSONSchema {
+  return {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    $id: `${SITE}/schema/coc.json`,
+    title: 'fish-lsp coc.nvim configuration',
+    description:
+      "coc-settings.json fragment registering fish-lsp under coc.nvim's " +
+      '`languageserver` key. `initializationOptions` $refs the shared ' +
+      'initialization-options schema.',
+    type: 'object',
+    properties: {
+      languageserver: {
+        type: 'object',
+        properties: {
+          'fish-lsp': {
+            type: 'object',
+            description: 'fish-lsp language server registration.',
+            properties: {
+              command: { type: 'string', default: 'fish-lsp' },
+              args: { type: 'array', items: { type: 'string' }, default: ['start'] },
+              filetypes: { type: 'array', items: { type: 'string' }, default: ['fish'] },
+              rootPatterns: { type: 'array', items: { type: 'string' } },
+              initializationOptions: { $ref: INIT_OPTIONS_URL },
+            },
+          },
+        },
+      },
+    },
   };
 }

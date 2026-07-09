@@ -18,10 +18,7 @@
       ]
     }
   ],
-  "rewrites": [
-    { "source": "/page/:slug", "destination": "/page/:slug/index.html" }
-  ],
   "redirects": [
-    { "source": "/page", "destination": "/page/installation", "permanent": false }
+    { "source": "/page/:path+", "destination": "/docs/:path+", "permanent": true }
   ]
 }
