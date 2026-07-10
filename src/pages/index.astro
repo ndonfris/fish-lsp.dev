@@ -5,6 +5,7 @@ import Footer   from '@components/Footer.astro';
 import Terminal from '@components/Terminal.astro';
 import PlaygroundBanner from '@components/PlaygroundBanner.astro';
 import CodeTabs from '@components/CodeTabs.astro';
+import MoreHelp from '@components/MoreHelp.astro';
 import '@theme/global.css';
 import { getCollection } from 'astro:content';
 import type { NavSection } from '@typedefs/content';
@@ -132,10 +133,7 @@ const fishInfo = await getFishInfo();
         { label: 'curl',   lines: ['# install globally', 'curl -fsSL https://fish-lsp.dev/install.sh | fish', '', '# verify', 'fish-lsp info'] },
       ]}
     />
-    <p class="install-hint">
-      Need more detail?
-      <a href="/docs/installation">See the full installation guide →</a>
-    </p>
+    <MoreHelp text="Need more detail?" href="/docs/installation" linkText="See the full installation guide →" />
   </section>
 
   <!-- ── Doc cards ────────────────────────────────────────────── -->
@@ -239,7 +237,6 @@ const fishInfo = await getFishInfo();
    rows still fill). */
 
 /* ── Install (tabs now live in src/components/CodeTabs.astro) ─────── */
-.install-hint { margin-top: 1rem; font-size: 0.82rem; color: var(--text-muted); }
 
 /* ── Doc cards ──────────────────────────────────────────────────── */
 .doc-grid {
