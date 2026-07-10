@@ -30,6 +30,7 @@ configuration boils down to translating one shell command for `fish` files:
 > - [Vim/Neovim](#neovim)
 >   - [mason.nvim](#mason.nvim)
 >   - [coc.nvim](#coc.nvim)
+>   - [nvf](#nvf)
 >   - [YouCompleteMe](#youcompleteme)
 >   - [vim-lsp](#vim-lsp)
 > - [Emacs](#emacs)
@@ -38,10 +39,10 @@ configuration boils down to translating one shell command for `fish` files:
 > - [Helix](#helix)
 > - [Kakoune](#kakoune)
 > - [Kate](#kate)
+> - [BBEdit](#bbedit)
 > - [VSCode or VSCodium](#vscode-or-vscodium)
 > - [Zed](#zed)
 > - [IntelliJ](#intellij)
-> - [BBEdit](#bbedit)
 
 </small>
 
@@ -98,6 +99,7 @@ Minimal `coc-settings.json`:
 }
 ```
 
+{/** 
 Full config with workspace paths:
 
 ```json
@@ -118,6 +120,16 @@ Full config with workspace paths:
     }
   }
 }
+```
+*/}
+
+## [nvf](https://github.com/NotAShelf/nvf)
+
+```nix
+vim.languages.fish.lsp = {
+    enable = true;
+    servers = ["fish-lsp"];
+};
 ```
 
 ## [YouCompleteMe](https://github.com/ycm-core/youcompleteme)
@@ -209,13 +221,23 @@ args = ["start"]
 (add-hook 'fish-mode-hook #'lsp)
 ```
 
+## [BBEdit](https://www.barebones.com/products/bbedit/)
+
+Follow the [`bbedit` branch instructions](https://github.com/ndonfris/fish-lsp-language-clients/blob/bbedit/BBEdit%20Install.md) 
+> [!Important]
+> Includes a `Fish.plist` for syntax highlighting.
+
 ## [VSCode](https://code.visualstudio.com/) or [VSCodium](https://vscodium.com/)
 
-Install the extension and the server works out-of-the-box — no client config:
+Install the extension and the server works out-of-the-box:
 
 - [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp)
 - [Open VSX (VSCodium)](https://open-vsx.org/extension/ndonfris/fish-lsp)
 - [Extension source](https://github.com/ndonfris/vscode-fish-lsp)
+
+> [!NOTE]
+> The extension includes its own copy of `fish-lsp`, so you don't need to install it separately.   
+> However, if you want to use a custom version of `fish-lsp`, this can be configured in the extension settings.
 
 ## [Zed](https://zed.dev/)
 
@@ -224,12 +246,6 @@ See [zed-fish-lsp](https://github.com/alysson-souza/zed-fish-lsp)
 ## [IntelliJ](https://www.jetbrains.com/idea/)
 
 See [jetbrains-fish](https://github.com/tox-dev/jetbrains-fish?tab=readme-ov-file#installation)
-
-## [BBEdit](https://www.barebones.com/products/bbedit/)
-
-Follow the [`bbedit` branch instructions](https://github.com/ndonfris/fish-lsp-language-clients/blob/bbedit/BBEdit%20Install.md) 
-> [!Important]
-> Includes a `Fish.plist` for syntax highlighting.
 
 ## Testing in Isolation
 
@@ -240,10 +256,12 @@ git clone https://github.com/ndonfris/fish-lsp-language-clients \
 
 # 2. Aliases in config.fish
 alias nvimfish 'NVIM_APPNAME=nvim-fish-lsp nvim'
-alias nfl      'nvimfish ~/.config/fish/config.fish'
+alias nff      'nvimfish ~/.config/fish/config.fish'
 
 # 3. Launch
-nfl
+nff
+# or 
+nvimfish ~/.config/fish/config.fish
 ```
 
 > [!TIP]
@@ -251,6 +269,7 @@ nfl
 > with your configuration.
 
 
+{/* 
 ## JSON Schema (editor autocomplete)
 
 Every `fish-lsp` option is published as a [JSON Schema](https://json-schema.org/),
@@ -298,3 +317,4 @@ file glob to the schema URL instead. For example, in VSCode/VSCodium
 }
 ```
 
+*/}

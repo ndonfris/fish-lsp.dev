@@ -4,6 +4,7 @@ import react    from '@astrojs/react';
 import alpinejs from '@astrojs/alpinejs';
 import icon     from 'astro-icon';
 import mdx      from '@astrojs/mdx';
+import sitemap  from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
 import remarkGithubAlerts from 'remark-github-alerts';
 import remarkCodeFile from './src/plugins/remark-codefile.mjs';
@@ -77,6 +78,12 @@ export default defineConfig({
   // pnpm astro build writes to dist/ (gitignored)
   outDir: 'dist',
 
+  // Canonical URLs have no trailing slash, matching vercel.json's
+  // `trailingSlash: false` and the non-slash in-site links (see src/config.ts).
+  // Keeps sitemap `<loc>`s aligned with what Vercel actually serves, so crawlers
+  // don't hit a 308 redirect on every entry.
+  trailingSlash: 'never',
+
   // Host-agnostic redirects (work in dev + static build, unlike a host-only rule).
   //   /docs/man → /docs/commands  (CLI reference doubles as the man-page docs)
   //   /page     → /docs/installation  (legacy bare path; the /page/* wildcard
@@ -87,7 +94,23 @@ export default defineConfig({
     '/page': '/docs/installation',
   },
 
-  integrations: [react(), alpinejs(), icon(), mdx(), pagefindDev()],
+  integrations: [
+    react(),
+    alpinejs(),
+    icon(),
+    mdx(),
+    // Emits sitemap-index.xml (referenced by /robots.txt). Keep the excluded
+    // paths in sync with DISALLOW in src/pages/robots.txt.ts: the playground
+    // and JSON schema endpoints shouldn't appear in the sitemap either.
+    sitemap({
+      filter: (page) => {
+        // Normalize away the trailing slash the sitemap appends (/playground/).
+        const path = new URL(page).pathname.replace(/\/+$/, '') || '/';
+        return path !== '/playground' && !path.startsWith('/schema');
+      },
+    }),
+    pagefindDev(),
+  ],
 
   vite: {
     plugins: [tailwindcss()],
