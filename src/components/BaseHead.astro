@@ -1,19 +1,47 @@
 ---
 /**
  * Shared <head> contents for every layout: charset, viewport, title,
- * description, favicon and the Google-fonts (JetBrains Mono + Inter) links.
+ * description, canonical URL, social (OpenGraph/Twitter) tags, favicon and the
+ * Google-fonts (JetBrains Mono + Inter) links.
  * Previously duplicated in Layout.astro and DocsLayout.astro.
  */
+import { SITE_ORIGIN } from '../config';
+
 interface Props {
   title:        string;
   description?: string;
+  /** Social-card image, resolved against the site origin. Overridable per page. */
+  image?:       string;
 }
-const { title, description = '' } = Astro.props;
+const { title, description = '', image = '/help-msg-new.png' } = Astro.props;
+
+// Canonical URL always points at the production origin and never carries a
+// trailing slash, matching `trailingSlash: 'never'` (astro.config.ts) and
+// `trailingSlash: false` (vercel.json) so crawlers see a single canonical form.
+const path      = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const canonical = new URL(path, SITE_ORIGIN).href;
+const ogImage   = new URL(image, SITE_ORIGIN).href;
 ---
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{title}</title>
 <meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<!-- OpenGraph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="fish-lsp" />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link
