@@ -1,0 +1,47 @@
+---
+/**
+ * Bare (`.plain`) inline code sample for the diagnostic-codes table.
+ *
+ * Authors write the snippet as children using literal escape sequences and opt
+ * into interpreting them with flags — MDX passes `\n` / `\t` through as the
+ * two-character sequences backslash-n / backslash-t (CommonMark leaves `\`+letter
+ * literal), so this component turns them into real formatting:
+ *
+ *   <TrCode splitNewlines splitTabs>function foo\n\techo inside foo\nend</TrCode>
+ *   → <pre class="plain"><code>function foo<br/>    echo inside foo<br/>end</code></pre>
+ *
+ *   splitNewlines → each `\n` becomes <br/>
+ *   splitTabs     → each `\t` becomes `tabWidth` spaces (default 4)
+ *
+ * Caveat: children are parsed as MDX, so reserve this for literal command text.
+ * Markdown-special characters (`*`, `_`, backticks) would be interpreted; pass
+ * those via the `code` prop instead, which skips markdown parsing.
+ */
+interface Props {
+  /** Convert each literal `\n` into <br/>. */
+  splitNewlines?: boolean;
+  /** Convert each literal `\t` into spaces. */
+  splitTabs?: boolean;
+  /** Spaces emitted per tab when `splitTabs` is set. */
+  tabWidth?: number;
+  /** Snippet source; overrides children. Not markdown-parsed. */
+  code?: string;
+}
+
+const { splitNewlines = false, splitTabs = false, tabWidth = 4, code } = Astro.props;
+
+// Prefer the `code` prop; otherwise render the slotted children to a string.
+// Text children come back HTML-escaped (so `<`/`>`/`&` are already safe), and in
+// the table's inline context MDX doesn't wrap them — strip a stray <p> in case
+// it's ever used in a block context.
+const raw = (code ?? (await Astro.slots.render('default')))
+  .trim()
+  .replace(/^<p>([\s\S]*)<\/p>$/, '$1');
+
+// `code`-prop strings can carry real \n / \t; normalize both real control chars
+// and the literal backslash sequences the MDX slot delivers.
+let html = raw;
+if (splitTabs)     html = html.replace(/\\t|\t/g, ' '.repeat(tabWidth));
+if (splitNewlines) html = html.replace(/\\n|\n/g, '<br/>');
+---
+<pre class="plain"><code set:html={html} /></pre>

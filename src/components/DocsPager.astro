@@ -58,9 +58,9 @@ const nextPage =
         href={`/docs/${prevPage.slug}`}
         rel="prev"
         class="group flex flex-col gap-1 rounded-lg border border-line bg-surface-1 p-4
-               no-underline transition-colors hover:border-fish-blue hover:bg-surface-2"
+               no-underline transition-colors hover:border-fish-periwinkle hover:bg-surface-2"
       >
-        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-blue">← Previous</span>
+        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-periwinkle">← Previous</span>
         <span class="font-mono text-sm font-semibold text-ink">{prevPage.title}</span>
       </a>
     ) : <div aria-hidden="true" class="max-sm:hidden"></div>}
@@ -70,9 +70,9 @@ const nextPage =
         href={`/docs/${nextPage.slug}`}
         rel="next"
         class="group flex flex-col items-end gap-1 rounded-lg border border-line bg-surface-1 p-4
-               text-right no-underline transition-colors hover:border-fish-blue hover:bg-surface-2"
+               text-right no-underline transition-colors hover:border-fish-periwinkle hover:bg-surface-2"
       >
-        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-blue">Next →</span>
+        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-periwinkle">Next →</span>
         <span class="font-mono text-sm font-semibold text-ink">{nextPage.title}</span>
       </a>
     ) : <div aria-hidden="true" class="max-sm:hidden"></div>}

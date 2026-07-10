@@ -151,15 +151,15 @@ import { Icon } from 'astro-icon/components';
       if (!items.length) { results.innerHTML = msg('No results'); return; }
       results.innerHTML = items
         .map((it, i) => {
-          const active = i === activeIndex ? ' border-line bg-fish-blue/[0.08]' : '';
+          const active = i === activeIndex ? ' border-line bg-fish-periwinkle/[0.08]' : '';
           const label =
             it.page && it.page !== it.title
               ? `<span class="font-mono text-[0.62rem] uppercase tracking-wide text-ink-dim">${it.page}</span>`
               : '';
           return (
-            `<a class="block rounded-md border border-transparent px-3 py-2.5 no-underline transition-colors hover:border-line hover:bg-fish-blue/[0.08]${active}" href="${it.url}" role="option" data-idx="${i}">` +
+            `<a class="block rounded-md border border-transparent px-3 py-2.5 no-underline transition-colors hover:border-line hover:bg-fish-periwinkle/[0.08]${active}" href="${it.url}" role="option" data-idx="${i}">` +
             `<span class="mb-0.5 flex items-baseline gap-2"><span class="font-mono text-[0.85rem] font-semibold text-fish-cyan">${it.title}</span>${label}</span>` +
-            `<span class="block text-[0.78rem] leading-relaxed text-ink-muted [&_mark]:rounded-sm [&_mark]:bg-fish-blue/20 [&_mark]:px-0.5 [&_mark]:text-fish-blue">${it.excerpt}</span>` +
+            `<span class="block text-[0.78rem] leading-relaxed text-ink-muted [&_mark]:rounded-sm [&_mark]:bg-fish-periwinkle/20 [&_mark]:px-0.5 [&_mark]:text-fish-periwinkle">${it.excerpt}</span>` +
             `</a>`
           );
         })

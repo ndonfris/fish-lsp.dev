@@ -52,7 +52,7 @@ const outLine = `${line} pl-[1.1rem] text-[0.94em] text-ink-muted`;
     {commands.map((cmd, i) => (
       <Fragment>
         <div class:list={[line, i > 0 && 'mt-2']}>
-          <span class="select-none text-fish-blue">{cmd.prompt ?? '~'}</span><span class="text-ink-dim">❯</span>
+          <span class="select-none text-fish-periwinkle">{cmd.prompt ?? '~'}</span><span class="text-ink-dim">❯</span>
           <span set:html={cmd.input} />
         </div>
         {toLines(cmd.output).map(out => (
@@ -62,8 +62,12 @@ const outLine = `${line} pl-[1.1rem] text-[0.94em] text-ink-muted`;
     ))}
     {emptyFinalPrompt && (
       <div class:list={[line, commands.length > 0 && 'mt-2']}>
-        <span class="select-none text-fish-blue">~</span><span class="text-ink-dim">❯</span>
-        <span class="inline-block h-[1em] w-2 animate-blink bg-fish-blue align-text-bottom" aria-hidden="true"></span>
+        <span class="select-none text-fish-periwinkle">~</span><span class="text-ink-dim">❯</span>
+        <!-- The zero-width space + leading-none give the empty cursor a real text
+             baseline, so flex `items-baseline` aligns it to the character cell
+             instead of pinning its bottom edge to the baseline (which left a gap
+             under it in the descender area). -->
+        <span class="inline-block h-[1.1em] w-2 leading-none animate-blink bg-fish-periwinkle" aria-hidden="true">&#8203;</span>
       </div>
     )}
   </div>

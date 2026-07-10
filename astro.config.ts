@@ -117,9 +117,16 @@ export default defineConfig({
   },
 
   markdown: {
+    // Off: smartypants rewrites `--` → en/em-dash and straight quotes → curly
+    // ones in prose text nodes (it skips backtick code spans, but NOT text
+    // inside raw-HTML blocks like the <pre class="plain"> samples). For CLI docs
+    // that's a hazard — any `--flag` or copy-pasteable quote in prose gets
+    // mangled — so we render punctuation literally.
+    smartypants: false,
+
     // Astro 6 deprecated top-level `markdown.remarkPlugins`; pass them to
     // `unified({...})` instead. Everything else in `markdown` (shikiConfig,
-    // heading IDs, gfm/smartypants) is still applied by createMarkdownProcessor.
+    // heading IDs, gfm) is still applied by createMarkdownProcessor.
     processor: unified({
       remarkPlugins: [remarkMermaid, remarkGithubAlerts, remarkCodeFile, remarkCommandPrompt],
     }),

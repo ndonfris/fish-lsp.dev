@@ -16,15 +16,20 @@
 
 /* ─── Tailwind theme tokens ───────────────────────────────────────
    Registers the brand palette as utilities:
-     accents  → bg-fish-blue, text-fish-cyan, border-fish-cyan/30 …
+     accents  → bg-fish-periwinkle, text-fish-cyan, border-fish-cyan/30 …
      surfaces → bg-surface-1 (0–3)
      text     → text-ink, text-ink-muted, text-ink-dim
      border   → border-line
    Prefer these utilities over hand-written scoped CSS. The :root vars
    below remain for the scoped styles not yet migrated.                */
 @theme {
-  --color-fish-blue:     rgb(78, 108, 250);   /* #4e6cfa */
-  --color-fish-blue-dim: rgb(58, 85, 224);    /* #3a55e0 */
+  /* True blue — reserved for large solid fills (footer, button backgrounds)
+     where the periwinkle read as too purple. */
+  --color-fish-blue:     rgb(37, 99, 235);    /* #2563eb (blue-600) — hue ~221°, matches the material-ocean shiki blue #82aaff */
+  --color-fish-blue-dim: rgb(29, 78, 216);    /* #1d4ed8 (blue-700, button hover) */
+  /* Periwinkle — the brand accent for text, links, logo, outlines, hovers. */
+  --color-fish-periwinkle:     rgb(78, 108, 250);   /* #4e6cfa */
+  --color-fish-periwinkle-dim: rgb(58, 85, 224);    /* #3a55e0 */
   --color-fish-cyan:     rgb(100, 210, 255);  /* #64d2ff */
   --color-fish-green:    rgb(50, 213, 131);   /* #32d583 */
   --color-fish-yellow:   rgb(255, 209, 102);  /* #ffd166 */
@@ -42,6 +47,15 @@
   --color-ink-dim:   rgb(74, 85, 120);        /* #4a5578; */
 
   --color-line: rgba(78, 108, 250, 0.2);
+
+  /* Font-size utilities (Tailwind `text-*`). `--text-xs` restates Tailwind's
+     default so the small end of the scale is explicit; `--text-xxs` adds a new
+     extra-small step (utility `text-xxs`) for dense samples like inline table
+     code. Each also sets its paired `…--line-height`. */
+  --text-xs:   0.75rem;
+  --text-xs--line-height:  calc(1 / 0.75);
+  --text-xxs:  0.65rem;
+  --text-xxs--line-height: calc(0.9 / 0.65);
 
   --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
                'Source Code Pro', ui-monospace, monospace;
@@ -65,9 +79,13 @@
 /* ─── Design tokens ───────────────────────────────────────────── */
 @layer base {
   :root {
-    --fish-blue:     #4e6cfa;
-    --fish-blue-dim: #3a55e0;
-    --fish-blue-glow: rgba(78, 108, 250, 0.2);
+    /* True blue — large solid fills only (footer, button backgrounds). */
+    --fish-blue:     #2563eb;
+    --fish-blue-dim: #1d4ed8;
+    /* Periwinkle — brand accent for text, links, logo, outlines, hovers. */
+    --fish-periwinkle:     #4e6cfa;
+    --fish-periwinkle-dim: #3a55e0;
+    --fish-periwinkle-glow: rgba(78, 108, 250, 0.2);
     --fish-cyan:     #64d2ff;
     --fish-green:    #32d583;
     --fish-yellow:   #ffd166;
@@ -114,7 +132,7 @@
     body { padding-top: 56px; }
   }
 
-  a             { color: var(--fish-blue); text-decoration: none; }
+  a             { color: var(--fish-periwinkle); text-decoration: none; }
   a:hover       { color: var(--fish-cyan); }
   code, pre     { font-family: var(--font-mono); }
 
@@ -128,7 +146,7 @@
   ::-webkit-scrollbar       { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg-1); }
   ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--fish-blue-dim); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--fish-periwinkle-dim); }
 }
 
 /* ─── Prose (rendered markdown) ──────────────────────────────── */
@@ -142,7 +160,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 1.25rem;
-  color: var(--fish-blue);
+  color: var(--fish-periwinkle);
   letter-spacing: -0.02em;
 }
 
@@ -168,7 +186,7 @@
 .prose li  { margin: 0.25rem 0; }
 
 .prose a {
-  color: var(--fish-blue);
+  color: var(--fish-periwinkle);
   border-bottom: 1px solid rgba(78,108,250,0.3);
   transition: color 0.15s, border-color 0.15s;
 }
@@ -220,6 +238,36 @@
   /* Code inside a block keeps the <pre>'s whitespace handling, not the inline
      `nowrap` above (which would collapse indentation). */
   white-space: inherit;
+}
+
+/* `<pre class="plain">` mirrors inline-code styling — the same `--bg-3` surface,
+   cyan text, thin border and 4px radius as `.prose code` — instead of the full
+   code-block theme, for a multi-line sample inside a table cell. It shrinks to
+   fit its content, drops the lang label, and the DocsLayout enhancer skips it
+   (its selector excludes `.plain`), so it gets no copy button or wrapper. */
+.prose pre.plain {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3em 0.5em;
+  margin: 0.25rem 0;
+  /* Without this the block inherits the body's loose 1.7, spreading the <br/>
+     lines far apart. Tighten to a code-appropriate leading. */
+  line-height: 1.4;
+}
+.prose pre.plain::before { content: none; }
+.prose pre.plain code {
+  color: var(--fish-cyan);
+  font-size: var(--text-xxs);
+  font-weight: 300;
+  letter-spacing: -0.025em;   /* tracking-tighter */
+  /* JetBrains Mono (like Cascadia Code / Fira Code) is a ligature font — without
+     this it joins `--`, `->`, `==` etc. into single connected glyphs. Render
+     each character literally. */
+  font-variant-ligatures: none;
 }
 
 /* ─── Mermaid diagrams ───────────────────────────────────────── */
@@ -328,7 +376,7 @@
 .copy-btn.is-scrolling { opacity: 0 !important; pointer-events: none; }
 
 .prose blockquote {
-  border-left: 3px solid var(--fish-blue);
+  border-left: 3px solid var(--fish-periwinkle);
   margin: 1.5rem 0;
   padding: 0.75rem 1.25rem;
   background: var(--bg-2);
@@ -337,10 +385,19 @@
   font-style: normal;
 }
 
+/* `display: block` + `overflow-x: auto` turns the table itself into the scroll
+   container: it sizes to its content (`width: max-content`) but is capped at the
+   prose width (`max-width: 100%`), so a wide table scrolls horizontally on its
+   own instead of forcing the whole page wider than the viewport (which broke the
+   mobile layout and the footer/wave seam). */
 .prose table {
-  width: 100%;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
   margin: 1.25rem 0;
 }
 
@@ -355,8 +412,8 @@
   background: var(--bg-2);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  letter-spacing: 0;
 }
 
 .prose img {
@@ -388,7 +445,7 @@
    define the accent colors (unconditionally dark — the site has no light
    mode) and add a tinted, rounded surface to match the site's blockquotes. */
 :root {
-  --color-note:      var(--fish-blue);
+  --color-note:      var(--fish-periwinkle);
   --color-tip:       var(--fish-green);
   --color-important: #a371f7;
   --color-warning:   var(--fish-yellow);

@@ -32,7 +32,7 @@ const { frontmatter, editPath } = Astro.props;
 
     <!-- ── Main content: centered container; drawer floats over the margin ── -->
     <main class="docs-main">
-      <Container>
+      <Container class="max-w-4xl">
         {/* data-pagefind-body scopes the search index to docs content only
             (the homepage and chrome are excluded). */}
         <article class="prose" data-pagefind-body data-pagefind-meta={`title:${frontmatter.title}`}>
@@ -71,7 +71,9 @@ const { frontmatter, editPath } = Astro.props;
   const iconTmpl = document.getElementById('copy-icon-tmpl') as HTMLTemplateElement | null;
   const copyIcon = iconTmpl?.innerHTML ?? '';
 
-  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre:not(.mermaid)')) {
+  // `.plain` blocks opt out of the code-block theme (inline-code styling, no
+  // copy button), so they're excluded from the wrapper/button enhancer.
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre:not(.mermaid):not(.plain)')) {
     // CodeTabs / CodeFile / CommandPrompt render their own frame around
     // highlighted blocks; skip their Shiki <pre>s so they aren't
     // double-wrapped/double-buttoned.
@@ -120,7 +122,7 @@ html, body { margin: 0; width: 100%; }
 /* The nav drawer + backdrop now live in src/components/HamburgerMenu.astro */
 
 /* ── Main: full width; inner content is centered by <Container> ──
-   (mx-auto max-w-3xl). The drawer floats over the left margin. */
+   (mx-auto max-w-4xl). The drawer floats over the left margin. */
 .docs-main {
   width: 100%;
   box-sizing: border-box;

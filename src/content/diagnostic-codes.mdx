@@ -5,7 +5,8 @@ slug: diagnostic-codes
 order: 10
 section: Reference
 ---
-<!-- import CodeTabs from '@components/CodeTabs.astro'; -->
+import TrCode from '@components/table/TrCode.astro';
+import Thr from '@components/table/Thr.astro';
 
 # Diagnostic Error Codes
 The `fish-lsp` provides numerous diagnostics which are displayed in your editor with a specific error code, and a description of the error.
@@ -21,8 +22,8 @@ The error codes are used to identify specific diagnostics and can be used to dis
 
 | Error Code | Description                                                | Example                                                                                                         | Fix                                                                                     |
 | ---------- | ---------------------------------------------------------- | -----------------------------------------------------------------------------------------                       | --------------------------------------------------------------------------------------- |
-| 1001       | Missing closing token                                      | `echo "` <br> `echo '` <br/> `begin` <br/> `function foo` <br/> `echo (`                                        | `echo "";` <br> `echo '';` <br/> `begin; end` <br/> `function foo; end` <br/> `echo ()` |
-| 1002       | Extra closing token                                        | `function; end; end;` <br> `if; end; end;`                                                                      | `function; end;` <br> `if; end;`                                                        |
+| 1001       | Missing closing token                                      | `echo "` <br /> `echo '` <br/> `begin` <br/> `function foo` <br/> `echo (`                                        | `echo "";` <br/> `echo '';` <br/> `begin; end` <br/> `function foo; end` <br /> `echo ()` |
+| 1002       | Extra closing token                                        | `function; end; end;` <br /> `if; end; end;`                                                                      | `function; end;` <br/> `if; end;`                                                        |
 | 1003       | Invalid array index                                        | `$PATH[0]`                                                                                                      | `$PATH[1]`                                                                              |
 | 1004       | Source filename does not exist                             | `source ./non-existent-file.fish`                                                                               | `source ./existing-file.fish`                                                           |
 | 1005       | Sourcing filename with `.` syntax                          | `. ./file.fish`                                                                                                 | `source ./file.fish`                                                                    |
@@ -32,17 +33,17 @@ The error codes are used to identify specific diagnostics and can be used to dis
 | 2004       | External shell command used when equivalent fish builtin exists | `cat file.txt`                                                                                             | `command cat file.txt` or use the fish builtin equivalent                               |
 | 3001       | test command string check, should be wrapped as a string   | `test $str1 = $str2`                                                                                            | `test "$str1" = "$str2"`                                                                |
 | 3002       | Conditional command should include a silence option        | `if set some_var; end;`                                                                                         | `if set -q some_var; end;`                                                              |
-| 3003       | Dereference variable definition could be undefined         | `set $some_var value`                                                                                           | `if set -q some_var \|\| test -n "$some_var"` <br/> `set $some_var value` <br/> `end`                   |
-| 4001       | Autoloaded function missing definition                     | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><hr/>`# empty`                                    | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><hr/>`function file; end;`|
-| 4002       | Autoloaded function does not match filename                | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><hr/>`function __file;end;`                       | in a autoloaded function at: __fish/functions/file.fish__<br/><hr/>`function file; end;`     |
-| 4003       | Function name using reserved keyword                       | `function continue`<br/>`end`                                                                                   | `function _continue`<br/>`end`                                                          |
-| 4004       | Unused local function                                      | in a autoloaded function at:<br/> __fish/functions/foo.fish__<br/><hr/>`function foo;end;`<br/> `function bar; end;` | in a autoloaded function at:<br/> __fish/functions/foo.fish__<br/> <hr/>`function foo`<br/>`    bar`<br/>`end`<br/>`function bar; end` |
-| 4005       | autoloaded completion missing command name                 | when a file like: <br/> __fish/completions/foo.fish__<br/><hr/>`complete -c nofoo -f`                           | when a file like: <br/> __fish/completions/foo.fish__<br/><hr/>`complete -c foo -f`     |
+| 3003       | Dereference variable definition could be undefined         | `set $some_var value`                                                                                           | <TrCode splitNewlines splitTabs>if set -q some_var \|\| test -n "$some_var"\n\tset $some_var value\nend</TrCode>                   |
+| 4001       | Autoloaded function missing definition                     | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><Thr />`# empty`                             | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><Thr/>`function file; end;`|
+| 4002       | Autoloaded function does not match filename                | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><Thr/>`function __file; end;`                 | in a autoloaded function at:<br/> __fish/functions/file.fish__<br/><Thr/>`function file; end;`     |
+| 4003       | Function name using reserved keyword                       | <TrCode splitNewlines splitTabs>function continue\nend</TrCode>                                                 | `function _continue`<br/>`end`                                                          |
+| 4004       | Unused local function                                      | in a autoloaded function at:<br/> __fish/functions/foo.fish__<br/><Thr /><TrCode splitNewlines splitTabs>function foo\nend\nfunction bar\nend</TrCode> | in a autoloaded function at:<br/> __fish/functions/foo.fish__<br/><Thr /><TrCode splitNewlines splitTabs>function foo\n\tbar\nend\nfunction bar\nend</TrCode> |
+| 4005       | autoloaded completion missing command name                 | when a file like: <br/> __fish/completions/foo.fish__<br/><Thr/>`complete -c nofoo -f`                          | when a file like: <br/> __fish/completions/foo.fish__<br/><Thr/>`complete -c foo -f`     |
 | 4006       | duplicate function name in same scope                      | `function a; end;` <br/> `function a; end` <br/> `alias a="command a"`                                          | `function a; end;` <br/> `function b; end` <br/> `alias c="command a"` <br/>            |
-| 4007       | Autoloaded event hook function missing usage               | `function foo --on-event some_event; end;` <br/>                                                                | `function foo --on-event some_event; end;` <br/> `emit some_event` <br/>                |
+| 4007       | Autoloaded event hook function missing usage               | <TrCode splitNewlines splitTabs>function foo\n\t--on-event some_event\nend</TrCode>                  | <TrCode splitNewlines splitTabs>function foo\n\t--on-event some_event\nend\nemit some_event</TrCode> <br/>                |
 | 4008       | Autoloaded function requires a description                 | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                   |
 | 5001       | Argparse missing end of stdin                              | `argparse h/help`                                                                                               | `argparse h/help -- $argv`                                                              |
-| 5555       | Unreachable code                                           | `echo "$status"; and return 0; or return 1;` <br/> `echo $status # unreachable`                                 | `echo "$status"` <br/> `echo $status # reachable`                                       |
+| 5555       | Unreachable code                                           | `return 0; echo "$status"` <br/> `echo $status # unreachable`                                                   | `echo "$status"` <br/> `echo $status # reachable`                                       |
 | 6001       | fish-lsp deprecated env variable                           | `set -gx fish_lsp_logfile`                                                                                      | `set -gx fish_lsp_log_file`                                                             |
 | 7001       | Unknown command                                            | `nonexistent_command`                                                                                           | Use a valid command or define the function                                              |
 | 8001       | fish-lsp invalid diagnostic code                           | `# @fish-lsp-disable 100111`                                                                                    | `# @fish-lsp-disable 1001`                                                              |
@@ -262,12 +263,14 @@ Depending on the situation, my personal preference for using aliases is as follo
 >
 > This way your abbreviations, functions, and aliases are all in separate files and can be managed independently.
 
-<!-- <br/> -->
 
+{/*
 <!-- The two key takeaways from this example are: -->
 <!-- - you can set `$fish_lsp_*` environment variables in multiple locations by using fish-shell's scoping rules, and you can use this to your advantage to disable diagnostics for specific functions or files. -->
 <!-- - keeping your `~/.config/fish/config.fish` modular by using the `~/.config/fish/conf.d/` directory to group items that can be loaded independently, will help you manage your fish configuration more effectively. -->
 <!---->
+*/}
+
 ## Other Notes
 
 Diagnostics errors are planned to be expanded in the future to include more specific errors and warnings.
