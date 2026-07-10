@@ -1,0 +1,47 @@
+---
+// Fallback for unknown routes. Astro builds this to `404.html`, which Vercel
+// (and most static hosts) serve automatically for any path that doesn't match.
+import Layout from '@layouts/Layout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import '@theme/global.css';
+
+const homeHref = '/';
+const docsHref = '/docs/installation';
+---
+
+<Layout title="404 — Page Not Found | fish-lsp">
+  <!-- Column that fills the viewport so the footer is pinned to the bottom
+       even when the content is shorter than one screen. -->
+  <div class="flex min-h-dvh flex-col">
+    <Header variant="home" />
+
+    <main class="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
+      <p class="font-mono text-7xl font-bold text-fish-periwinkle">404</p>
+      <h1 class="text-2xl font-semibold text-ink">This page swam away</h1>
+      <p class="max-w-md text-base text-ink-muted">
+        The page you're looking for doesn't exist or may have moved.
+        Try the docs, or head back home.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <!-- `text-…!` (important) beats the site's unlayered `a { color }`
+             rules, which otherwise override Tailwind's layered color utility. -->
+        <a
+          href={homeHref}
+          class="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink! no-underline transition-opacity hover:opacity-70"
+        >
+          ← Home
+        </a>
+        <a
+          href={docsHref}
+          class="rounded-md bg-fish-blue px-4 py-2 text-sm font-medium text-white! no-underline transition-opacity hover:opacity-90"
+        >
+          Browse the docs
+        </a>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

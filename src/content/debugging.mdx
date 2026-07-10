@@ -1,0 +1,394 @@
+---
+title: Debugging
+description: Troubleshoot fish-lsp installation, startup, and editor connection issues
+slug: debugging
+order: 9
+section: Reference
+---
+
+import CodeFile from '@components/CodeFile.astro';
+import CommandPrompt from '@components/CommandPrompt.astro';
+import CommandSequence from '@components/CommandSequence.astro';
+import CommandOutput from '@components/CommandOutput.astro';
+import ExpandablePrompt from '@components/ExpandablePrompt.astro';
+
+# Debugging
+
+The `fish-lsp` binary ships several built-in diagnostics. Most problems can be
+identified with the commands below.
+
+> [!TIP]
+> Short abbreviations for many of these commands are available — see [Abbreviations](/docs/abbreviations).
+
+## First Checks
+
+```fish
+# every available sub-command and flag
+fish-lsp --help-all
+
+# build version, paths, capabilities, health
+fish-lsp info
+
+# confirm the resolved binary is the one you expect, and on your $PATH
+fish-lsp info --bin
+which fish-lsp
+```
+
+## Startup Verification
+
+The server ships with a built-in headless startup test, to verify that the server can perform analysis on a given workspace without requiring a working client connection.
+
+This is useful for debugging issues with the server itself, or with your client configuration. 
+
+In general, a working output from the following command indicates that the server is functioning correctly:
+
+<CommandPrompt command="fish-lsp info --time-startup" copy='true' >
+    <Fragment slot="output">
+
+    ```text
+                                               fish-lsp
+    
+                NOTE: a normal server instance will only start one of these workspaces
+    
+                  if you frequently find yourself working inside a relatively large
+                  workspaces, please consider using the provided environment variable
+    
+                                `set -gx fish_lsp_max_background_files`
+    
+    -----------------------------------------------------------------------------------------------
+    Server Start Time:                                                                    796.34 ms
+    Background Analysis Time:                                                            1454.20 ms
+    Total Files Indexed:                                                                  841 files
+    -----------------------------------------------------------------------------------------------
+    Indexed paths in `$fish_lsp_all_indexed_paths`:                                         2 paths
+         [1]        | `$__fish_config_dir` |                                              828 files
+         [2]        | `$__fish_data_dir` |                                                 13 files
+    -----------------------------------------------------------------------------------------------
+    ```
+
+    </Fragment>
+</CommandPrompt>
+
+Profiling is offered, to measure the duration of each phase in the startup process, and to help identify any bottlenecks in the server's initialization.
+
+
+<CommandPrompt command="fish-lsp info \\n    --time-startup \\n    --profile \\n    --no-warning \\n    --use-workspace ~/.config/fish" copy='true' lang='fish'>
+    <Fragment slot="output">
+
+    ```text
+-----------------------------------------------------------------------------------------------
+Server Start Time:                                                                    776.57 ms
+Background Analysis Time:                                                            1414.10 ms
+Total Files Indexed:                                                                  828 files
+-----------------------------------------------------------------------------------------------
+Startup Stage Profile                                                                  9 stages
+     [1]        | analyzer.analyze() |                                                count 675
+                                                total 954.26 ms |   avg 1.41 ms |  max 47.16 ms
+     [2]        | analyzer.getAnalyzedDocument() |                                    count 675
+                                                total 866.45 ms |   avg 1.28 ms |  max 44.59 ms
+     [3]        | analyzer.processNestedTree() |                                      count 675
+                                                total 577.03 ms |   avg 0.85 ms |  max 34.62 ms
+     [4]        | analyzer.parser.parse() |                                           count 675
+                                                total 219.26 ms |   avg 0.32 ms |  max 13.04 ms
+     [5]        | analyzer.symbols.refreshDocument() |                                count 675
+                                                total 85.09 ms |    avg 0.13 ms |   max 7.25 ms
+     [6]        | analyzer.createFullDocument() |                                     count 675
+                                                total 67.82 ms |    avg 0.10 ms |   max 3.61 ms
+     [7]        | analyzer.cache.setDocument() |                                      count 828
+                                                total 0.57 ms |    avg 0.00 ms |    max 0.04 ms
+     [8]        | analyzer.referenceCandidates.removeByUri() |                        count 675
+                                                total 0.56 ms |    avg 0.00 ms |    max 0.10 ms
+     [9]        | analyzer.analyzePartial() |                                         count 153
+                                                total 0.25 ms |    avg 0.00 ms |    max 0.12 ms
+-----------------------------------------------------------------------------------------------
+Indexed paths in `~/.config/fish`:                                                       1 path
+     [1]        | `$__fish_config_dir` |                                              828 files
+-----------------------------------------------------------------------------------------------
+    ```
+
+    </Fragment>
+</CommandPrompt>
+
+
+{/*
+
+```fish
+# Depending on your configuration, you may need to limit the indexed startup paths to a single workspace, e.g.:
+# set -lx fish_lsp_all_indexed_paths ~/.config/fish
+fish-lsp  info --time-startup --profile --no-warning --use-workspace ~/.config/fish 
+```
+
+Successful output will look like this: 
+
+<img src="/startup-profiling.svg" alt="fish-lsp  info --time-startup --profile --no-warning --use-workspace ~/.config/fish output" />
+*/}
+
+The `--time-only` flag can be used as an alias to essentially behave like `--time-startup --no-warning`, and will produce a more concise output:
+
+
+<CommandPrompt command="fish-lsp info --time-only" copy='true' lang='fish'>
+<Fragment slot="output">
+
+```text
+Server Start Time:                                                                    776.57 ms
+Background Analysis Time:                                                            1414.10 ms
+Total Files Indexed:                                                                  828 files
+```
+
+ </Fragment>
+</CommandPrompt>
+
+
+{/*
+```fish
+fish-lsp info --time-only
+```
+
+<img src="/time-only.svg" alt="fish-lsp info --time-only" />
+*/}
+
+
+> [!IMPORTANT]
+> For user's who are experiencing issues with successfully configuring their editor to connect to the server, the startup verification commands above are likely the most straightforward way to confirm that the server is functioning correctly.
+>
+> Typically, this indicates that a language client configuration issue is the probable cause of initial installation issues, rather than a problem with the server itself.
+
+
+## Checking Server Health
+
+The server comes equipped with a built-in health check, which verifies that the minimum requirements for the server runtime are met, and also checks for out of date `fish-lsp` manpages + completions.
+
+```fish prompt 
+fish-lsp info --check-health
+---
+fish-lsp health check
+=====================
+
+checking `fish-lsp` command:
+✓ fish-lsp version: v1.1.4
+✓ fish-lsp binary found: ~/.yarn/bin/fish-lsp
+
+checking dependencies:
+✓ fish shell: v4.7.1-224-gf5af5564a
+✓ tree-sitter initialized successfully
+✓ node version satisfies minimum version '>=20.0.0' (current version: 22.14.0)
+
+fish_lsp_all_indexed_paths:
+✓ fish-lsp workspace '~/.config/fish' is a directory
+✓ fish-lsp workspace '~/.config/fish' is readable
+✓ fish-lsp workspace '~/.config/fish' is writable
+
+checking log file:
+✓ log file found: /tmp/fish-lsp.log
+✓ log directory is writable: /tmp
+
+checking completions:
+✓ completions file found: ~/.config/fish/completions/fish-lsp.fish
+✓ completions file is up to date
+
+checking man page:
+✓ global man file found: ~/.local/share/man/man1/fish-lsp.1
+✓ binary man file found: ~/.local/share/man/man1/fish-lsp.1
+✓ global man file is up to date
+
+memory usage:
+  rss: 85 MB
+  heap Used: 17 MB
+  heap Total: 34 MB
+
+system information:
+  platform: linux
+  node.js: v22.14.0
+  architecture: x64
+
+all checks completed!
+```
+
+{/* 
+
+```fish
+# run health diagnostics
+fish-lsp info --check-health
+```
+
+<img src="/check-health.svg" alt="fish-lsp info --check-health output" />
+*/}
+
+## Logging
+
+Logging is **disabled by default**. Enable it by pointing
+`fish_lsp_log_file` at a writable path, then tail it while a server is running:
+
+```fish
+set -gx fish_lsp_log_file /tmp/fish_lsp.log
+set -gx fish_lsp_log_level debug   # debug | info | warning | error | log
+
+tail -f (fish-lsp info --log-file)
+# now reproduce the issue from your editor
+```
+
+## Server Connects But Nothing Works
+
+Confirm your client passes `start` as the argument and targets `fish` files:
+
+```json
+{
+  "command": "fish-lsp",
+  "args": ["start"],
+  "filetypes": ["fish"]
+}
+```
+
+Then check `fish-lsp info` to confirm you're running the expected version. See
+[Client Configurations](/docs/client-configurations) for editor-specific examples.
+
+## Inspecting Parse Output
+
+Given a file like:
+
+```fish /tmp/example.fish test input
+function greet --argument-names name
+    set -l greeting "Hello"
+    echo "$greeting, $name!"
+end
+
+greet World
+```
+
+We could inspect how the server is parsing and analyzing it with the following commands:
+
+```fish prompt
+fish-lsp info --dump-parse-tree /tmp/example.fish
+---
+(program [0:0, 6:0]
+  (function_definition [0:0, 3:3]
+    (function [0:0, 0:8] "function")
+    (word [0:9, 0:14] "greet")
+    (word [0:15, 0:31] "--argument-names")
+    (word [0:32, 0:36] "name")
+    (\n [0:36, 1:0] "\n")
+    (command [1:4, 1:27]
+      (word [1:4, 1:7] "set")
+      (word [1:8, 1:10] "-l")
+      (word [1:11, 1:19] "greeting")
+      (double_quote_string [1:20, 1:27]
+        (" [1:20, 1:21] "\"")
+        (" [1:26, 1:27] "\"")
+      )
+    )
+    (\n [1:27, 2:0] "\n")
+    (command [2:4, 2:28]
+      (word [2:4, 2:8] "echo")
+      (double_quote_string [2:9, 2:28]
+        (" [2:9, 2:10] "\"")
+        (variable_expansion [2:10, 2:19]
+          ($ [2:10, 2:11] "$")
+          (variable_name [2:11, 2:19] "greeting")
+        )
+        (variable_expansion [2:21, 2:26]
+          ($ [2:21, 2:22] "$")
+          (variable_name [2:22, 2:26] "name")
+        )
+        (" [2:27, 2:28] "\"")
+      )
+    )
+    (\n [2:28, 3:0] "\n")
+    (end [3:0, 3:3] "end")
+  )
+  (\n [3:3, 5:0] "\n\n")
+  (command [5:0, 5:11]
+    (word [5:0, 5:5] "greet")
+    (word [5:6, 5:11] "World")
+  )
+  (\n [5:11, 6:0] "\n")
+)
+```
+
+```fish prompt
+fish-lsp info --dump-symbol-tree /tmp/example.fish
+---
+/tmp/example.fish
+└── 󰊕  greet [0, 9] (local) (FUNCTION)
+    ├──   argv [0, 9] (local) (FUNCTION_VARIABLE)
+    ├──   name [0, 32] (local) (FUNCTION_VARIABLE)
+    └──   greeting [1, 11] (local) (SET)
+```
+
+```fish prompt
+fish-lsp info --dump-semantic-tokens /tmp/example.fish
+---
+0:0        keyword      len=8                                  "function"
+0:9        function     len=5   [local]                        "greet"
+0:32       variable     len=4   [local]                        "name"
+1:4        function     len=3   [defaultLibrary]               "set"
+1:11       variable     len=8   [local]                        "greeting"
+2:4        function     len=4   [defaultLibrary]               "echo"
+2:11       variable     len=8   [local]                        "greeting"
+2:22       variable     len=4   [local]                        "name"
+3:0        keyword      len=3                                  "end"
+5:0        function     len=5   [local]                        "greet"
+```
+
+{/*
+### Parse Tree
+
+```fish
+fish-lsp info --dump-parse-tree /tmp/example.fish
+```
+
+<img src="/dump-parse-tree.svg" alt="fish-lsp info --dump-parse-tree output" />
+
+### Symbol Tree
+
+```fish
+fish-lsp info --dump-symbol-tree /tmp/example.fish
+```
+
+<img src="/dump-symbol-tree.svg" alt="fish-lsp info --dump-symbol-tree output" />
+
+Pass `--no-icons` to swap the nerdfont glyphs for plain-text tags (`f`/`v`/`e`) if
+your terminal font doesn't render them:
+
+```fish
+fish-lsp info --dump-symbol-tree /tmp/example.fish --no-icons
+```
+
+### Semantic Tokens
+
+```fish
+fish-lsp info --dump-semantic-tokens /tmp/example.fish
+```
+
+<img src="/dump-semantic-tokens.svg" alt="fish-lsp info --dump-semantic-tokens output" />
+*/}
+
+Add `--no-color` to any of the three `--dump-*` flags to strip ANSI colors,
+e.g. when piping the output somewhere else.
+
+You could also pipe valid fish shell as stdin to any of the above `--dump-*` commands. 
+
+```fish prompt
+cat /tmp/example.fish | fish-lsp info --dump-parse-tree -
+````
+
+## Source Maps
+
+To debug the bundled server code with readable stack traces:
+
+```fish
+set -gx NODE_OPTIONS '--enable-source-maps --inspect'
+$EDITOR ~/.config/fish/config.fish
+```
+
+> [!NOTE]
+> Source maps might not be included in the build you are using (decided by the package manager or installation method used)
+> 
+> You can confirm if source maps are included by checking the output of: 
+>
+> ```fish prompt
+> fish-lsp info --source-maps --check
+> ```
+> 
+> <img src="/source-maps.svg" alt="fish-lsp info --source-maps --check output" />
+> 
+> If you are seeing bundled js locations in the stack traces, then try testing with a build that includes source maps instead (i.e., building from source with `yarn build:bin` or `yarn build:npm`, or downloading a [standalone release](https://github.com/ndonfris/fish-lsp/releases/tag/v1.1.4))

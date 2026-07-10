@@ -1,0 +1,35 @@
+---
+/**
+ * A "Need more details?" hint line followed by a link — the reusable form of the
+ * homepage's `.install-hint` paragraph.
+ *
+ * Supply the link either as props or as a slotted element:
+ *
+ *   <MoreHelp href="/docs/installation" linkText="See the full installation guide →" />
+ *
+ *   <MoreHelp text="Want the internals?">
+ *     <a href="/docs/how-it-works">Read how it works →</a>   (a slotted <a> wins over href/linkText)
+ *   </MoreHelp>
+ */
+interface Props {
+  /** Lead text shown before the link. */
+  text?: string;
+  /** Link target. Used with `linkText` when no link is slotted in. */
+  href?: string;
+  /** Link label. Used with `href`. */
+  linkText?: string;
+  /** Extra classes for the wrapping <p>. */
+  class?: string;
+}
+
+const { text = 'Need more details?', href, linkText, class: extra = '' } = Astro.props;
+
+// A slotted link (any custom <a>) takes precedence over the href/linkText props.
+const hasSlot = Astro.slots.has('default');
+---
+
+<p class:list={['mt-4 text-[0.82rem] text-ink-muted', extra]}>
+  {text}
+  {' '}
+  {hasSlot ? <slot /> : href && <a href={href}>{linkText}</a>}
+</p>

@@ -7,11 +7,17 @@ dist/
 # dependencies
 node_modules/
 
+# pnpm artifacts
+.pnpm-store/
+pnpm-debug.log*
+
+# typescript incremental build info
+*.tsbuildinfo
+
 # logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
 # environment variables
 .env
@@ -19,16 +25,3 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
-
-# Ignore everything in the public/ directory
-public/*
-
-# Re-include specific files
-!public/comment.svg
-!public/favicon.svg
-!public/favicon-centered-bluee.svg
-!public/new_output.gif
-!public/mermaid-diagram.png
-!public/help-msg-new.png
-!public/sitemap-index.xml
-!public/fish-lsp-info.svg

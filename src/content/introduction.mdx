@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: Explaining and introducing how to properly setup and configure the fish-lsp server for your development environment.
+slug: introduction
+order: 1
+section: Getting Started
+---
+
+# Introduction
+The `fish-lsp` project provides a language server for the fish-shell, enabling advanced features like autocompletion, syntax checking, and more in compatible editors.
+
+<img src="/new_output.gif" alt="fish-lsp logo" />
+
+## General Setup Strategies
+
+To correctly get the server up and running, the process should be relatively straight forward.
+
+Depending on how you plan to use the `fish-lsp` language-server, the installation and configuration process may vary.
+
+However, *for most users*, the setup process generally falls into one of the two categories below:
+
+1. The **most common case**, is that the user needs to [manually install the server](/docs/installation), and then [configure their language-client](/docs/client-configurations) to start the server for `*.fish` files.
+
+    > <ins>***Example Clients:***</ins><br/>
+    > - `vim`/`nvim` (nvim-lspconfig, coc.nvim, mason.nvim, YouCompleteMe, vim-lsp, etc.)
+    > - `helix`
+    > - `kakoune`
+    > - `kate`
+    > - `emacs` (`lsp-mode`, or other common alternatives)
+    > - `IntelliJ`
+    > - `BBEdit`
+    >
+    > *The list is not exhaustive, and any client that supports the Language Server Protocol should be able to use `fish-lsp` as a language server.*
+
+2. The user's Text-Editor, IDE, or language-client automatically installs the server for them.
+
+    Normally, this is the case editors like [VSCode](https://github.com/ndonfris/vscode-fish-lsp/) or [VSCodium](https://vscodium.com/), where an **extension** directly installs the language server and configuration is then directly done through the extension itself.
+    In these cases, it is not required to manually/globally install the server, as this is already done for you by the extension.
+
+    It is also worth noting that the binary `fish-lsp` command used by the extension out-of-the-box is not accessible to the user's shell. User's might want to add the binary to their `$PATH` to access it directly from the command line
+
+## Binary help output
+
+Once the user has installed the `fish-lsp` binary, they can run the following command to see the help output:
+
+```fish
+fish-lsp --help
+```
+
+<img src="/fish-lsp-help.svg" alt="fish-lsp help output" />
+
+More commandline-line subcommand & flag combinations are available to the binary `fish-lsp` executable, and might be helpful to debug an issue encountered
+
+## General Notes
+
+A few general notes about the `fish-lsp` project:
+
+- The project is still in **active development**, and while it is usable, there may be bugs or missing features. Please report any issues you encounter on the [GitHub Issues page](https://github.com/ndonfris/fish-lsp/issues).
+
+- The project is **open-source** and contributions are welcome! If you would like to contribute, please see the [Contributing Guide](https://github.com/ndonfris/fish-lsp/blob/master/docs/CONTRIBUTING.md).
+
+- The project is **cross-platform** and should work on any operating system that supports the fish-shell and the Language Server Protocol.
+

@@ -1,0 +1,80 @@
+---
+/**
+ * Bottom-of-page prev/next pagination for docs. Self-contained: given the
+ * current page's slug, it derives the previous/next pages from the same
+ * flattened nav order used by the sidebar (HamburgerMenu) and renders the
+ * pager. Renders nothing when there is no neighbor in either direction.
+ */
+import { getCollection } from 'astro:content';
+import type { NavSection } from '@typedefs/content';
+
+interface Props {
+  /** Slug of the page currently being rendered. */
+  currentSlug: string;
+}
+const { currentSlug } = Astro.props;
+
+const allPages = await getCollection('pages');
+const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
+const grouped = new Map<string, typeof allPages>();
+
+for (const page of allPages) {
+  const sec = page.data.section ?? 'Other';
+  if (!grouped.has(sec)) grouped.set(sec, []);
+  grouped.get(sec)!.push(page);
+}
+for (const pages of grouped.values()) {
+  pages.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+}
+
+const navSections: NavSection[] = [
+  ...sectionOrder.filter(s => grouped.has(s)),
+  ...[...grouped.keys()].filter(s => !sectionOrder.includes(s)),
+].map(label => ({
+  label,
+  pages: (grouped.get(label) ?? []).map(p => ({
+    title: p.data.title,
+    slug:  p.data.slug,
+  })),
+}));
+
+// Flattened page order (matches the sidebar) → prev/next.
+const flatPages = navSections.flatMap(s => s.pages);
+const currentIndex = flatPages.findIndex(p => p.slug === currentSlug);
+const prevPage = currentIndex > 0 ? flatPages[currentIndex - 1] : null;
+const nextPage =
+  currentIndex >= 0 && currentIndex < flatPages.length - 1
+    ? flatPages[currentIndex + 1]
+    : null;
+---
+
+{(prevPage || nextPage) && (
+  <nav
+    class="mt-12 grid grid-cols-2 gap-4 border-t border-line pt-6 max-sm:grid-cols-1"
+    aria-label="Pagination"
+  >
+    {prevPage ? (
+      <a
+        href={`/docs/${prevPage.slug}`}
+        rel="prev"
+        class="group flex flex-col gap-1 rounded-lg border border-line bg-surface-1 p-4
+               no-underline transition-colors hover:border-fish-periwinkle hover:bg-surface-2"
+      >
+        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-periwinkle">← Previous</span>
+        <span class="font-mono text-sm font-semibold text-ink">{prevPage.title}</span>
+      </a>
+    ) : <div aria-hidden="true" class="max-sm:hidden"></div>}
+
+    {nextPage ? (
+      <a
+        href={`/docs/${nextPage.slug}`}
+        rel="next"
+        class="group flex flex-col items-end gap-1 rounded-lg border border-line bg-surface-1 p-4
+               text-right no-underline transition-colors hover:border-fish-periwinkle hover:bg-surface-2"
+      >
+        <span class="font-mono text-xs text-ink-muted group-hover:text-fish-periwinkle">Next →</span>
+        <span class="font-mono text-sm font-semibold text-ink">{nextPage.title}</span>
+      </a>
+    ) : <div aria-hidden="true" class="max-sm:hidden"></div>}
+  </nav>
+)}

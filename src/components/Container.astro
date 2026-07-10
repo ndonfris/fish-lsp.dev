@@ -1,0 +1,16 @@
+---
+/**
+ * Centered inner-content wrapper (Tailwind `max-w-3xl ... mx-auto` convention).
+ *
+ * Only the readable page body is wrapped in this. Header, footer and the docs
+ * sidebar are intentionally left OUTSIDE it so they bleed to the full parent
+ * width.  Pass `class` to override the max-width (e.g. `max-w-5xl`).
+ */
+interface Props {
+  class?: string;
+}
+const { class: extra = 'max-w-3xl' } = Astro.props;
+---
+<div class:list={['mx-auto px-4 w-full', extra]}>
+  <slot />
+</div>

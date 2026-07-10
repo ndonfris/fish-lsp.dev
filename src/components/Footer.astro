@@ -1,39 +1,64 @@
 ---
-import { Icon } from 'astro-icon/components';
-import 'tw-base'
-
-const site = {
-  title: 'fish-lsp.dev',
-  repo: 'https://github.com/ndonfris/fish-lsp.dev',
-  srcRepo: 'https://github.com/ndonfris/fish-lsp'
+interface Props {
+  /** Docs pages set this to add an "Edit this page on GitHub" line. */
+  editPage?: boolean;
+  /** Repo-relative path of the page source, e.g. "src/content/installation.md". */
+  editPath?: string;
 }
+const { editPage = false, editPath } = Astro.props;
 
+const DOCS_URL  = '/docs/installation';
+const GITHUB    = 'https://github.com/ndonfris/fish-lsp';
+/** This website's own repo (where the page sources live) and its default branch. */
+const SITE_REPO   = 'https://github.com/ndonfris/fish-lsp.dev';
+const SITE_BRANCH = 'master';
 
+const editHref = editPath
+  ? `${SITE_REPO}/blob/${SITE_BRANCH}/${editPath}`
+  : `${GITHUB}/wiki`;
+
+const year = new Date().getFullYear();
 ---
 
-<!-- <div class="container w-full mx-auto bg-blue-500 h-28"> -->
-<div class="w-full py-4 mx-auto bg-blue-500">
-  <div class="max-w-2xl px-4 mx-auto">
-    <div class="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-      <div class="flex flex-wrap justify-center gap-y-1 md:flex-col md:gap-y-2 md:justify-start">
-        <a href={`${site.srcRepo}/wiki`} class="font-sans text-sm text-black hover:text-white px-3 border-r border-black/25 md:border-r-0 md:px-0">wiki</a>
-        <a href={`${site.srcRepo}/wiki/Sources`} class="font-sans text-sm text-black hover:text-white px-3 border-r border-black/25 md:border-r-0 md:px-0">resources</a>
-        <a href={`${site.srcRepo}#features`} class="font-sans text-sm text-black hover:text-white px-3 border-r border-black/25 md:border-r-0 md:px-0">features</a>
-        <a href="/playground" class="font-sans text-sm text-black hover:text-white px-3 border-r border-black/25 md:border-r-0 md:px-0">playground</a>
-        <a href={`${site.srcRepo}/wiki/Development-Notes`} class="font-sans text-sm text-black hover:text-white px-3 md:px-0">notes</a>
-      </div>
-
-      <div class="text-center">
-        <a href={site.repo} class="inline-block text-sm text-black hover:text-white">
-          <span>
-            edit this website
-            <Icon name="external-link" class="inline mb-1"/>
-          </span>
-        </a>
-        <p class="text-sm text-black">
-          <Icon name="fish-bowl" class="w-8 h-8 mx-auto text-center"/> <a href="#" class="text-sm tracking-tighter underline">{site.title}</a> &copy; <span class="italic font-semibold">2025</span>
-        </p>
-      </div>
-    </div>
+<footer>
+  <!-- Wave transition -->
+  <div class="h-22 overflow-hidden sm:h-20!">
+    <!-- svg is wider than the container (clipped by overflow-hidden) so the
+         deepest wave still covers the right edge while it drifts left. -->
+    <svg class="h-full w-[112%] max-w-none" viewBox="0 -10 700 90" preserveAspectRatio="none" aria-hidden="true">
+      <path class="origin-left animate-wave [animation-duration:12s]" d="M0,30 c150,-35 300,35 500,0 c200,-35 400,35 600,0 v60 h-1100z" fill="var(--fish-blue)" opacity="0.3"/>
+      <path class="origin-left animate-wave [animation-duration:10s]" d="M0,40 c120,-25 280,25 450,0 c170,-25 330,25 500,0 v50 h-950z"  fill="var(--fish-blue)" opacity="0.5"/>
+      <path class="origin-left animate-wave [animation-duration:8s]"  d="M0,50 c100,-18 260,18 400,0 c140,-18 280,18 420,0 v40 h-820z"  fill="var(--fish-blue)"/>
+    </svg>
   </div>
-</div>
+
+  <div class="bg-fish-blue px-8 pt-5 pb-6 sm:pt-2 text-center font-mono text-[0.8rem] max-sm:text-left">
+    <nav
+      class="mb-3 flex flex-wrap justify-center gap-x-4 gap-y-2 [&_a]:text-white/70 [&_a]:transition-colors [&_a]:hover:text-white sm:[&>a:not(:first-child)]:before:mr-4 sm:[&>a:not(:first-child)]:before:text-white/30 sm:[&>a:not(:first-child)]:before:content-['|'] max-sm:flex-col max-sm:flex-nowrap max-sm:items-start max-sm:gap-y-2"
+      aria-label="Footer navigation"
+    >
+      <!-- <a href={`${GITHUB}/wiki`}         target="_blank" rel="noopener noreferrer">wiki</a> -->
+      <a href={GITHUB}                    target="_blank" rel="noopener noreferrer">github</a>
+      <a href="https://www.npmjs.com/package/fish-lsp" target="_blank" rel="noopener noreferrer">npm</a>
+      <a href="https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp" target="_blank" rel="noopener noreferrer">vscode</a>
+      <a href={`${GITHUB}/discussions`}   target="_blank" rel="noopener noreferrer">discussions</a>
+      <a href={DOCS_URL}                  target="_blank" rel="noopener noreferrer">docs</a>
+    </nav>
+
+    <!-- mobile-only divider between links and the meta line -->
+    <hr class="my-4 border-t border-white/20 sm:hidden" />
+
+    {editPage && (
+      <a href={editHref} target="_blank" rel="noopener noreferrer"
+         class="mb-[0.6rem] block text-white/50 transition-colors hover:text-white">
+        Edit this page on GitHub ↗
+      </a>
+    )}
+    <a class="block mb-0 underline sm:mb-0 text-white/50 transition-colors hover:text-white" href="fish-lsp.dev" target="_blank" rel="noopener noreferrer">
+       <span class="text-white-50!">fish-lsp.dev</span>
+       <!-- <span class="text-white! text-center justify-center text-sm">🐟</span> -->
+       <span class="text-white! text-center justify-center text-sm">@</span>
+       <span class="text-white/50">{year}</span>
+    </a>
+  </div>
+</footer>

@@ -1,0 +1,323 @@
+---
+title: Diagnostic Error Codes
+description: fish-lsp diagnostic error codes reference table
+slug: diagnostic-codes
+order: 10
+section: Reference
+---
+import { Icon } from 'astro-icon/components';
+import TrCode from '@components/table/TrCode.astro';
+import Thr from '@components/table/Thr.astro';
+
+{/* import DiagnosticIcon from '@components/table/DiagnosticIcon.astro'; */}
+{/* import Diag from '@components/table/Diag.astro'; */}
+
+# Diagnostic Error Codes
+The `fish-lsp` provides numerous diagnostics which are displayed in your editor with a specific error code, and a description of the error.
+
+The error codes are used to identify specific diagnostics and can be used to disable/enable specific diagnostics in your fish scripts.
+
+![](/comment.svg)
+
+> [!Important]
+> This page provides a reference table for all the diagnostic error codes that `fish-lsp` can produce.
+
+## Error Code Table
+
+{/*
+| Code        |  Description                                                    | Severity                | Example                                                                                                         | Fix                                                                                                                                                                                                   |
+| ----------- | --------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ERROR  |  **`1001`**  | Missing closing token                                      | `echo "` <br /> `echo '` <br/> `begin` <br/> `function foo` <br/> `echo (`                                      | `echo "";` <br/> `echo '';` <br/> `begin; end` <br/> `function foo; end` <br /> `echo ()` |
+|  **`1002`** | Extra closing token                                             | <Diag level="error" />  | `function; end; end;` <br /> `if; end; end;`                                                                    | `function; end;` <br/> `if; end;`                        |
+|  **`1003`** | Invalid array index                                             | <Diag level="error" />  | `$PATH[0]`                                                                                                      | `$PATH[1]`                                                                                                                                                                                            |
+|  **`1004`** | Source filename does not exist                                  | <Diag level="error" />  | `source ./non-existent-file.fish`                                                                               | `source ./existing-file.fish`                                                                                                                                                                         |
+|  **`1005`** | Sourcing filename with `.` syntax                               | <Diag level="error" />  | `. ./file.fish`                                                                                                 | `source ./file.fish`                                                                                                                                                                                  |
+|  **`2001`** | Non-escaped expansion variable in single quote string           | <Diag level="WARN"  />  | `echo '$HOME'`                                                                                                  | `echo "$HOME"`                                                                                                                                                                                        |
+|  **`2002`** | alias used, prefer using functions instead                      | <Diag level="WARN"  />  | `alias ls='ls -G'`                                                                                              | <TrCode splitNewlines splitTabs>function ls\n\tcommand ls -G $argv\nend</TrCode>                                                                                                                      |
+|  **`2003`** | Universal scope set in non-interactive session                  | <Diag level="WARN"  />  | `set -Ux persistent_var`                                                                                        | `set -gx persistent_var`                                                                                                                                                                              |
+|  **`2004`** | External shell command used when equivalent fish builtin exists | <Diag level="WARN"  />  | `cat file.txt`                                                                                             | `command cat file.txt` or use the fish builtin equivalent                                                                                                                                                  |
+|  **`3001`** | test command string check, should be wrapped as a string        | <Diag level="WARN"  />  | `test $str1 = $str2`                                                                                            | `test "$str1" = "$str2"`                                                                                                                                                                              |
+|  **`3002`** | Conditional command should include a silence option             | <Diag level="WARN"  />  | `if set some_var; end;`                                                                                         | `if set -q some_var; end;`                                                                                                                                                                            |
+|  **`3003`** | Dereference variable definition could be undefined              | <Diag level="WARN"  />  | `set $some_var value`                                                                                           | <TrCode splitNewlines splitTabs>if set -q some_var \|\| test -n "$some_var"\n\tset $some_var value\nend</TrCode>                                                                                      |
+|  **`4001`** | Autoloaded function missing definition                          | <Diag level="WARN"  />  | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr />`# empty`                             | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function file; end;`                                                                                                        |
+|  **`4002`** | Autoloaded function does not match filename                     | <Diag level="ERROR" />  | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function __file; end;`                | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function file; end;`                                                                                                        |
+|  **`4003`** | Function name using reserved keyword                            | <Diag level="ERROR" />  | <TrCode splitNewlines splitTabs>function continue\nend</TrCode>                                                 | <TrCode splitNewlines splitTabs>function _continue\nend</TrCode>                                                                                                                                      |
+|  **`4004`** | Unused local function                                           | <Diag level="WARN"  />  | in a autoloaded function at:<br/> **fish/functions/foo.fish**<br/><Thr /><TrCode splitNewlines splitTabs>function foo\nend\nfunction bar\nend</TrCode> | in a autoloaded function at:<br/> **fish/functions/foo.fish**<br/><Thr /><TrCode splitNewlines splitTabs>function foo\n\tbar\nend\nfunction bar\nend</TrCode>  |
+|  **`4005`** | autoloaded completion missing command name                      | <Diag level="ERROR" />  | when a file like: <br/> **fish/completions/foo.fish**<br/><Thr/>`complete -c nofoo -f`                          | when a file like: <br/> **fish/completions/foo.fish**<br/><Thr/>`complete -c foo -f`                                                                                                                  |
+|  **`4006`** | duplicate function name in same scope                           | <Diag level="WARN"  />  | <TrCode splitNewlines splitTabs>function a; end;\nfunction a; end;\nalias a="command a"</TrCode>                | <TrCode splitNewlines splitTabs>function a; end;\nfunction b; end;\nalias c="command a"</TrCode>                                                                                                      |
+|  **`4007`** | Autoloaded event hook function missing usage                    | <Diag level="WARN"  />  | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend</TrCode>                          | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend\nemit some_event</TrCode>                                                                                               |
+|  **`4008`** | Autoloaded function requires a description                      | <Diag level="WARN"  />  | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                                                                                                                                 |
+|  **`4009`** | Autoloaded helper function name collision                       | <Diag level="INFO"  />  | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                                                                                                                                 |
+|  **`5001`** | Argparse missing end of stdin                                   | <Diag level="ERROR" />  | `argparse h/help`                                                                                               | `argparse h/help -- $argv`                                                                                                                                                                            |
+|  **`5555`** | Unreachable code                                                | <Diag level="WARN"  />  | <TrCode splitNewlines splitTabs>return 0\necho $status # unreachable</TrCode>                                   | <TrCode splitNewlines splitTabs>echo $status # reachable</TrCode>                                                                                                                                     |
+|  **`6001`** | fish-lsp deprecated env variable                                | <Diag level="WARN"  />  | `set -gx fish_lsp_logfile`                                                                                      | `set -gx fish_lsp_log_file`                                                                                                                                                                           |
+|  **`8001`** | fish-lsp invalid diagnostic code                                | <Diag level="WARN"  />  | `# @fish-lsp-disable 100111`                                                                                    | `# @fish-lsp-disable 1001`                                                                                                                                                                            |
+|  **`7001`** | Unknown command                                                 | <Diag level="WARN"  />  | `nonexistent_command`                                                                                           | Use a valid command or define the function                                                                                                                                                            |
+|  **`9999`** | use `fish --no-execute` to check for syntax errors              | <Diag level="ERROR" />  | **N/A**                                                                                                         | **N/A**                                                                                                                                                                                               |
+
+*/}
+
+
+| Severity                                      | Code         | Description                                                | Example                                                                                                         | Fix                                                                                       |
+| --------------------------------------------- | ------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| <span class="text-red-400">ERROR</span>       |  **`1001`**  | Missing closing token                                      | `echo "` <br /> `echo '` <br/> `begin` <br/> `function foo` <br/> `echo (`                                      | `echo "";` <br/> `echo '';` <br/> `begin; end` <br/> `function foo; end` <br /> `echo ()` |
+| <span class="text-red-400">ERROR</span>       |  **`1002`**  | Extra closing token                                        | `function; end; end;` <br /> `if; end; end;`                                                                    | `function; end;` <br/> `if; end;`                                                         |
+| <span class="text-red-400">ERROR</span>       |  **`1003`**  | Invalid array index                                        | `$PATH[0]`                                                                                                      | `$PATH[1]`                                                                                |
+| <span class="text-red-400">ERROR</span>       |  **`1004`**  | Source filename does not exist                             | `source ./non-existent-file.fish`                                                                               | `source ./existing-file.fish`                                                             |
+| <span class="text-red-400">ERROR</span>       |  **`1005`**  | Sourcing filename with `.` syntax                          | `. ./file.fish`                                                                                                 | `source ./file.fish`                                                                      |
+| <span class="text-yellow-400">WARNING</span>  |  **`2001`**  | Non-escaped expansion variable in single quote string      | `echo '$HOME'`                                                                                                  | `echo "$HOME"`                                                                            |
+| <span class="text-yellow-400">WARNING</span>  |  **`2002`**  | alias used, prefer using functions instead                 | `alias ls='ls -G'`                                                                                              | <TrCode splitNewlines splitTabs>function ls\n\tcommand ls -G $argv\nend</TrCode>          |
+| <span class="text-yellow-400">WARNING</span>  |  **`2003`**  | Universal scope set in non-interactive session             | `set -Ux persistent_var`                                                                                        | `set -gx persistent_var`                                                                  |
+| <span class="text-yellow-400">WARNING</span>  |  **`2004`**  | External shell command used when equivalent fish builtin exists | `cat file.txt`                                                                                             | `command cat file.txt` or use the fish builtin equivalent                                 |
+| <span class="text-yellow-400">WARNING</span>  |  **`3001`**  | test command string check, should be wrapped as a string   | `test $str1 = $str2`                                                                                            | `test "$str1" = "$str2"`                                                                  |
+| <span class="text-yellow-400">WARNING</span>  |  **`3002`**  | Conditional command should include a silence option        | `if set some_var; end;`                                                                                         | `if set -q some_var; end;`                                                                |
+| <span class="text-yellow-400">WARNING</span>  |  **`3003`**  | Dereference variable definition could be undefined         | `set $some_var value`                                                                                           | <TrCode splitNewlines splitTabs>if set -q some_var \|\| test -n "$some_var"\n\tset $some_var value\nend</TrCode> |
+| <span class="text-yellow-400">WARNING</span>  |  **`4001`**  | Autoloaded function missing definition                     | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr />`# empty`                             | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function file; end;` |
+| <span class="text-red-400">ERROR</span>       |  **`4002`**  | Autoloaded function does not match filename                | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function __file; end;`                | in a autoloaded function at:<br/> **fish/functions/file.fish**<br/><Thr/>`function file; end;` |
+| <span class="text-red-400">ERROR</span>       |  **`4003`**  | Function name using reserved keyword                       | <TrCode splitNewlines splitTabs>function continue\nend</TrCode>                                                 | <TrCode splitNewlines splitTabs>function _continue\nend</TrCode>                          |
+| <span class="text-yellow-400">WARNING </span> |  **`4004`**  | Unused local function                                      | in a autoloaded function at:<br/> **fish/functions/foo.fish**<br/><Thr /><TrCode splitNewlines splitTabs>function foo\nend\nfunction bar\nend</TrCode> | in a autoloaded function at:<br/> **fish/functions/foo.fish**<br/><Thr /><TrCode splitNewlines splitTabs>function foo\n\tbar\nend\nfunction bar\nend</TrCode> |
+| <span class="text-red-400">ERROR</span>       |  **`4005`**  | autoloaded completion missing command name                 | when a file like: <br/> **fish/completions/foo.fish**<br/><Thr/>`complete -c nofoo -f`                          | when a file like: <br/> **fish/completions/foo.fish**<br/><Thr/>`complete -c foo -f`      |
+| <span class="text-yellow-400">WARNING</span>  |  **`4006`**  | duplicate function name in same scope                      | <TrCode splitNewlines splitTabs>function a; end;\nfunction a; end;\nalias a="command a"</TrCode>                | <TrCode splitNewlines splitTabs>function a; end;\nfunction b; end;\nalias c="command a"</TrCode>     |
+| <span class="text-yellow-400">WARNING</span>  |  **`4007`**  | Autoloaded event hook function missing usage               | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend</TrCode>                          | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend\nemit some_event</TrCode> |
+| <span class="text-yellow-400">WARNING</span>  |  **`4008`**  | Autoloaded function requires a description                 | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                     |
+| <span class="text-blue-600">INFO</span>       |  **`4009`**  | Autoloaded helper function name collision                  | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                     |
+| <span class="text-red-400">ERROR</span>       |  **`5001`**  | Argparse missing end of stdin                              | `argparse h/help`                                                                                               | `argparse h/help -- $argv`                                                                |
+| <span class="text-yellow-400">WARNING</span>  |  **`5555`**  | Unreachable code                                           | <TrCode splitNewlines splitTabs>return 0\necho $status # unreachable</TrCode>                                   | <TrCode splitNewlines splitTabs>echo $status # reachable</TrCode>                         |
+| <span class="text-yellow-400">WARNING</span>  |  **`6001`**  | fish-lsp deprecated env variable                           | `set -gx fish_lsp_logfile`                                                                                      | `set -gx fish_lsp_log_file`                                                               |
+| <span class="text-yellow-400">WARNING</span>  |  **`7001`**  | Unknown command                                            | `nonexistent_command`                                                                                           | Use a valid command or define the function                                                |
+| <span class="text-yellow-400">WARNING</span>  |  **`8001`**  | fish-lsp invalid diagnostic code                           | `# @fish-lsp-disable 100111`                                                                                    | `# @fish-lsp-disable 1001`                                                                |
+| <span class="text-red-400">ERROR</span>       |  **`9999`**  | use `fish --no-execute` to check for syntax errors         | **N/A**                                                                                                         | **N/A**                                                                                   |
+
+
+## Using comments to disable diagnostics per file
+
+You can disable/enable diagnostics from the language server by adding comments to
+line(s)/line-ranges in your scripts.
+
+There are **4 different ways** to change the diagnostics behavior's via comments:
+
+```fish
+# @fish-lsp-disable
+# @fish-lsp-disable-next-line
+# @fish-lsp-enable
+# @fish-lsp-enable-next-line
+```
+
+Without specifying which diagnostics to disable/enable, the comments will by default disable/enable all diagnostics until the end of the file, or next disable/enable directive.
+
+To specify disabling only specific diagnostics, you can add the error codes to the comments:
+
+```fish
+# @fish-lsp-enable 1001 1002 1003 1004 2001 2002 2003 2004 3001 3002 4001 4002 4003 4004 4008 5001 7001
+echo 'enables diagnostics even if they were previously disabled'
+
+# @fish-lsp-disable 1001 1002 1003 1004 2001 2002 2003 2004 3001 3002 4001 4002 4003 4004 4008 5001 7001
+echo 'disables diagnostics even if they were previously enabled'
+```
+
+The following example shows how to use these comments in your fish scripts:
+
+```fish
+# @fish-lsp-enable
+echo 'enables all previously disabled diagnostics'
+
+# @fish-lsp-disable-next-line 2001 2002
+alias l='ls $PWD' # no warnings for alias usage or non-escaped expansion variables
+alias l='ls $PWD' # warnings 2001, 2002 will be shown
+
+## diagnostics can be disabled for a range of lines
+# @fish-lsp-disable 2002
+alias ls  'exa --color=always --icons -1'
+alias lsd 'exa --color=always --icons'
+alias lst 'exa --color=always --icons --tree'
+# @fish-lsp-enable 2002
+### only diagnostic 2002 will be disabled in the range of lines above,
+### other diagnostics wont be affected
+
+# @fish-lsp-disable
+echo 'all diagnostics will be disabled till EOF unless otherwise enabled'
+# @fish-lsp-enable-next-line 2002
+alias ls_problem 'exa --color=always --icons -1' # diagnostic 2002 will be enabled
+
+echo 'all diagnostics will be disabled again'
+```
+
+> [!TIP]
+> Try this out directly in the [playground!](https://playground.fish-lsp.dev/?preview=IyBAZmlzaC1sc3AtZW5hYmxlCmVjaG8gJ2VuYWJsZXMgYWxsIHByZXZpb3VzbHkgZGlzYWJsZWQgZGlhZ25vc3RpY3MnCgojIEBmaXNoLWxzcC1kaXNhYmxlLW5leHQtbGluZSAyMDAxIDIwMDIKYWxpYXMgbD0nbHMgJFBXRCcgIyBubyB3YXJuaW5ncyBmb3IgYWxpYXMgdXNhZ2Ugb3Igbm9uLWVzY2FwZWQgZXhwYW5zaW9uIHZhcmlhYmxlcwphbGlhcyBsPSdscyAkUFdEJyAjIHdhcm5pbmdzIDIwMDEsIDIwMDIgd2lsbCBiZSBzaG93bgoKIyMgZGlhZ25vc3RpY3MgY2FuIGJlIGRpc2FibGVkIGZvciBhIHJhbmdlIG9mIGxpbmVzCiMgQGZpc2gtbHNwLWRpc2FibGUgMjAwMgphbGlhcyBscyAgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0xJw%3D%3D&uri=file%3A%2F%2F%2Fworkspace%2Fexample.fish#code=IyBAZmlzaC1sc3AtZW5hYmxlCmVjaG8gJ2VuYWJsZXMgYWxsIHByZXZpb3VzbHkgZGlzYWJsZWQgZGlhZ25vc3RpY3MnCgojIEBmaXNoLWxzcC1kaXNhYmxlLW5leHQtbGluZSAyMDAxIDIwMDIKYWxpYXMgbD0nbHMgJFBXRCcgIyBubyB3YXJuaW5ncyBmb3IgYWxpYXMgdXNhZ2Ugb3Igbm9uLWVzY2FwZWQgZXhwYW5zaW9uIHZhcmlhYmxlcwphbGlhcyBsPSdscyAkUFdEJyAjIHdhcm5pbmdzIDIwMDEsIDIwMDIgd2lsbCBiZSBzaG93bgoKIyMgZGlhZ25vc3RpY3MgY2FuIGJlIGRpc2FibGVkIGZvciBhIHJhbmdlIG9mIGxpbmVzCiMgQGZpc2gtbHNwLWRpc2FibGUgMjAwMgphbGlhcyBscyAgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0xJwphbGlhcyBsc2QgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zJwphbGlhcyBsc3QgJ2V4YSAtLWNvbG9yPWFsd2F5cyAtLWljb25zIC0tdHJlZScKIyBAZmlzaC1sc3AtZW5hYmxlIDIwMDIKIyMjIG9ubHkgZGlhZ25vc3RpYyAyMDAyIHdpbGwgYmUgZGlzYWJsZWQgaW4gdGhlIHJhbmdlIG9mIGxpbmVzIGFib3ZlLAojIyMgb3RoZXIgZGlhZ25vc3RpY3Mgd29udCBiZSBhZmZlY3RlZAoKIyBAZmlzaC1sc3AtZGlzYWJsZQplY2hvICdhbGwgZGlhZ25vc3RpY3Mgd2lsbCBiZSBkaXNhYmxlZCB0aWxsIEVPRiB1bmxlc3Mgb3RoZXJ3aXNlIGVuYWJsZWQnCiMgQGZpc2gtbHNwLWVuYWJsZS1uZXh0LWxpbmUgMjAwMgphbGlhcyBsc19wcm9ibGVtICdleGEgLS1jb2xvcj1hbHdheXMgLS1pY29ucyAtMScgIyBkaWFnbm9zdGljIDIwMDIgd2lsbCBiZSBlbmFibGVkCgplY2hvICdhbGwgZGlhZ25vc3RpY3Mgd2lsbCBiZSBkaXNhYmxlZCBhZ2Fpbic%3D&uri=file%3A%2F%2F%2Fworkspace%2Fexample.fish)
+
+> [!NOTE]
+> The `fish-lsp` will provide **code-actions**, **quickfixes** and **completions** for using these comments in your fish scripts.
+
+
+## Using the fish_lsp_diagnostic_disable_error_codes env variable
+
+By default all error codes are enabled. Any specific diagnostic can be disabled by appending their number to the `fish_lsp_diagnostic_disable_error_codes` environment variable.
+
+For example to disable error codes **1001** and **1002** you can set the environment variable as follows:
+
+```fish
+set -gx fish_lsp_diagnostic_disable_error_codes 1001 1002
+```
+
+If you want to **ALWAYS** disable these diagnostics, you can add them to your `config.fish` file:
+
+```fish
+# ~/.config/fish/config.fish
+
+set -gx fish_lsp_diagnostic_disable_error_codes 1001 1002
+```
+
+## Temporarily disabling diagnostics
+
+You could also disable diagnostics temporarily by setting the environment variable in your current shell session:
+
+```fish
+# run this in your interactive shell prompt
+begin
+    set -lx fish_lsp_diagnostic_disable_error_codes 2001 2002 2003 
+    $EDITOR ~/.config/fish/config.fish
+end
+```
+
+The previous example will open your `config.fish` file with diagnostics **2001**, **2002**, and **2003** disabled. Once you close the editor, any previous diagnostic settings will be restored.
+
+> [!NOTE]
+> See the fish-shell's documentation on [variable scopes](https://fishshell.com/docs/current/language.html#variables-scope) for more information.
+
+## Disabling Diagnostics for edit_command_buffer
+
+The fish function `edit_command_buffer` is used to edit the current command buffer in the editor. This function is used by the fish shell to edit the current command buffer when you press `alt + e` in the fish shell. 
+
+You can check what key is binded to this function by running the following command in your fish shell interactive session:
+
+```fish
+bind | string match -e 'edit_command_buffer'
+# YOUR OUTPUT SHOULD LOOK SOMETHING LIKE:
+#    bind --preset alt-v edit_command_buffer
+#    bind --preset alt-e edit_command_buffer
+```
+
+If you wanted to disable diagnostics only while using the `fish-lsp` is editing a command buffer, you can easily do this by wrapping the `edit_command_buffer` function with **locally** **exported** `$fish_lsp_*` variables.
+
+The following example shows how to disable **ALL** diagnostics for the `edit_command_buffer` function:
+
+```fish
+function edit_command_buffer_wrapper --description 'edit command buffer with custom server configurations' 
+  # place any CUSTOM server configurations here                                                            
+  set -lx fish_lsp_diagnostic_disable_error_codes 1001 1002 1003 1004 2001 2002 2003 3001 3002 3003        
+  # set -lx fish_lsp_max_background_files 100
+  # set -lx fish_lsp_all_indexed_paths ~/.config/fish
+  # set -lx fish_lsp_modifiable_paths ~/.config/fish
+  # set -lx fish_lsp_logfile /tmp/fish-lsp-cmdline.logs
+  # you could see all the available env variables by running: 
+  # `fish-lsp env --show --no-comments`
+
+  # open the command buffer with the custom server configuration, without                                  
+  # overwriting the default server settings                                                                
+  edit_command_buffer                                                                                      
+end                                                                                                        
+```
+
+Now you can call the `edit_command_buffer_wrapper` function instead of the `edit_command_buffer` function to open the command buffer with the custom server configurations.
+
+```fish
+bind alt-e edit_command_buffer_wrapper
+```
+
+## Disabling Alias Warnings
+
+Since fish's `alias` command is [just a wrapper around function](https://fishshell.com/docs/current/cmds/alias.html) and it is recommended to use functions instead of aliases. Users who still prefer using aliases may want to disable diagnostic code **2002**.
+
+> [!Warning]
+> Using [comment directives](#using-comments-to-disable-diagnostics-per-file) is likely a more flexible way to disable diagnostics.
+
+Depending on the situation, my personal preference for using aliases is as follows:
+
+1. Write an aliases file in `~/.config/fish/conf.d/aliases.fish`
+
+    ```fish
+    $EDITOR ~/.config/fish/conf.d/aliases.fish
+    ```
+
+   > [!NOTE]
+   > the `~/.config/fish/conf.d/` directory is auto-loaded before fish reads your `config.fish` file during startup, so placing your aliases in here will ensure they are loaded before your interactive shell starts.
+
+2. Put all your existing aliases in this file, and add a function to edit the aliases file without alias warnings
+
+    ```fish
+    # ~/.config/fish/conf.d/aliases.fish
+    
+    # function to edit the aliases file without alias warnings
+    # short for 'alias edit'
+    function aliased --description 'edit conf.d/aliases.fish'
+        # when executing `aliased`, the file will be opened without alias warnings
+        set -lx fish_lsp_diagnostic_disable_error_codes 2001 2002
+        $EDITOR ~/.config/fish/conf.d/aliases.fish
+    
+        fish --no-execute ~/.config/fish/conf.d/aliases.fish
+        and source ~/.config/fish/conf.d/aliases.fish
+    
+        if test $status -eq 0 
+            set_color blue --bold && echo -n 'SUCCESS: ' && set_color normal
+            echo "~/.config/fish/conf.d/aliases.fish sourced"
+        else
+            set_color red --bold && echo -n 'ERROR: ' && set_color normal
+            echo "~/.config/fish/conf.d/aliases.fish not sourced"
+        end
+    end
+    
+    # enter your aliases here
+    alias sf='source ~/.config/fish/config.fish'
+    alias ls='exa -1 --color=auto --icons'
+    alias lsd='exa --color=always --icons' 
+    alias nvimf='$EDITOR ~/.config/fish/config.fish'
+    alias nvimn='$EDITOR ~/.config/nvim/init.lua'
+    alias rdme='$EDITOR README.md'
+    # ...
+    ```
+
+3. Source your fish configuration file and the `conf.d/aliases.fish` file
+
+   ```fish
+   source ~/.config/fish/conf.d/aliases.fish
+   source ~/.config/fish/config.fish 
+   ```
+
+4. Now you can use aliases without warnings when executing `aliased`, but prefer using functions elsewhere in your fish workspace
+
+   ```fish
+   # in your interactive shell, execute the aliased function
+   aliased
+   
+   # alias warnings are still shown elsewhere in your config
+   $EDITOR ~/.config/fish/config.fish
+   ```
+
+<br/>
+
+> [!NOTE]
+> I also like to structure my abbreviations in a similar structure, with both:
+>  - a `~/.config/fish/conf.d/abbreviations.fish` file.
+>  - an `abbred` function to edit the abbreviations file.
+>
+> This way your abbreviations, functions, and aliases are all in separate files and can be managed independently.
+
+
+{/*
+<!-- The two key takeaways from this example are: -->
+<!-- - you can set `$fish_lsp_*` environment variables in multiple locations by using fish-shell's scoping rules, and you can use this to your advantage to disable diagnostics for specific functions or files. -->
+<!-- - keeping your `~/.config/fish/config.fish` modular by using the `~/.config/fish/conf.d/` directory to group items that can be loaded independently, will help you manage your fish configuration more effectively. -->
+<!---->
+*/}
+
+## Other Notes
+
+Diagnostics errors are planned to be expanded in the future to include more specific errors and warnings.
+
+If you have any suggestions for new error codes, please see this [discussion](https://github.com/ndonfris/fish-lsp/discussions/37).
+
+Any help contributing to **code-actions/quick-fixes** that the lsp could provide for these errors would be greatly appreciated.
+
+## Relevant Source Code
+
+The relevant source code for the diagnostics can be found [here](https://github.com/ndonfris/fish-lsp/tree/master/src/diagnostics).

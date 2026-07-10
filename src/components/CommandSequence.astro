@@ -1,0 +1,195 @@
+---
+/**
+ * A terminal with multiple prompts. Each `step` is its own prompt line with an
+ * optional output; steps expand independently (their output appears inline,
+ * right below the command) and **double-clicking anywhere toggles them all**.
+ *
+ *   <CommandSequence
+ *     steps={[
+ *       { command: 'yarn install', output: 'added 402 packages' },
+ *       { command: 'yarn build',   output: 'build complete' },
+ *     ]}
+ *   />
+ *
+ * Two shapes fall out of the same `steps` prop:
+ *  - Mode A (one prompt, chained commands, one output): a single step whose
+ *    `command` spans multiple lines, e.g.
+ *      { command: 'cmd1\n  and cmd2\n  and cmd3 && cmd4', output: '…' }
+ *  - Mode B (several prompts, each with its own inline output): one step each.
+ *
+ * Commands are Shiki-highlighted (fish by default), individually selectable
+ * (user-select: all, via .cmd-code in global.css) and copyable. Output is text.
+ * For a single command with a screenshot, use CommandPrompt / CommandOutput.
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+interface Step {
+  /** The command line(s) for this prompt. */
+  command: string;
+  /** Optional output shown inline below the command when expanded. */
+  output?: string;
+  /** Per-step Shiki language override (defaults to the component `lang`). */
+  lang?: string;
+}
+
+interface Props {
+  /** The prompt steps, top to bottom. */
+  steps: Step[];
+  /** Default Shiki language for every step. Defaults to "fish". */
+  lang?: string;
+  /** Prompt glyph before each command. Defaults to "❯". */
+  prompt?: string;
+  /** Start every step expanded. */
+  open?: boolean;
+  /** Shiki theme; defaults to the site's markdown theme. */
+  codeTheme?: string;
+}
+
+const {
+  steps,
+  lang = 'fish',
+  prompt = '❯',
+  open = false,
+  codeTheme = 'material-theme-ocean',
+} = Astro.props;
+
+const norm = steps.map((s) => ({
+  cmd: s.command.replace(/\n+$/, ''),
+  out: s.output?.replace(/\n+$/, ''),
+  lang: s.lang ?? lang,
+  expandable: !!s.output?.trim(),
+}));
+---
+
+<div
+  data-command-seq
+  title="Double-click to expand / collapse all"
+  class="overflow-hidden rounded-md border border-line bg-surface-1 py-1.5 font-mono"
+>
+  {norm.map((s) => (
+    <div data-step>
+      {/* Whole row toggles this prompt's output (expandable steps only). */}
+      <div
+        data-cmd-toggle={s.expandable ? '' : undefined}
+        role={s.expandable ? 'button' : undefined}
+        tabindex={s.expandable ? '0' : undefined}
+        aria-expanded={s.expandable ? (open ? 'true' : 'false') : undefined}
+        aria-label={s.expandable ? 'Toggle output' : undefined}
+        class:list={[
+          'flex items-start gap-2.5 px-4 py-1',
+          { 'cursor-pointer hover:bg-surface-2/60': s.expandable },
+        ]}
+      >
+        <span class="w-4 shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+        <Code code={s.cmd} lang={s.lang as any} theme={codeTheme as any} class="cmd-code min-w-0 flex-1" />
+
+        {s.expandable && (
+          <span
+            data-chevron
+            aria-hidden="true"
+            class="mt-[0.15rem] shrink-0 select-none text-[0.7rem] text-ink-dim transition-transform"
+          >▸</span>
+        )}
+
+        <button
+          type="button"
+          data-copy={s.cmd}
+          aria-label="Copy command"
+          class="cmd-copy inline-flex shrink-0 cursor-pointer select-none items-center justify-center
+                 rounded-[5px] border border-line bg-surface-3 p-[0.25rem] text-ink-muted
+                 transition-colors hover:border-fish-cyan hover:bg-surface-2 hover:text-fish-cyan"
+        >
+          <Icon name="copy" class="block h-[13px] w-[13px]" />
+        </button>
+      </div>
+
+      {s.expandable && (
+        <div
+          data-step-output
+          class:list={[
+            'cmd-output pb-1 pl-[2.625rem] pr-4 text-[0.8rem] leading-relaxed',
+            'text-ink-muted whitespace-pre-wrap break-words',
+            { hidden: !open },
+          ]}
+        >
+          {s.out}
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  /* Rotate + tint the per-row chevron when its output is open. */
+  [data-cmd-toggle][aria-expanded='true'] [data-chevron] {
+    transform: rotate(90deg);
+    color: var(--fish-cyan);
+  }
+
+  /* Copied feedback (toggled by the script below) */
+  .cmd-copy.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* Screenshots / images in the output stay responsive. */
+  .cmd-output :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-command-seq]').forEach((root) => {
+    const toggles = [...root.querySelectorAll<HTMLButtonElement>('[data-cmd-toggle]')];
+    const isOpen = (t: HTMLElement) => t.getAttribute('aria-expanded') === 'true';
+    const setStep = (t: HTMLElement, next: boolean) => {
+      t.setAttribute('aria-expanded', String(next));
+      const out = t.closest('[data-step]')?.querySelector<HTMLElement>('[data-step-output]');
+      out?.classList.toggle('hidden', !next);
+    };
+
+    // Single click toggles that row; a double-click (below) cancels the pending
+    // single toggle and flips them all instead.
+    let clickTimer: number | undefined;
+    toggles.forEach((t) => {
+      t.addEventListener('click', () => {
+        window.clearTimeout(clickTimer);
+        clickTimer = window.setTimeout(() => setStep(t, !isOpen(t)), 200);
+      });
+      // The row is a role="button" div — support keyboard activation.
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setStep(t, !isOpen(t));
+        }
+      });
+    });
+
+    root.addEventListener('dblclick', () => {
+      window.clearTimeout(clickTimer);
+      window.getSelection()?.removeAllRanges(); // drop the text the dbl-click selected
+      const anyClosed = toggles.some((t) => !isOpen(t));
+      toggles.forEach((t) => setStep(t, anyClosed)); // any closed → open all, else close all
+    });
+
+    // Copy buttons: don't let a click/dblclick bubble into toggle behaviour.
+    root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      btn.addEventListener('dblclick', (e) => e.stopPropagation());
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        window.clearTimeout(clickTimer);
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') ?? '');
+          btn.classList.add('is-copied');
+          window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    });
+  });
+</script>

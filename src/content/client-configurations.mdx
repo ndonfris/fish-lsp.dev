@@ -1,0 +1,320 @@
+---
+title: Client Configurations
+description: Configure fish-lsp with Neovim, VSCode, Emacs, Helix, and other LSP clients
+slug: client-configurations
+order: 4
+section: Configuration
+---
+
+import '@theme/global.css';
+
+# Client Configurations
+
+`fish-lsp` works with any LSP-compatible editor. In almost every client the
+configuration boils down to translating one shell command for `fish` files:
+
+1. **command** → `fish-lsp`
+2. **arguments** → `start`
+3. **filetype** → `fish`
+
+> [!IMPORTANT]
+> Editors like VSCode/VSCodium install and wire up the server automatically via
+> their extension — no client configuration required. A
+> [server configuration](/docs/server-configurations) can still be applied.
+---
+
+<small>
+
+> #### <div class="text-fish-alt-white/70"> **All Clients** </div>
+> 
+> - [Vim/Neovim](#neovim)
+>   - [mason.nvim](#mason.nvim)
+>   - [coc.nvim](#coc.nvim)
+>   - [nvf](#nvf)
+>   - [YouCompleteMe](#youcompleteme)
+>   - [vim-lsp](#vim-lsp)
+> - [Emacs](#emacs)
+>   - [lsp-mode](#lsp-mode)
+>   - [eglot](#eglot)
+> - [Helix](#helix)
+> - [Kakoune](#kakoune)
+> - [Kate](#kate)
+> - [BBEdit](#bbedit)
+> - [VSCode or VSCodium](#vscode-or-vscodium)
+> - [Zed](#zed)
+> - [IntelliJ](#intellij)
+
+</small>
+
+
+## Pre-Built Examples
+
+The [`fish-lsp-language-clients`](https://github.com/ndonfris/fish-lsp-language-clients)
+repo has ready-to-use, testable configs:
+
+- [kickstart.nvim](https://github.com/ndonfris/fish-lsp-language-clients/tree/kickstart)
+- [native neovim LSP](https://github.com/ndonfris/fish-lsp-language-clients/tree/native-nvim)
+- [coc.nvim (complete)](https://github.com/ndonfris/fish-lsp-language-clients/tree/coc_example)
+- [coc.nvim (minimal)](https://github.com/ndonfris/fish-lsp-language-clients/tree/coc_minimal)
+
+## [Neovim](https://neovim.io/) (native LSP, `>= 0.8`)
+
+```lua
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'fish',
+  callback = function()
+    vim.lsp.start({
+      name = 'fish-lsp',
+      cmd = { 'fish-lsp', 'start' },
+    })
+  end,
+})
+```
+
+Or use [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#fish_lsp):
+
+```lua
+require('lspconfig').fish_lsp.setup({})
+```
+
+## [mason.nvim](https://github.com/mason-org/mason.nvim)
+
+```vim
+:MasonInstall fish-lsp
+```
+
+## [coc.nvim](https://github.com/neoclide/coc.nvim)
+
+Minimal `coc-settings.json`:
+
+```json
+{
+  "languageserver": {
+    "fish-lsp": {
+      "command": "fish-lsp",
+      "filetypes": ["fish"],
+      "args": ["start"]
+    }
+  }
+}
+```
+
+{/** 
+Full config with workspace paths:
+
+```json
+{
+  "languageserver": {
+    "fishlsp": {
+      "command": "fish-lsp",
+      "filetypes": ["fish"],
+      "args": ["start"],
+      "revealOutputChannelOn": "info",
+      "initializationOptions": {
+        "workspaces": {
+          "paths": {
+            "defaults": ["$HOME/.config/fish", "/usr/share/fish"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+*/}
+
+## [nvf](https://github.com/NotAShelf/nvf)
+
+```nix
+vim.languages.fish.lsp = {
+    enable = true;
+    servers = ["fish-lsp"];
+};
+```
+
+## [YouCompleteMe](https://github.com/ycm-core/youcompleteme)
+
+```vim
+let g:ycm_language_server =
+      \ [
+      \   {
+      \       'name': 'fish',
+      \       'cmdline': [ 'fish-lsp', 'start' ],
+      \       'filetypes': [ 'fish' ],
+      \   }
+      \ ]
+```
+
+## [vim-lsp](https://github.com/prabirshrestha/vim-lsp)
+
+```vim
+if executable('fish-lsp')
+  au User lsp_setup call lsp#register_server({
+      \ 'name': 'fish-lsp',
+      \ 'cmd': {server_info->['fish-lsp', 'start']},
+      \ 'allowlist': ['fish'],
+      \ })
+endif
+```
+
+## [Helix](https://docs.helix-editor.com/title-page.html)
+
+In `~/.config/helix/languages.toml`:
+
+```toml
+[[language]]
+name = "fish"
+language-servers = [ "fish-lsp" ]
+
+[language-server.fish-lsp]
+command = "fish-lsp"
+args = ["start"]
+## (Optional)
+# environment = { "fish_lsp_show_client_popups" = "false" }
+```
+
+## [Kakoune](https://kakoune.org/)
+
+For [kakoune-lsp](https://github.com/kakoune-lsp/kakoune-lsp), in `~/.config/kak-lsp/kak-lsp.toml`:
+
+```toml
+[language.fish]
+filetypes = ["fish"]
+command = "fish-lsp"
+args = ["start"]
+```
+
+## [Kate](https://kate-editor.org/)
+
+```json
+{
+  "servers": {
+    "fish": {
+      "command": ["fish-lsp", "start"],
+      "url": "https://github.com/ndonfris/fish-lsp",
+      "highlightingModeRegex": "^fish$"
+    }
+  }
+}
+```
+
+## [Emacs](https://emacsdocs.org/docs/emacs/The-Emacs-Editor)
+
+<a id="eglot"></a>Using [eglot](https://github.com/joaotavora/eglot) (built into Emacs 29+):
+
+```elisp
+(require 'eglot)
+(add-to-list 'eglot-server-programs
+  '(fish-mode . ("fish-lsp" "start")))
+(add-hook 'fish-mode-hook 'eglot-ensure)
+```
+
+<a id="lsp-mode"></a> Using [lsp-mode](https://github.com/emacs-lsp/lsp-mode):
+
+```elisp
+(require 'lsp-mode)
+(lsp-register-client
+ (make-lsp-client
+  :new-connection (lsp-stdio-connection '("fish-lsp" "start"))
+  :activation-fn (lsp-activate-on "fish")
+  :server-id 'fish-lsp))
+(add-hook 'fish-mode-hook #'lsp)
+```
+
+## [BBEdit](https://www.barebones.com/products/bbedit/)
+
+Follow the [`bbedit` branch instructions](https://github.com/ndonfris/fish-lsp-language-clients/blob/bbedit/BBEdit%20Install.md) 
+> [!Important]
+> Includes a `Fish.plist` for syntax highlighting.
+
+## [VSCode](https://code.visualstudio.com/) or [VSCodium](https://vscodium.com/)
+
+Install the extension and the server works out-of-the-box:
+
+- [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp)
+- [Open VSX (VSCodium)](https://open-vsx.org/extension/ndonfris/fish-lsp)
+- [Extension source](https://github.com/ndonfris/vscode-fish-lsp)
+
+> [!NOTE]
+> The extension includes its own copy of `fish-lsp`, so you don't need to install it separately.   
+> However, if you want to use a custom version of `fish-lsp`, this can be configured in the extension settings.
+
+## [Zed](https://zed.dev/)
+
+See [zed-fish-lsp](https://github.com/alysson-souza/zed-fish-lsp)
+
+## [IntelliJ](https://www.jetbrains.com/idea/)
+
+See [jetbrains-fish](https://github.com/tox-dev/jetbrains-fish?tab=readme-ov-file#installation)
+
+## Testing in Isolation
+
+```fish
+# 1. Clone an example config under a separate Neovim appname
+git clone https://github.com/ndonfris/fish-lsp-language-clients \
+  -b coc_example ~/.config/nvim-fish-lsp
+
+# 2. Aliases in config.fish
+alias nvimfish 'NVIM_APPNAME=nvim-fish-lsp nvim'
+alias nff      'nvimfish ~/.config/fish/config.fish'
+
+# 3. Launch
+nff
+# or 
+nvimfish ~/.config/fish/config.fish
+```
+
+> [!TIP]
+> Missing a client? [Open a PR](https://github.com/ndonfris/fish-lsp-language-clients/pulls)
+> with your configuration.
+
+
+{/* 
+## JSON Schema (editor autocomplete)
+
+Every `fish-lsp` option is published as a [JSON Schema](https://json-schema.org/),
+so a JSON-configured client can get **autocomplete, hover docs, and validation**
+while you edit its config. The schemas are served from `fish-lsp.dev`
+(CORS-enabled, so editors can fetch them directly):
+
+| Schema | Use it for |
+| --- | --- |
+| [`/schema/initialization-options.json`](/schema/initialization-options.json) | the LSP `initializationOptions` object (canonical) |
+| [`/schema/config.json`](/schema/config.json) | the raw `fish_lsp_*` config object |
+| [`/schema/vscode.json`](/schema/vscode.json) | VSCode `settings.json` (`fish-lsp.*` keys) |
+| [`/schema/vscode-contributes.json`](/schema/vscode-contributes.json) | self-contained `contributes.configuration` (extension `package.json`) |
+| [`/schema/coc.json`](/schema/coc.json) | coc.nvim `coc-settings.json` (`languageserver.fish-lsp`) |
+| [`/schema/env-defaults.json`](/schema/env-defaults.json) | the default values (`fish-lsp env --json`) |
+
+The `vscode.json` and `coc.json` schemas `$ref` the canonical
+`initialization-options.json`, so every option is defined in one place.
+
+[`/schema.json`](/schema.json) is a catalog listing all of them.
+
+**Inline `$schema`** — if your client reads config from a standalone JSON file,
+add a `$schema` key and most editors will validate/autocomplete it:
+
+```json
+{
+  "$schema": "https://fish-lsp.dev/schema/initialization-options.json",
+  "fish_lsp_log_level": "info",
+  "fish_lsp_enabled_handlers": ["complete", "hover"]
+}
+```
+
+**Editor association** — for editors that can't read an inline `$schema`, map a
+file glob to the schema URL instead. For example, in VSCode/VSCodium
+`settings.json`:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["fish-lsp.json"],
+      "url": "https://fish-lsp.dev/schema/initialization-options.json"
+    }
+  ]
+}
+```
+
+*/}

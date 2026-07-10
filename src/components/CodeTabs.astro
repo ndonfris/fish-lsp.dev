@@ -1,0 +1,326 @@
+---
+/**
+ * Tabbed code-snippet component (e.g. the homepage "Get running in seconds"
+ * install picker: pnpm | npm | yarn | brew | pacman).
+ *
+ * - Tabs and their content are fully data-driven via the `tabs` prop.
+ * - Each panel renders a copy-to-clipboard button (always visible — no hover
+ *   needed) using the shared `copy` icon.
+ * - The tab bar scrolls horizontally on narrow / mobile viewports so a long
+ *   list of tabs never overflows the page.
+ *
+ * Optional, opt-in extras (defaults preserve the original behavior):
+ * - Per-tab `lang` → renders that tab's `lines` as a Shiki-highlighted code
+ *   block instead of the default command styling.
+ * - `fullWidth` → tabs share the full width equally with centered, wrapping
+ *   labels (great for picking between a couple of command variants); disables
+ *   the horizontal-scroll arrow.
+ * - `scrollable={false}` → keep content-hugging tabs but drop the scroll arrow.
+ *
+ * Styled with Tailwind utilities + brand tokens from @theme in global.css.
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+export interface CodeTab {
+  /** Tab label, e.g. "pnpm". Also used to derive the panel id. */
+  label: string;
+  /**
+   * Snippet lines. Convention (default, command-style rendering):
+   *   "# ..."  → rendered as a dimmed comment
+   *   ""       → blank spacer line
+   *   anything → rendered as a command
+   *
+   * When `lang` is set the convention above is ignored and the lines are
+   * joined verbatim into a single Shiki-highlighted code block.
+   */
+  lines: string[];
+  /**
+   * Text copied to the clipboard. Defaults to the command lines only
+   * (comments and blank lines stripped), or the full joined lines when
+   * `lang` is set.
+   */
+  copy?: string;
+  /**
+   * Optional. When set, this tab's `lines` are joined with newlines and
+   * rendered as one Shiki-highlighted code block in the given language
+   * (e.g. "fish", "ts", "json") instead of the default command styling.
+   * The copy button is preserved; copy defaults to the full joined lines.
+   * Omit to keep the original per-line rendering.
+   */
+  lang?: string;
+}
+
+interface Props {
+  tabs: CodeTab[];
+  /** Unique base id so multiple instances on one page never collide. */
+  id?: string;
+  /**
+   * Shiki theme used for tabs that set `lang`. Defaults to the site's
+   * markdown theme so highlighted blocks match the rest of the docs.
+   */
+  codeTheme?: string;
+  /**
+   * When true, the tabs stretch to fill the full width of the component,
+   * sharing it equally with centered labels — ideal for offering a couple of
+   * command variants the user picks between. Labels that don't fit wrap onto
+   * multiple centered lines and shrink slightly on narrow viewports. Implies
+   * `scrollable: false` (the tabs always fit, so there's no overflow arrow).
+   */
+  fullWidth?: boolean;
+  /**
+   * Whether the tab bar scrolls horizontally with an overflow "→" arrow when
+   * the tabs outgrow the width. Defaults to true; set false to guarantee the
+   * tabs are always fully visible (no scroll affordance). Forced off by
+   * `fullWidth`.
+   */
+  scrollable?: boolean;
+  /** Accessible label for the tab bar. Defaults to "Options". */
+  ariaLabel?: string;
+}
+
+const {
+  tabs,
+  id = 'codetabs',
+  codeTheme = 'material-theme-ocean',
+  fullWidth = false,
+  scrollable = true,
+  ariaLabel = 'Options',
+} = Astro.props;
+
+// Full-width tabs always fit, so the horizontal-scroll arrow is never shown.
+const showScrollHint = scrollable && !fullWidth;
+
+const isComment = (l: string) => l.trimStart().startsWith('#');
+// A highlighted tab copies its full source; a command tab strips comments/blanks.
+const copyText = (t: CodeTab) =>
+  t.copy ??
+  (t.lang
+    ? t.lines.join('\n')
+    : t.lines.filter((l) => l.trim() && !isComment(l)).join('\n'));
+const panelId = (i: number) => `${id}-panel-${i}`;
+---
+
+<div data-codetabs>
+  <!-- Tab bar. Default: hugs its content and scrolls horizontally when the tabs
+       outgrow the viewport. fullWidth: tabs share the full width equally. -->
+  <div class="relative">
+    <div
+      role="tablist"
+      aria-label={ariaLabel}
+      class:list={[
+        'codetabs-bar flex',
+        fullWidth ? 'w-full' : 'overflow-x-auto',
+      ]}
+    >
+      {tabs.map((t, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${id}-tab-${i}`}
+          aria-controls={panelId(i)}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          class:list={[
+            'cursor-pointer border border-line bg-surface-2 px-[0.9rem] py-[0.4rem]',
+            'font-mono text-ink-muted transition-colors',
+            'first:rounded-tl-md last:rounded-tr-md [&:not(:first-child)]:-ml-px',
+            // Hover on a NON-selected tab: same blue hue but a light translucent
+            // fill, so it reads as "clickable" and stays clearly distinct from
+            // the solid-blue selected tab. The `:not([aria-selected=true])`
+            // guard keeps the selected tab on solid blue when hovered.
+            '[&:not([aria-selected=true]):hover]:bg-fish-periwinkle/15',
+            '[&:not([aria-selected=true]):hover]:text-fish-periwinkle',
+            '[&:not([aria-selected=true]):hover]:border-fish-periwinkle/40',
+            'aria-selected:bg-fish-blue aria-selected:text-white aria-selected:border-fish-blue',
+            'aria-selected:relative aria-selected:z-[1]',
+            fullWidth
+              // Equal share of the width, centered label that wraps and shrinks
+              // slightly on narrow viewports instead of overflowing/scrolling.
+              ? 'flex-1 min-w-0 flex items-center justify-center text-center leading-tight ' +
+                'whitespace-normal text-balance text-[clamp(0.68rem,2.4vw,0.8rem)]'
+              // Default: hug the label on one line, scroll if the bar overflows.
+              : 'flex-shrink-0 whitespace-nowrap text-[0.78rem]',
+          ]}
+        >{t.label}</button>
+      ))}
+    </div>
+
+    {showScrollHint && (
+      /* Overflow affordance: a → arrow shown at the right edge only when the
+         tabs overflow and aren't scrolled to the end. Tapping scrolls right. */
+      <button
+        type="button"
+        data-scroll-hint
+        aria-label="Show more tabs"
+        class="codetabs-hint absolute bottom-0 right-0 top-0 z-[2] items-center justify-end
+               bg-linear-to-r from-transparent to-surface-0 pl-8 pr-1"
+      >
+        <span
+          class="flex h-6 w-6 items-center justify-center rounded-full border border-line
+                 bg-surface-2 text-[0.7rem] text-fish-cyan shadow-sm"
+          aria-hidden="true"
+        >→</span>
+      </button>
+    )}
+  </div>
+
+  {tabs.map((t, i) => (
+    <div
+      role="tabpanel"
+      id={panelId(i)}
+      aria-labelledby={`${id}-tab-${i}`}
+      class:list={[
+        'relative rounded-b-md rounded-tr-md border border-line',
+        'font-mono text-[0.875rem] leading-relaxed text-ink',
+        // Command tabs draw their own surface/padding; `lang` tabs let the
+        // Shiki <pre> supply the background and fill the frame edge-to-edge
+        // (overflow-hidden clips the <pre> to the panel's rounded corners so
+        // there's a single border, not a box-inside-a-box).
+        t.lang ? 'overflow-hidden' : 'bg-surface-1 p-4 px-5',
+        { hidden: i !== 0 },
+      ]}
+    >
+      <button
+        type="button"
+        data-copy={copyText(t)}
+        aria-label="Copy to clipboard"
+        class="copy-btn absolute right-2 top-2 z-10 inline-flex cursor-pointer items-center
+               justify-center rounded-[5px] border border-line bg-surface-3 p-[0.25rem]
+               text-ink-muted transition-colors hover:border-fish-cyan hover:bg-surface-2
+               hover:text-fish-cyan"
+      >
+        <Icon name="copy" class="block h-[13px] w-[13px]" />
+      </button>
+
+      {t.lang ? (
+        /* The Shiki <pre> fills the panel; its padding-right (in the scoped
+           style below) leaves room for the copy button. */
+        <Code
+          code={t.lines.join('\n')}
+          lang={t.lang as any}
+          theme={codeTheme as any}
+          class="codetabs-code overflow-x-auto"
+        />
+      ) : (
+        /* pad the right so long commands don't slide under the copy button */
+        <div class="pr-8">
+          {t.lines.map((l) =>
+            l.trim() === '' ? (
+              <div class="h-2" aria-hidden="true"></div>
+            ) : isComment(l) ? (
+              <div class="italic text-ink-dim">{l}</div>
+            ) : (
+              <div class="text-fish-cyan">{l}</div>
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  /* The tab bar scrolls horizontally; hide its scrollbar since the → arrow
+     (below) is the overflow affordance. Swipe still works on touch. */
+  .codetabs-bar { scrollbar-width: none; }
+  .codetabs-bar::-webkit-scrollbar { display: none; }
+
+  /* Overflow arrow: hidden until the script detects horizontal overflow. */
+  .codetabs-hint { display: none; cursor: pointer; }
+  .codetabs-hint.is-visible { display: flex; }
+
+  /* Copied feedback (toggled by the script below) */
+  .copy-btn.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* Shiki-highlighted tabs (tabs that set `lang`): the <Code> pre is the panel
+     surface. Drop its default margin/radius (the panel's border + overflow clip
+     are the single frame) and reserve room on the right for the copy button.
+     The higher-specificity `.prose pre.codetabs-code` selector is needed to
+     beat the global `.prose pre` rule (border/background/padding/lang-label)
+     when CodeTabs is used inside docs prose. */
+  :global(.codetabs-code),
+  :global(.prose pre.codetabs-code) {
+    margin: 0;
+    /* Horizontal padding matches CommandPrompt / normal codeblocks (1rem); the
+       copy button still lands in the top whitespace, not on the code. */
+    padding: 1.25rem 1rem;
+    border: 0;
+    border-radius: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  :global(.prose pre.codetabs-code)::before {
+    content: none;
+  }
+  /* Desktop: reserve right space so the absolute copy button never covers code,
+     even at the far end of a horizontal scroll (mobile hides the button). */
+  @media (min-width: 641px) {
+    :global(.codetabs-code),
+    :global(.prose pre.codetabs-code) {
+      padding-right: 2.5rem;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-codetabs]').forEach((root) => {
+    const tabs = root.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    const panels = root.querySelectorAll<HTMLElement>('[role="tabpanel"]');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('aria-controls');
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        panels.forEach((p) => p.classList.toggle('hidden', p.id !== target));
+      });
+    });
+
+    // ── Horizontal-overflow arrow ──────────────────────────────────
+    const bar = root.querySelector<HTMLElement>('.codetabs-bar');
+    const hint = root.querySelector<HTMLElement>('[data-scroll-hint]');
+    if (bar && hint) {
+      const update = () => {
+        const overflowing = bar.scrollWidth - bar.clientWidth > 1;
+        const atEnd = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 1;
+        hint.classList.toggle('is-visible', overflowing && !atEnd);
+      };
+      hint.addEventListener('click', () =>
+        bar.scrollBy({ left: bar.clientWidth * 0.7, behavior: 'smooth' }),
+      );
+      bar.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      window.addEventListener('load', update);
+      update();
+    }
+
+    root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') ?? '');
+          btn.classList.add('is-copied');
+          window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      });
+    });
+
+    // ── GitHub-style: hide the copy button while a Shiki panel scrolls ──
+    // horizontally, restore it shortly after scrolling stops.
+    root.querySelectorAll<HTMLElement>('pre.codetabs-code').forEach((pre) => {
+      const btn = pre
+        .closest<HTMLElement>('[role="tabpanel"]')
+        ?.querySelector<HTMLElement>('.copy-btn');
+      if (!btn) return;
+      let scrollTimer: number;
+      pre.addEventListener('scroll', () => {
+        btn.classList.add('is-scrolling');
+        window.clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(() => btn.classList.remove('is-scrolling'), 350);
+      }, { passive: true });
+    });
+  });
+</script>

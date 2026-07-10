@@ -1,0 +1,501 @@
+@import 'tailwindcss';
+/* GitHub-style alerts (`> [!NOTE]` …) — structural styles from the plugin.
+   Colors + theming live in the "GitHub alerts" block lower in this file. */
+@import 'remark-github-alerts/styles/github-base.css';
+
+/* Nerd Font icon subset — only the glyphs `fish-lsp --dump-symbol-tree` emits
+   (function U+F0295, variable U+EA88, event U+F0675). `unicode-range` scopes it
+   to exactly those codepoints, so it's used ONLY as a fallback for the icons
+   (the mono font supplies everything else). ~1 KB. */
+@font-face {
+  font-family: 'Symbols Nerd Subset';
+  src: url('/fonts/symbols-nerd-subset.woff2') format('woff2');
+  font-display: swap;
+  unicode-range: U+EA88, U+F0295, U+F0675;
+}
+
+/* ─── Tailwind theme tokens ───────────────────────────────────────
+   Registers the brand palette as utilities:
+     accents  → bg-fish-periwinkle, text-fish-cyan, border-fish-cyan/30 …
+     surfaces → bg-surface-1 (0–3)
+     text     → text-ink, text-ink-muted, text-ink-dim
+     border   → border-line
+   Prefer these utilities over hand-written scoped CSS. The :root vars
+   below remain for the scoped styles not yet migrated.                */
+@theme {
+  /* True blue — reserved for large solid fills (footer, button backgrounds)
+     where the periwinkle read as too purple. */
+  --color-fish-blue:     rgb(37, 99, 235);    /* #2563eb (blue-600) — hue ~221°, matches the material-ocean shiki blue #82aaff */
+  --color-fish-blue-dim: rgb(29, 78, 216);    /* #1d4ed8 (blue-700, button hover) */
+  /* Periwinkle — the brand accent for text, links, logo, outlines, hovers. */
+  --color-fish-periwinkle:     rgb(78, 108, 250);   /* #4e6cfa */
+  --color-fish-periwinkle-dim: rgb(58, 85, 224);    /* #3a55e0 */
+  --color-fish-cyan:     rgb(100, 210, 255);  /* #64d2ff */
+  --color-fish-green:    rgb(50, 213, 131);   /* #32d583 */
+  --color-fish-yellow:   rgb(255, 209, 102);  /* #ffd166 */
+  --color-fish-red:      rgb(255, 107, 107);  /* #ff6b6b */
+  --color-fish-white:    rgb(232, 236, 248);  /* #e8ecf8 */
+  --color-fish-alt-white: rgb(175, 175, 255); /* #afafff */
+
+  --color-surface-0: rgb(10, 13, 20);         /* #0a0d14 */
+  --color-surface-1: rgb(15, 19, 32);         /* #0f1320 */
+  --color-surface-2: rgb(20, 24, 41);         /* #141829 */
+  --color-surface-3: rgb(28, 34, 54);         /* #1c2236 */
+
+  --color-ink:       rgb(232, 236, 248);      /* #e8ecf8; */
+  --color-ink-muted: rgb(122, 138, 180);      /* #7a8ab4; */
+  --color-ink-dim:   rgb(74, 85, 120);        /* #4a5578; */
+
+  --color-line: rgba(78, 108, 250, 0.2);
+
+  /* Font-size utilities (Tailwind `text-*`). `--text-xs` restates Tailwind's
+     default so the small end of the scale is explicit; `--text-xxs` adds a new
+     extra-small step (utility `text-xxs`) for dense samples like inline table
+     code. Each also sets its paired `…--line-height`. */
+  --text-xs:   0.75rem;
+  --text-xs--line-height:  calc(1 / 0.75);
+  --text-xxs:  0.65rem;
+  --text-xxs--line-height: calc(0.9 / 0.65);
+
+  --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
+               'Source Code Pro', ui-monospace, monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* terminal cursor blink → `animate-blink` */
+  --animate-blink: blink 1s step-end infinite;
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+
+  /* footer wave drift → `animate-wave` (override duration per layer) */
+  --animate-wave: wave-anim 10s linear infinite;
+  @keyframes wave-anim {
+    0%, 100% { transform: translateX(0);   }
+    50%      { transform: translateX(-18%); }
+  }
+}
+
+/* ─── Design tokens ───────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* True blue — large solid fills only (footer, button backgrounds). */
+    --fish-blue:     #2563eb;
+    --fish-blue-dim: #1d4ed8;
+    /* Periwinkle — brand accent for text, links, logo, outlines, hovers. */
+    --fish-periwinkle:     #4e6cfa;
+    --fish-periwinkle-dim: #3a55e0;
+    --fish-periwinkle-glow: rgba(78, 108, 250, 0.2);
+    --fish-cyan:     #64d2ff;
+    --fish-green:    #32d583;
+    --fish-yellow:   #ffd166;
+    --fish-red:      #ff6b6b;
+    --fish-white:    #e8ecf8;
+    --fish-alt-white: #afafff;
+    --fish-primary: #e8ecf8; /* text-primary */
+
+    --bg-0:  #0a0d14;
+    --bg-1:  #0f1320;
+    --bg-2:  #141829;
+    --bg-3:  #1c2236;
+
+    --border:       rgba(78, 108, 250, 0.2);
+    --text-primary: #e8ecf8;
+    --text-muted:   #7a8ab4;
+    --text-dim:     #4a5578;
+
+    --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
+                 'Source Code Pro', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* ─── Base reset ──────────────────────────────────────────────────
+   In @layer base so Tailwind utilities (a later cascade layer) can override
+   element defaults — e.g. `text-white` on an <a> beats `a { color: … }`.
+   Without this the unlayered `a {…}` rule wins over utilities. */
+@layer base {
+  html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg-0);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* The mobile header is `position: fixed` (see Header.astro) — reserve its
+     height so page content isn't hidden underneath it. */
+  @media (max-width: 640px) {
+    body { padding-top: 56px; }
+  }
+
+  a             { color: var(--fish-periwinkle); text-decoration: none; }
+  a:hover       { color: var(--fish-cyan); }
+  code, pre     { font-family: var(--font-mono); }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--fish-periwinkle-dim); }
+}
+
+/* ─── Prose (rendered markdown) ──────────────────────────────── */
+/* Width is governed by the centered <Container> (max-w-3xl); prose fills it. */
+.prose {
+  max-width: 100%;
+  color: var(--text-primary);
+}
+
+.prose h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--fish-periwinkle);
+  letter-spacing: -0.02em;
+}
+
+.prose h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2.5rem 0 0.75rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.5rem;
+  color: var(--fish-cyan);
+}
+
+.prose p   { margin: 0 0 1rem; }
+.prose ul,
+.prose ol  { margin: 0.5rem 0 1rem 1.5rem; }
+.prose li  { margin: 0.25rem 0; }
+
+.prose a {
+  color: var(--fish-periwinkle);
+  border-bottom: 1px solid rgba(78,108,250,0.3);
+  transition: color 0.15s, border-color 0.15s;
+}
+.prose a:hover {
+  color: var(--fish-cyan);
+  border-color: rgba(100,210,255,0.5);
+}
+
+.prose code {
+  background: var(--bg-3);
+  color: var(--fish-cyan);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  border: 1px solid var(--border);
+  /* Keep an inline-code chip intact: never break it mid-word (e.g. `--check`
+     → `--`/`check`). It moves to the next line as a unit (wraps before it). */
+  white-space: nowrap;
+}
+
+.prose pre {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  /* Horizontal padding matches CommandPrompt's px-4 (1rem). */
+  padding: 1.25rem 1rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  position: relative;
+}
+
+.prose pre::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.5rem; right: 0.75rem;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  /* Code inside a block keeps the <pre>'s whitespace handling, not the inline
+     `nowrap` above (which would collapse indentation). */
+  white-space: inherit;
+}
+
+/* `<pre class="plain">` mirrors inline-code styling — the same `--bg-3` surface,
+   cyan text, thin border and 4px radius as `.prose code` — instead of the full
+   code-block theme, for a multi-line sample inside a table cell. It shrinks to
+   fit its content, drops the lang label, and the DocsLayout enhancer skips it
+   (its selector excludes `.plain`), so it gets no copy button or wrapper. */
+.prose pre.plain {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3em 0.5em;
+  margin: 0.25rem 0;
+  /* Without this the block inherits the body's loose 1.7, spreading the <br/>
+     lines far apart. Tighten to a code-appropriate leading. */
+  line-height: 1.4;
+}
+.prose pre.plain::before { content: none; }
+.prose pre.plain code {
+  color: var(--fish-cyan);
+  font-size: var(--text-xxs);
+  font-weight: 300;
+  letter-spacing: -0.025em;   /* tracking-tighter */
+  /* JetBrains Mono (like Cascadia Code / Fira Code) is a ligature font — without
+     this it joins `--`, `->`, `==` etc. into single connected glyphs. Render
+     each character literally. */
+  font-variant-ligatures: none;
+}
+
+/* ─── Mermaid diagrams ───────────────────────────────────────── */
+.prose .mermaid {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.prose .mermaid::before { content: none; }
+.prose .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ─── Code block + copy button (wrapper added by DocsLayout script) ── */
+.prose .code-block { position: relative; margin: 1.25rem 0; }
+.prose .code-block > pre { margin: 0; }
+
+/* Copy buttons: hidden on mobile (per request). On desktop, reserve right-hand
+   space on code that carries an absolute copy button so text is never covered —
+   including at the far end of a horizontal scroll (clearance ≈ button width). */
+@media (max-width: 640px) {
+  .copy-btn,
+  .cmd-copy { display: none !important; }
+}
+@media (min-width: 641px) {
+  .prose .code-block > pre { padding-right: 2.5rem; }
+}
+
+/* CodeTabs / CodeFile / CommandPrompt / CommandOutput have no intrinsic prose
+   margin, so give them the same block spacing as code blocks — otherwise the
+   next paragraph sits flush. */
+.prose [data-codetabs],
+.prose [data-codefile],
+.prose [data-command-prompt],
+.prose [data-command-details],
+.prose [data-command-seq],
+.prose [data-xprompt] { margin: 1.25rem 0; }
+
+/* Command-component copy buttons: dim by default (like the code-block copy
+   button), full-strength on hover/focus/after copying. */
+.cmd-copy { opacity: 0.35; }
+.cmd-copy:hover,
+.cmd-copy:focus-visible,
+.cmd-copy.is-copied { opacity: 1; }
+@media (hover: none) { .cmd-copy { opacity: 0.55; } }
+
+/* Shared Shiki command block for CommandPrompt / CommandOutput: sits inline
+   with the prompt glyph and is transparent so the terminal frame background
+   shows through. The `.prose pre.cmd-code` selector beats the global
+   `.prose pre` rule (border/background/padding/lang-label) in docs prose. */
+.cmd-code,
+.prose pre.cmd-code {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.prose pre.cmd-code::before { content: none; }
+
+/* Commands never wrap — wrapping would break at hyphens (splitting shell tokens
+   like `--check` into `--` / `check`), which CSS can't cleanly prevent. Long
+   lines scroll horizontally instead. The copy button is absolute on mobile, so
+   the command gets the full width and most lines fit without scrolling. */
+.cmd-code,
+.prose pre.cmd-code {
+  white-space: pre;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.4rem; right: 0.4rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.25rem;
+  cursor: pointer;
+  opacity: 0.35; /* low so the code behind stays visible; full on hover */
+  transition: opacity 0.12s, color 0.12s, border-color 0.12s, background 0.12s;
+}
+.copy-btn svg { display: block; width: 13px; height: 13px; }
+.prose .code-block:hover .copy-btn,
+.copy-btn:focus-visible,
+.copy-btn:hover { opacity: 1; }
+.copy-btn:hover { color: var(--fish-cyan); border-color: var(--fish-cyan); background: var(--bg-2); }
+.copy-btn.is-copied { color: var(--fish-green); border-color: var(--fish-green); opacity: 1; }
+/* Touch devices have no hover — keep it partly visible */
+@media (hover: none) { .copy-btn { opacity: 0.55; } }
+/* GitHub-style: hide the copy button while the code scrolls horizontally,
+   restore it once scrolling stops (toggled by the scripts). `!important`
+   beats the `:hover`/`is-copied` opacity rules during the scroll. */
+.copy-btn.is-scrolling { opacity: 0 !important; pointer-events: none; }
+
+.prose blockquote {
+  border-left: 3px solid var(--fish-periwinkle);
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-2);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+/* `display: block` + `overflow-x: auto` turns the table itself into the scroll
+   container: it sizes to its content (`width: max-content`) but is capped at the
+   prose width (`max-width: 100%`), so a wide table scrolls horizontally on its
+   own instead of forcing the whole page wider than the viewport (which broke the
+   mobile layout and the footer/wave seam). */
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+  margin: 1.25rem 0;
+}
+
+.prose th,
+.prose td {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.prose th {
+  background: var(--bg-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.prose img {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  max-width: 100%;
+  margin: 1.5rem 0;
+}
+
+/* SVG terminal screenshots (freeze output) are vector — stretch to fill the
+   prose column instead of sitting at their small captured intrinsic size.
+   Freeze already draws its own rounded window chrome + border, so drop the
+   generic .prose img border/radius to avoid a double border. */
+.prose img[src$='.svg'] {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  /* margin: -3.5rem 0; */
+  /* padding-top: 0.25rem; */
+  /* padding-bottom: 1rem; */
+}
+
+.prose strong { font-weight: 900; }
+.prose em     { font-style: italic; font-weight: 400; opacity: 95%;  }
+.prose hr     { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+/* ─── GitHub alerts (remark-github-alerts) ───────────────────────
+   Base structure comes from `github-base.css` (imported at top). Here we
+   define the accent colors (unconditionally dark — the site has no light
+   mode) and add a tinted, rounded surface to match the site's blockquotes. */
+:root {
+  --color-note:      var(--fish-periwinkle);
+  --color-tip:       var(--fish-green);
+  --color-important: #a371f7;
+  --color-warning:   var(--fish-yellow);
+  --color-caution:   var(--fish-red);
+}
+.prose .markdown-alert {
+  margin: 1.5rem 0;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background: var(--bg-2);
+}
+.prose .markdown-alert .markdown-alert-title {
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+/* Faint accent wash per kind (border-left + title color come from base CSS) */
+.prose .markdown-alert-note      { background: color-mix(in srgb, var(--color-note)      8%, var(--bg-2)); }
+.prose .markdown-alert-tip       { background: color-mix(in srgb, var(--color-tip)       8%, var(--bg-2)); }
+.prose .markdown-alert-important { background: color-mix(in srgb, var(--color-important) 8%, var(--bg-2)); }
+.prose .markdown-alert-warning   { background: color-mix(in srgb, var(--color-warning)   8%, var(--bg-2)); }
+.prose .markdown-alert-caution   { background: color-mix(in srgb, var(--color-caution)   8%, var(--bg-2)); }
+
+/* ─── Lists ───────────────────────────────────────────────────── */
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+/** ─── List marker colour ───────────────────────────────────── */
+ul li::marker {
+  color: color-mix(in srgb, rgba(175, 175, 255, .8), rgb(232, 236, 248, .9));
+}
+
+ol li::marker {
+  color: color-mix(in srgb, rgba(175, 175, 255, .8), rgb(232, 236, 248, .9));
+  text-shadow: 0 0 1px rgba(175, 175, 255, .8);
+  font-weight: 800;
+}
+
+/* ─── Syntax token colours (used in terminal demos) ──────────── */
+.token-cmd     { color: #64d2ff; }
+.token-flag    { color: #ffd166; }
+.token-str     { color: #a8ff78; }
+.token-var     { color: #f78fb3; }
+.token-comment { color: #4a5578; font-style: italic; }

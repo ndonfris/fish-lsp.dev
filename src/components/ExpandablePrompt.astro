@@ -1,0 +1,241 @@
+---
+/**
+ * A slot-based expandable command prompt — one or more command/output pairs in
+ * a single terminal frame. Each command is Shiki-highlighted (fish by default);
+ * each output expands inline below its command when clicked.
+ *
+ * Single pair:
+ *   <ExpandablePrompt>
+ *     <Fragment slot="cmd">fish-lsp --help</Fragment>
+ *     <Fragment slot="output">usage: fish-lsp [options]...</Fragment>
+ *   </ExpandablePrompt>
+ *
+ * Multiple pairs — number the slots (cmd/output, cmd2/output2, cmd3/output3, …):
+ *   <ExpandablePrompt>
+ *     <Fragment slot="cmd">fish-lsp --help</Fragment>
+ *     <Fragment slot="output">…</Fragment>
+ *     <Fragment slot="cmd2">fish-lsp info</Fragment>
+ *     <Fragment slot="output2">…</Fragment>
+ *   </ExpandablePrompt>
+ *
+ * - The first command may also be the default (unnamed) children.
+ * - A command with no matching `output*` slot renders as a plain (non-clickable)
+ *   row. `open` starts every pair expanded (like <details open>).
+ * - Preserve output formatting with a fenced code block (```text …```) — see
+ *   the docs; it stays literal (no smartypants / no <code> conversion).
+ */
+import { Icon } from 'astro-icon/components';
+import { Code } from 'astro:components';
+
+interface Props {
+  /** Prompt glyph before each command. Defaults to "❯". */
+  prompt?: string;
+  /** Start every pair expanded (like `<details open>`). */
+  open?: boolean;
+  /** Word used in the disclosure cue ("show <label>"). Defaults to "output". */
+  label?: string;
+  /** Shiki language for the commands. Defaults to "fish". */
+  lang?: string;
+  /** Shiki theme; defaults to the site's markdown theme. */
+  codeTheme?: string;
+}
+
+const {
+  prompt = '❯',
+  open = false,
+  label = 'output',
+  lang = 'fish',
+  codeTheme = 'material-theme-ocean',
+} = Astro.props;
+
+// A slotted command is rendered to plain text so it can be Shiki-highlighted.
+// Block boundaries become newlines; entities + MDX "smartypants" are undone so
+// shell commands stay literal (-- not en-dash, straight quotes, ...).
+const decode = (s: string) =>
+  s
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#(?:39|x27);/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    // This project's MDX smartypants renders `--` as an em-dash, so map both
+    // em- and en-dashes back to `--` for literal shell flags.
+    .replace(/[—–]/g, '--')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/…/g, '...')
+    .trim();
+
+const baseId = Math.random().toString(36).slice(2, 8);
+
+// Gather (command, output) pairs from numbered slots: cmd/output, cmd2/output2…
+interface Pair {
+  cmdText: string;
+  hasOut: boolean;
+  outputHtml: string;
+  id: string;
+}
+const pairs: Pair[] = [];
+for (let i = 1; i <= 50; i++) {
+  const cmdName = i === 1 ? 'cmd' : `cmd${i}`;
+  const outName = i === 1 ? 'output' : `output${i}`;
+  const useDefault = i === 1 && !Astro.slots.has('cmd') && Astro.slots.has('default');
+  if (!Astro.slots.has(cmdName) && !useDefault) break;
+  const cmdText = decode(await Astro.slots.render(useDefault ? 'default' : cmdName));
+  const hasOut = Astro.slots.has(outName);
+  const outputHtml = hasOut ? await Astro.slots.render(outName) : '';
+  pairs.push({ cmdText, hasOut, outputHtml, id: `xout-${baseId}-${i}` });
+}
+---
+
+<div data-xprompt class="overflow-hidden rounded-md border border-line bg-surface-1">
+  {pairs.map((p, idx) => (
+    <div data-xstep data-open={p.hasOut ? (open ? 'true' : 'false') : undefined}
+         class:list={[{ 'border-t border-line': idx > 0 }]}>
+      {/* Command row (a toggle when it has output). The output expands out
+          below it; the dotted "hide output" cue sits under the output. */}
+      <div
+        data-xtoggle={p.hasOut ? '' : undefined}
+        role={p.hasOut ? 'button' : undefined}
+        tabindex={p.hasOut ? '0' : undefined}
+        aria-expanded={p.hasOut ? (open ? 'true' : 'false') : undefined}
+        aria-controls={p.hasOut ? p.id : undefined}
+        aria-label={p.hasOut ? 'Toggle output' : undefined}
+        class:list={[
+          'flex items-start gap-2.5 px-4 py-2 font-mono',
+          { 'cursor-pointer hover:bg-surface-2/50': p.hasOut },
+        ]}
+      >
+        <span class="shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+        <Code code={p.cmdText} lang={lang as any} theme={codeTheme as any} class="cmd-code min-w-0 flex-1" />
+
+        <button
+          type="button"
+          data-copy={p.cmdText}
+          aria-label="Copy command"
+          class="cmd-copy inline-flex shrink-0 cursor-pointer select-none items-center justify-center
+                 rounded-[5px] border border-line bg-surface-3 p-[0.25rem] text-ink-muted
+                 transition-colors hover:border-fish-cyan hover:bg-surface-2 hover:text-fish-cyan"
+        >
+          <Icon name="copy" class="block h-[13px] w-[13px]" />
+        </button>
+      </div>
+
+      {p.hasOut && (
+        <div
+          id={p.id}
+          data-xoutput
+          class:list={[
+            'xoutput px-4 pb-2.5 pt-0.5 font-mono text-[0.72rem] leading-tight tracking-tight text-ink-muted break-words',
+            { hidden: !open },
+          ]}
+          set:html={p.outputHtml}
+        />
+      )}
+
+      {p.hasOut && (
+        <div
+          data-xcue
+          class="xhint flex cursor-pointer items-center justify-center gap-1.5 border-t border-dotted
+                 border-ink-dim/70 py-1 text-xs font-semibold uppercase tracking-tight
+                 text-ink-dim transition-colors hover:text-fish-cyan"
+        >
+          <span class="cmd-when-closed">show {label}</span>
+          <span class="cmd-when-open">hide {label}</span>
+          <span data-chevron aria-hidden="true" class="text-[0.7rem] leading-none transition-transform">▾</span>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  /* Swap the cue label + flip the chevron based on each pair's open state
+     (tracked per step, since the cue is a sibling of the command-row toggle). */
+  .cmd-when-open { display: none; }
+  [data-xstep][data-open='true'] .cmd-when-open { display: inline; }
+  [data-xstep][data-open='true'] .cmd-when-closed { display: none; }
+  [data-xstep][data-open='true'] [data-chevron] { transform: rotate(180deg); }
+  [data-xstep][data-open='true'] .xhint { color: var(--fish-cyan); }
+
+  /* Copied feedback (toggled by the script below) */
+  .cmd-copy.is-copied {
+    color: var(--fish-green);
+    border-color: var(--fish-green);
+  }
+
+  /* Screenshots / images in the output stay responsive. */
+  .xoutput :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+  /* Collapse the outer margins of slotted output (e.g. an MDX <p>) so there's
+     no big gap above the first line or below the last line (before the cue). */
+  .xoutput > :global(:first-child) { margin-top: 0; }
+  .xoutput > :global(:last-child) { margin-bottom: 0; }
+
+  /* A fenced code block used as output (```text …```) renders as clean,
+     preformatted terminal text — no nested border/background/lang-label, and
+     the same small/tight sizing as plain output. */
+  .xoutput :global(pre) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent !important;
+    overflow-x: auto;
+  }
+  .xoutput :global(pre)::before { content: none; }
+  .xoutput :global(pre),
+  .xoutput :global(pre code) {
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-xprompt]').forEach((root) => {
+    root.querySelectorAll<HTMLElement>('[data-xstep]').forEach((step) => {
+      const toggle = step.querySelector<HTMLElement>('[data-xtoggle][role="button"]');
+      const cue = step.querySelector<HTMLElement>('[data-xcue]');
+      const output = step.querySelector<HTMLElement>('[data-xoutput]');
+      if (toggle && output) {
+        const setOpen = (next: boolean) => {
+          step.dataset.open = String(next);
+          toggle.setAttribute('aria-expanded', String(next));
+          output.classList.toggle('hidden', !next);
+        };
+        const flip = () => setOpen(step.dataset.open !== 'true');
+        toggle.addEventListener('click', flip);
+        cue?.addEventListener('click', flip);
+        toggle.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            flip();
+          }
+        });
+      }
+
+      // Copy this command without toggling.
+      const copyBtn = step.querySelector<HTMLButtonElement>('[data-copy]');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          try {
+            await navigator.clipboard.writeText(copyBtn.getAttribute('data-copy') ?? '');
+            copyBtn.classList.add('is-copied');
+            window.setTimeout(() => copyBtn.classList.remove('is-copied'), 1500);
+          } catch {
+            /* clipboard unavailable */
+          }
+        });
+      }
+    });
+  });
+</script>

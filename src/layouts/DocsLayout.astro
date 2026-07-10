@@ -1,0 +1,137 @@
+---
+import '@theme/global.css';
+import BaseHead   from '@components/BaseHead.astro';
+import Header     from '@components/Header.astro';
+import Container  from '@components/Container.astro';
+import Footer     from '@components/Footer.astro';
+import DocsPager  from '@components/DocsPager.astro';
+import { Icon } from 'astro-icon/components';
+import type { PageFrontmatter } from '@typedefs/content';
+
+interface Props {
+  frontmatter: PageFrontmatter;
+  /** Repo-relative source path, forwarded to the footer's edit link. */
+  editPath?: string;
+}
+
+const { frontmatter, editPath } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <BaseHead title={`${frontmatter.title} — fish-lsp`} description={frontmatter.description} />
+</head>
+<body>
+
+  <Header variant="docs" />
+
+  <div class="docs-body">
+
+    <!-- Sidebar nav + hamburger drawer now live in HamburgerMenu.astro (in the Header) -->
+
+    <!-- ── Main content: centered container; drawer floats over the margin ── -->
+    <main class="docs-main">
+      <Container class="max-w-4xl">
+        {/* data-pagefind-body scopes the search index to docs content only
+            (the homepage and chrome are excluded). */}
+        <article class="prose" data-pagefind-body data-pagefind-meta={`title:${frontmatter.title}`}>
+          <slot />
+        </article>
+
+        <DocsPager currentSlug={frontmatter.slug} />
+      </Container>
+    </main>
+  </div>
+
+  <Footer editPage editPath={editPath} />
+
+  <!-- Server-rendered copy icon, cloned into each code block by the script below -->
+  <template id="copy-icon-tmpl"><Icon name="copy" /></template>
+
+</body>
+</html>
+
+<script>
+  // ── Mermaid diagrams (```mermaid fences → <pre class="mermaid">) ──
+  import mermaid from 'mermaid';
+  if (document.querySelector('.prose .mermaid')) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose',
+      fontFamily: "'JetBrains Mono', monospace",
+    });
+    mermaid.run({ querySelector: '.prose .mermaid' });
+  }
+</script>
+
+<script>
+  // Wrap each Shiki code block and add an icon copy-to-clipboard button.
+  const iconTmpl = document.getElementById('copy-icon-tmpl') as HTMLTemplateElement | null;
+  const copyIcon = iconTmpl?.innerHTML ?? '';
+
+  // `.plain` blocks opt out of the code-block theme (inline-code styling, no
+  // copy button), so they're excluded from the wrapper/button enhancer.
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre:not(.mermaid):not(.plain)')) {
+    // CodeTabs / CodeFile / CommandPrompt render their own frame around
+    // highlighted blocks; skip their Shiki <pre>s so they aren't
+    // double-wrapped/double-buttoned.
+    if (pre.closest('[data-codetabs], [data-codefile], [data-command-prompt], [data-command-details], [data-command-seq], [data-xprompt]')) continue;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+    pre.replaceWith(wrapper);
+    wrapper.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.innerHTML = copyIcon;
+    btn.setAttribute('aria-label', 'Copy code to clipboard');
+    wrapper.appendChild(btn);
+
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code');
+      const text = (code?.textContent ?? pre.textContent ?? '').replace(/\n$/, '');
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add('is-copied');
+        window.setTimeout(() => btn.classList.remove('is-copied'), 1500);
+      } catch { /* clipboard unavailable */ }
+    });
+
+    // GitHub-style: hide the copy button while scrolling the code horizontally,
+    // restore it shortly after scrolling stops.
+    let scrollTimer: number;
+    pre.addEventListener('scroll', () => {
+      btn.classList.add('is-scrolling');
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => btn.classList.remove('is-scrolling'), 350);
+    }, { passive: true });
+  }
+</script>
+
+<style>
+/* ── Layout shell ─────────────────────────────────────────────── */
+/* The sticky header lives in src/components/Header.astro */
+html, body { margin: 0; width: 100%; }
+
+/* ── Body (drawer + main share one scroll container) ──────────── */
+.docs-body { position: relative; min-height: calc(100vh - 56px); }
+
+/* The nav drawer + backdrop now live in src/components/HamburgerMenu.astro */
+
+/* ── Main: full width; inner content is centered by <Container> ──
+   (mx-auto max-w-4xl). The drawer floats over the left margin. */
+.docs-main {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 3rem 0 4rem;
+}
+
+@media (max-width: 768px) {
+  .docs-main { padding: 2rem 0; }
+}
+
+/* The footer is the shared src/components/Footer.astro (<Footer editPage />) */
+</style>

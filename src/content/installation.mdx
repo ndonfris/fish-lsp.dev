@@ -1,0 +1,108 @@
+---
+title: Installation
+description: Install fish-lsp via a package manager, a standalone binary, or from source
+slug: installation
+order: 2
+section: Getting Started
+---
+import CodeTabs from '@components/CodeTabs.astro';
+import MoreHelp from '@components/MoreHelp.astro';
+
+# Installation
+
+`fish-lsp` requires **Node.js `>= 20`** (the project is developed against
+`node@22.14.0`). Some language clients — e.g. the
+[VSCode](https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp) /
+[VSCodium](https://open-vsx.org/extension/ndonfris/fish-lsp) extension — bundle
+the server for you, so manual installation isn't always required.
+
+For everyone else, pick one of the methods below.
+
+## Package Manager
+
+Pick your package manager. Stability across package managers can vary — if one
+gives you trouble, try another method.
+
+<CodeTabs
+id="install-docs"
+tabs={[
+    { label: 'npm',    lines: ['# install globally', 'npm install -g fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'yarn',   lines: ['# install globally', 'yarn global add fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'pnpm',   lines: ['# install globally', 'pnpm add -g fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'brew',   lines: ['# install globally', 'brew install fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'pacman', lines: ['# install globally', 'pacman -S fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'nix',    lines: ['# install globally', 'nix profile install nixpkgs#fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'conda',  lines: ['# install globally', 'conda install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'mamba',  lines: ['# install globally', 'mamba install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+        { label: 'curl',   lines: ['# install globally', 'curl -fsSL https://fish-lsp.dev/install.fish | fish', '', '# verify', 'fish-lsp info'] },
+]}
+/>
+
+> [!NOTE]
+> Package availability and freshness vary by ecosystem. The npm registry always
+> has the latest release.
+
+## Standalone Binary
+
+Download the pre-built standalone binary directly from the GitHub releases — no
+Node.js or package manager required.
+
+```fish
+# Download the latest standalone binary
+curl -L https://github.com/ndonfris/fish-lsp/releases/latest/download/fish-lsp.standalone \
+  -o ~/.local/bin/fish-lsp
+
+# Make it executable
+chmod +x ~/.local/bin/fish-lsp
+```
+
+> [!IMPORTANT]
+> Ensure `~/.local/bin` is in your `$PATH` so the `fish-lsp` command is found.
+
+## Build from Source
+
+{/* The most portable method.  */}
+
+> [!WARNING]
+> Recommended toolchain: `yarn@1.22.22`, `node@22.14.0`, `fish@4.0.8`.
+
+```fish
+git clone https://github.com/ndonfris/fish-lsp && cd fish-lsp
+yarn install && yarn build   # links ./dist/fish-lsp into your `yarn global bin` $PATH
+```
+
+<MoreHelp text="Need more detail?" href="/docs/building-from-source" linkText="See the full building from source guide →" />
+
+## Shell Completions
+
+Generate fish completions for the `fish-lsp` command itself:
+
+```fish
+fish-lsp complete > ~/.config/fish/completions/fish-lsp.fish
+```
+
+> [!NOTE]
+> Completions are needed for package-manager installs. Source builds write them
+> automatically during `yarn build`.
+
+## Verify the Installation
+
+```fish
+# show the help output
+fish-lsp --help
+
+# show build version, paths, and health
+fish-lsp info
+
+# verify the server indexes & parses your fish files correctly during startup
+fish-lsp info --time-only
+```
+
+If `fish-lsp` isn't found afterwards, confirm the install location is on your
+`$PATH` (`fish-lsp info --bin` prints the resolved binary path). 
+<MoreHelp text="For more info, check out"  href="/docs/debugging" linkText="debugging" />
+
+## Next Steps
+
+After installing, [configure your editor](/docs/client-configurations) to launch
+`fish-lsp start` for `fish` files, and optionally tune the [server settings](/docs/server-configurations).

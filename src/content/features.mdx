@@ -1,0 +1,529 @@
+---
+title: Features
+description: Complete list of fish-lsp LSP capabilities and their status
+slug: features
+order: 6
+section: Reference
+---
+import MoreHelp from '@components/MoreHelp.astro'
+
+# Features
+
+`fish-lsp` implements the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
+for the [fish shell](https://fishshell.com). The table below tracks the status of
+each capability.
+
+| Feature | Description | Status |
+| --- | --- | --- |
+| **Completion** | Completions for commands, variables, functions, and `--flags` | ✅ |
+| **Hover** | Documentation for commands, flags, functions, and variables | ✅ |
+| **Signature Help** | Shows the signature of a command or function | ✅ |
+| **Goto Definition** | Jump to a command, variable, function, or `--flag` definition | ✅ |
+| **Goto Implementation** | Jump between symbol definitions and completion definitions | ✅ |
+| **Find References** | All references to a symbol — strips locally-shadowed globals | ✅ |
+| **Rename** | Workspace-wide rename across matching global & local scope | ✅ |
+| **Document Symbols** | All commands, variables, and functions in a document | ✅ |
+| **Workspace Symbols** | All commands, variables, and functions in a workspace | ✅ |
+| **Document Formatting** | Format a whole document or a selection | ✅ |
+| **On-Type Formatting** | Format while typing | ✅ |
+| **Document Highlight** | Highlight all references to the symbol at the cursor | ✅ |
+| **Code Action** | Automated code generation / refactors | ✅ |
+| **Quick Fix** | Auto-fix lint issues from diagnostics | ✅ |
+| **Inlay Hint** | Virtual text / inlay hints | ✅ |
+| **Diagnostics** | Linting with [error codes](/docs/diagnostic-codes) | ✅ |
+| **Folding Range** | Collapsible regions | ✅ |
+| **Selection Range** | Smart range expansion when selecting | ✅ |
+| **Semantic Tokens** | Extra context-aware syntax highlighting | ✅ |
+| **Command Execution** | Run a server command from the client | ✅ |
+| **CLI Interactivity** | A CLI for server interaction, built via `fish-lsp complete` | ✅ |
+| **Indexing** | Indexes commands, variables, functions, and sourced files | ✅ |
+| **Logger** | Logs all server activity | ✅ |
+| **Code Lens** | Inline actionable lenses | ✖ |
+
+## Completions
+
+`onComplete` and `onCompleteResolve` are both active:
+
+- Context aware specific results based on the current process/command typed.
+- Chained short options (e.g. `ls -la`), retriggering completions for each short
+  option added in current argument as combination
+- Local & Global symbol completions unique to the current file
+- Documentation lookup on resolve
+- Subcommand-aware completions (e.g. `string`, `path`, `status`)
+- Extra completions for special fish values/contexts<br/>
+  (*i.e.*, [prebuilt-snippets](#prebuilt-snippets), complete pipes when previous token was `end` keyword, complete regex groups values when command specifies it for current cursor location)
+- Provides `# @fish-lsp-disable` comments, shebang lines, and many other special completion entries
+
+## Hover
+
+`onHover` resolves documentation for:
+
+- Chained short options: `ls -la`, or long options (uses completion pager to generate hover docs for flags)
+- Commands with subcommands: `git commit` (builtins will jump to subcommand manpage, other commands use completion pager/entire manpage)
+- Local symbols in private workspace or smallest scoped symbols considering autoloaded workspace (i.e., `~/.config/fish/`) or sourced files
+- Nearest reference: `set var "1"; set var "2";`
+- [prebuilt-snippets](#prebuilt-snippets) if applicable to the token under the cursor
+
+The hover fallback order is: symbol → prebuilt snippet → global symbol → man page → multi-reference.
+
+## Prebuilt Snippets
+
+The server ships curated, prebuilt documentation/completion data for fish
+concepts that aren't discoverable from your workspace alone:
+
+- Special fish variables (`$status`, `$pipestatus`, `$argv`, …)
+- `$status` exit-code meanings (including `>128` signal codes)
+- Environment & locale variables
+- `fish_lsp_*` configuration variables
+- Pipes and redirections
+- Syntax-highlighting / theme variables and helper commands
+
+These power hover and completion for shell features that have no definition in
+your files.
+
+## Document and Workspace Symbols
+
+Document Symbols are parsed during server initialization and cached for each
+file. Symbols correspond to functions, variables, and events defined in the
+file. As the server initializes, it will eventually index all the symbols in the
+current document's workspace, allowing you to request for workspace or document
+specific symbols.
+
+The cached symbols are used in various manors throughout most of the server
+handlers provided by `fish-lsp`.
+
+Accurate symbol caching is critical for features like `onComplete`, `onHover`, `onDefinition`, `onReferences`, `onRename`,
+`semanticTokens`, `onCodeAction`, `diagnostics`, and <ins>**much more**</ins>.
+
+## Diagnostics
+
+Diagnostics are enabled by default and surface as lint warnings/errors, many with
+quick fixes. Each rule has a stable code — see the full
+[Diagnostic Error Codes](/docs/diagnostic-codes) reference. Codes can be disabled
+individually via `fish_lsp_diagnostic_disable_error_codes` (see
+[Server Configurations](/docs/server-configurations)) or with disable comments in a file.
+
+## Code Actions
+
+Code actions are automated refactors, typically calculated from a document's diagnostics, or an expression the server recognizes for refactoring.
+
+Since shell scripts are often difficult to correctly generalize by expression
+context, code actions typically avoid suggesting opinionated edits when no
+errors are detected.
+
+> <ins>**Example of a useful Code Action:**</ins>
+>
+> ```fish
+> # ~/.config/fish/conf.d/my_func.fish
+> function my_func
+>     argparse h/help o/other -- $argv || return 1 
+> end
+> ```
+>
+> 1. Make sure the file above file is located in a fish autoloaded path (e.g., `~/.config/fish/conf.d/`).
+> 2. Place the cursor on the `argparse` command, on line 3 and execute a code action request (in [VSCode](https://code.visualstudio.com/) this is `<Control + .>`).
+> 3. Select the Code Action titled `Create completions for 'my_func' function`
+> 4. The focused document `~/.config/fish/conf.d/my_func.fish` will be updated to include the following completions:
+>
+>    ```fish
+>    # ~/.config/fish/conf.d/my_func.fish 
+>    function my_func
+>        argparse h/help o/other -- $argv || return 1 
+>    end
+>    # auto generated by fish-lsp
+>    complete -c my_func -s h -l help
+>    complete -c my_func -s o -l other
+>    ```
+>
+> 5. Optionally customize the completions to your liking, such as, adding
+>    descriptions, disabling file completions, or adding additional flags to the
+>    completions.
+>
+> ---
+> The Code Action above would work similarly if the function was defined in an
+> autoloaded `functions/*.fish` file (in this case `~/.config/fish/functions/my_func.fish`).
+>
+> If the file was located in a `functions/*.fish` path instead of a `conf.d/*.fish`
+> path the completions generated would be placed in `~/.config/fish/completions/my_func.fish`
+> since we wouldn't want the completions to be stored in the functions file itself.
+>
+> When using this Code Action inside of a standard fish file location that is sourced
+> directly during fish's startup phase, like `~/.config/fish/conf.d/*.fish`, the server will
+> generate the completions directly into the same file.
+<br />
+> [!IMPORTANT]
+> The above Code Action can be provided to any fish path that follows the
+> convention for being autoloaded. This includes something like a fisher plugin,
+> where the local repo/workspace does not actually have to be autoloaded in your existing fish
+> configuration but is structured `./{functions,completions,conf.d}/*.fish`.
+>
+> Any **autoloaded** function with missing `argparse` completions in the focused `./{functions,conf.d}/*.fish` document,
+> will cause this Code Action to be suggested when the cursor is on the `argparse` command.
+
+Some other examples of code actions include:
+
+- convert absolute path to use equivalent variable prefix: 
+    ```fish
+    /home/user/.config/fish/config.fish
+    ```
+    would be converted to:
+    ```fish
+    $XDG_CONFIG_HOME/fish/config.fish
+    ```
+    > [!NOTE]
+    > If multiple variables match initial prefix path of Code Action 
+    > absolute location path, the server will suggest the top few
+    > variables that expand to the longest matching folder path.
+    >
+    > In the above example, the Code Actions could have been suggested:
+    >
+    > ```
+    > 1. Replace with '$__fish_config_dir...' (line: 1)
+    > 2. Replace with '$XDG_CONFIG_HOME...' (line: 1)
+    > 3. Replace with '$HOME...' (line: 1)
+    > ````
+    
+  - Use unused `argparse ...` variables
+    
+    ```fish
+    # /tmp/foo.fish
+    argparse h/help -- $argv 
+    or return 1
+    ```
+
+    > Code Action: 
+    > 1. Use `argparse h/help` variable '_flag_help' if it's set in '/tmp/foo.fish'
+
+    Would insert the following changes:
+
+    ```fish
+    # /tmp/foo.fish
+    argparse h/help -- $argv 
+    or return 1    
+
+    if set -ql _flag_help
+        
+    end
+    ```
+
+  - Refactor/Rewrite an alias to its exactly equivalent function definition
+
+    ```fish
+    alias ll='ls -l'
+    ```
+
+    > Code Actions: <br />
+    >   1. Convert alias 'll' to inline function                                   
+    >   2. Convert alias 'll' to function in file: ~/.config/fish/functions/ll.fish
+
+    Outputs:
+
+    ```fish
+    function ll --wraps='ls -l' --description 'alias ll=ls -l'
+        ls -l $argv
+    end
+    ```
+  
+  - Refactor/Extract command under cursor to its own function
+
+  - Silence command under cursor 
+
+  - Simplify variable append/prepend using builtin `set` flags
+
+    ```fish
+    set -gx PATH $PATH /usr/local/bin
+    ```
+
+    > Code Actions: <br />
+    >  1. Simplify to 'set -a PATH ...'
+
+    Outputs:
+
+    ```fish
+    set -gx -a PATH /usr/local/bin
+    ```
+
+## Quick Fixes
+
+Quick fixes are a subset of code actions that are automatically suggested for
+directly correcting diagnostics. Common examples include:
+
+- disable comments for a specific diagnostic code, i.e., `# @fish-lsp-disable`
+  > [!NOTE]
+  > Disable comments can be specified for a single line, a range of lines, an
+  > entire file or even globally
+- removing unreachable code
+- deleting unused variables
+- ensuring autoloaded functions/completions (`~/.config/fish/{functions,completions}`) source the correct matching identifier name
+- finishing a partially typed command, for example:<br />
+  `argparse h/help` -> `argparse h/help -- $argv`
+- not wrapping expanded variables with double quotes when using `test` string flags <br />
+  `test -n $var` -> `test -n "$var"`
+  
+## Background Analysis
+
+`initiateBackgroundAnalysis()` runs non-blocking workspace analysis on startup,
+warming symbol caches before your first keypress so cross-file navigation and
+references work immediately.
+
+## Formatting
+
+The format handlers support all standard language-server-protocol formatting
+requests. These include requests which specify a range of text, or an entire
+document.
+
+Underneath the hood, the `fish-lsp` formatting handler relies on the
+`fish_indent` command to perform formatting. This means that the formatting
+behavior is consistent with the `fish_indent` command line tool, and will be
+familiar to user who have used `fish_indent` in the past.
+
+## Semantic Tokens
+
+The server's semantic token support works out of the box, and mainly highlights
+defined events, variables, and/or functions. The server recognizes these symbols
+when they are actual definitions or general references (which is much more difficult
+to abstractly determine).
+
+> [!NOTE]
+> The server also allows highlighting certain subcommands of builtins as matching commands.
+> Some examples include: `string split`, `path resolve`, `git commit`, etc...
+>
+> This feature can be disabled by the environment variable:
+>
+> ```fish
+> set -gx fish_lsp_show_subcommand_semantic_tokens false
+> ```
+
+## Inlay Hints
+
+Inlay hints are virtual text annotations that appear inline with certain code
+constructs.
+
+The server primarily displays inlay hints for exit status codes from
+`return [NUM]`/`exit [NUM]` statements.
+
+## Goto Implementation
+
+This is an experimental feature which allows the user to jump between a symbol's
+different kinds of definitions.
+
+A common use case can be summarized as follows:
+
+```fish
+# ~/.config/fish/functions/my_func.fish
+function my_func
+    #    ^^^^^^ cursor is here and initiates a goto implementation request
+    argparse h/help -- $argv || return 1
+    set -ql _flag_help && echo "my_func help msg" && return 0
+
+    # do normal my_func operations
+end
+```
+
+```fish
+# ~/.config/fish/completions/my_func.fish
+complete -c my_func -f
+#           ^^^^^^^ cursor would jump to here
+complete -c my_func -s h -l help -d "my_func help msg"
+#                      ^    ^^^^ it is also possible to jump between completion flags
+#                                for my_func using this example
+```
+
+## Rename
+
+The server's analysis contains significant consideration towards scoping rules,
+which allows for ambiguous renames to be correctly resolved. A rename request
+which contains the location of a symbol defined multiple times in different
+scopes will resolve the references to the current request scopes definition of
+said symbol.
+
+> [!WARNING]
+> The `$argv`, `$pipestatus`, `$status` variables are considered special and
+> cannot be renamed. Attempting to rename these variables will result in a
+> rejected rename request.
+
+## References
+
+The `textDocument/gotoReferences` request behaves very similiar to the
+`textDocument/rename` request, because underneath the hood renames require
+collecting all of the references for the location requested by the client.
+
+It is also worth mentioning that a special variable like `$argv` will not be
+rejected when its references are requested, because the server can correctly
+resolve all of the references to `$argv` without ambiguity. A complex example of
+this can be seen below:
+
+```fish
+function A -d 'special function'
+    argparse h/help -- $argv || return 1
+    #                   ^^^^ get references for $argv here
+
+    function B --no-scope-shadowing 
+        echo "inside B, argv is '$argv'"
+        C
+    end
+
+    function C --inherit-variable argv
+        echo "inside C, argv is '$argv'"
+    end
+
+    B
+end
+
+A --help --other
+
+# 5 references for argv should be returned
+# ========================================
+#   1. line 1  (A defines $argv)
+#   2. line 2  (argparse references $argv directly)
+#   3. line 6  (B references $argv directly since `--no-scope-shadowing` is used)
+#   4. line 10 (C inherits $argv directly since B had `--no-scope-shadowing` and C has `--inherit-variable argv`)
+#   5. line 11 (`echo` statement in C references $argv directly)
+```
+
+Another useful example of retrieving references requests can be done for
+checking the references of a function, or a functions `argparse flags` (where
+`argparse` command is used to define the flags for a function).
+
+Example:
+
+```fish
+# ~/.config/fish/conf.d/my_func.fish
+function my_func
+    argparse h/help -- $argv || return 1
+    #          ^^^^ goto references for the `--help` flag here
+
+    set -ql _flag_help && echo "my_func help msg" && return 0
+    #       ^^^^^^^^^^ reference
+end
+
+complete -c my_func -s h -l help -d "my_func help msg"
+#                           ^^^^  reference
+
+my_func --help
+#         ^^^^ reference
+
+# 4 references for the `--help` flag will be returned
+# ===================================================
+#   1. line 3  (my_func argparse defines $_flag_help)
+#   2. line 6  (directly references $_flag_help)
+#   3. line 10 (complete references the `--help` long option for `my_func` command)
+#   4. line 13 (my_func is called with the `--help` option directly)
+```
+
+When requesting references for a functions `argparse` switch, the server can correctly resolve any of the following matches:
+
+- `argparse h/help -- $argv` definitions directly
+- correctly scoped `_flag_[NAME]` variables matching the `argparse` switch name
+  in the function's scope (`set -ql _flag_help` in the above example)
+- `complete` commands where the command name matches the `argparse` function's parent name
+- command calls using the `argparse` switch (`my_func --help` in the above example)
+
+A function of course works similarly, where the server can correctly resolve any matches which:
+
+- **call the function**:  *line 13* in `my_func` example above, calling `my_func --help` would be a valid reference for the `my_func` function
+- **define completions for the function:**  `complete -c [FUNCTION_NAME] ...`
+- **use it in certain builtin command arguments:** `abbr --function [HERE]`, `bind ... [HERE]`, `function ... --wraps=[HERE]`, `alias ... [HERE]`, etc....
+
+> [!NOTE]
+> Excluding an argument to an unknown function where the token is an exact matching name to the reference request was a design choice
+> purposefully, because the server cannot know if the unknown function is a
+> wrapper for another function, or if it is a completely unrelated function.
+>
+> This helps ensure that onRename requests for general function names only
+> rename tokens which the server can guarantee results point to the same
+> function definition, avoiding unqouted arguments that might appear to be a
+> possible match but aren't intended as such by the user.
+
+An example:
+
+```fish
+# ~/.config/fish/functions/use.fish
+function using
+    #    ^^^^^ check references for `using` here
+    type -aq $argv
+end
+```
+
+```fish
+# ~/.config/fish/conf.d/fzf.fish
+if not using fzf # valid ref
+    return 0
+end
+
+# Below we would place the configuration settings that are only necessary if
+# `fzf` is available in the current environment. This pattern avoids fish from
+# loading the `fzf` configuration when a machine doesn't have `fzf` installed.
+
+# example:
+function fzf_history -d "a very simple implementation to use fzf for fish history searching"
+    set -l result (builtin history search -z | command fzf --read0) 
+    and test -n "$result"
+    and commandline -r $result 
+    and commandline --function repaint
+end
+```
+
+```fish
+# /tmp/some_script.fish
+function print
+    echo $argv
+end
+print are we using fzf?
+#            ^^^^^ not a valid reference
+functions -aq using
+#             ^^^^^ valid reference
+```
+
+## Logging
+
+The logger is mostly helpful for debugging the server. If it is not enabled to
+point at a file location in any of the possible user configuration locations,
+the server will treat its internal calls as `noop`.
+
+If you are experiencing issues with the server, it is recommended to enable
+logging by pointing `fish_lsp_log_file` to a file location, and then inspect the log
+file for any errors or warnings that may be occurring.
+
+To live test the logger, you can open 2 terminals and run the following commands:
+
+- First in <ins>**terminal A**</ins>:
+
+  ```fish prompt
+  echo 'set -gx fish_lsp_log_file /tmp/fish-lsp.log' >> ~/.config/fish/config.fish
+  source ~/.config/fish/config.fish
+  tail -f $fish_lsp_log_file
+  ```
+
+- Then once complete, in <ins>**terminal B**</ins> you can edit a file and see the logger output in <ins>**terminal A**</ins>:
+
+  ```fish prompt
+  $EDITOR /tmp/example.fish
+  ```
+
+## CLI
+
+The bundled binary shipped from this project includes considerable utilities
+that can be interactively used from the command line. This makes configuring,
+debugging, and contributing to the project much easier by preventing
+large amounts of overhead (specifically on the client side since the server can
+do things like mock a client initialization request and dump output for
+inspection).
+
+To make this as easy as possible, all you'd need to do is ensure that the
+`fish-lsp` binary is in your `$PATH` and then make sure the completions for the
+binary are loaded into your shell session.
+
+```fish prompt
+## possibly required:
+# complete -c fish-lsp -e && complete -e fish-lsp
+fish-lsp complete | source 
+# load in completions for this session only
+```
+
+```fish prompt
+fish-lsp complete > ~/.config/fish/completions/fish-lsp.fish 
+# load in completions for all sessions
+```
+
+<MoreHelp text="Need more detail?" href="/docs/server-configurations" linkText="See the full server configuration guide →" />

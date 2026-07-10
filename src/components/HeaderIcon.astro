@@ -1,33 +1,88 @@
 ---
-import "tw-base"
-import {Icon} from 'astro-icon/components';
+import { Icon } from 'astro-icon/components';
 
-const {
-  name,
-  label,
-} = Astro.props
-
-let href = '#'
-switch (name) {
-  case 'github':
-    href = "https://github.com/ndonfris/fish-lsp/"
-    break;
-  case 'npm':
-    href = "https://www.npmjs.com/package/fish-lsp"
-    break;
-  case 'vscode':
-    href = "https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp"
-    break;
-  case 'playground-terminal':
-    href = "/playground"
-    break;
-  default:
-    break;
+type NormalProps = {
+  /** Docs pages set this to add an "Edit this page on GitHub" line. */
+  name: 'github' | 'npm' | 'vscode' | 'playground';
+  /** Override the hover tooltip text (defaults to a label for `name`). */
+  label?: string;
 }
+
+type CustomProps = {
+  /** Docs pages set this to add an "Edit this page on GitHub" line. */
+  IconName: string;
+  IconHref: string;
+  /** Hover tooltip text (defaults to `IconName`). */
+  label?: string;
+}
+
+type Props = NormalProps | CustomProps;
+
+const props = Astro.props;
+
+const isNormalProps = (props: Props): props is NormalProps => {
+  return 'name' in props;
+};
+
+const isCustomProps = (props: Props): props is CustomProps => {
+  return 'IconName' in props && 'IconHref' in props;
+};
+
+const CachedInfo = {
+  'github': {
+    IconName: 'github',
+    IconHref: 'https://github.com/ndonfris/fish-lsp',
+    label: 'GitHub',
+  },
+  'npm': {
+    IconName: 'npm',
+    IconHref: 'https://www.npmjs.com/package/fish-lsp',
+    label: 'npm',
+  },
+  'vscode': {
+    IconName: 'vscode',
+    IconHref: 'https://marketplace.visualstudio.com/items?itemName=ndonfris.fish-lsp',
+    label: 'VS Code',
+  },
+  'playground': {
+    // IconName: 'playground-terminal',
+    IconName: 'browser-editor',
+    IconHref: 'https://fish-lsp.dev/playground',
+    label: 'Playground',
+  },
+}
+
+let data: { IconName: string; IconHref: string; label: string } | undefined;
+
+if (isNormalProps(props)) {
+  data = { ...CachedInfo[props.name], label: props.label ?? CachedInfo[props.name].label };
+} else if (isCustomProps(props)) {
+  data = { IconName: props.IconName, IconHref: props.IconHref, label: props.label ?? props.IconName };
+} else {
+  throw new Error('Invalid props for HeaderIcon component');
+}
+
+
+const { IconName: name, IconHref: href, label } = data;
 
 ---
 
-<a title={name} href={href} class="flex text-center sm:flex-col hover:text-purple-500 stroke-0"> 
-  <Icon name={name} class="mx-auto" />
-  <p class="text-sm">{label || name} </p>
+
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={label}
+  class="relative inline-flex items-center justify-center group"
+>
+  <Icon name={name} />
+  <span
+    role="tooltip"
+    class="pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 translate-y-1
+           whitespace-nowrap rounded-md border border-line bg-surface-2 px-2 py-1 font-mono
+           text-[0.7rem] text-ink opacity-0 transition-all duration-150
+           group-hover:translate-y-0 group-hover:opacity-100
+           group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+  >{label}</span>
 </a>
+

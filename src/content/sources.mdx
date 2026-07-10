@@ -1,0 +1,84 @@
+---
+title: Sources
+description: Sources and references that were used to help build the project.
+slug: sources
+order: 12
+section: Reference
+---
+
+# Sources
+
+## Source Code Repos
+
+The `fish-lsp` project uses a collection of repositories to implement the language server and client ***(NOT a <ins>mono-repo</ins>)***.
+
+The following is a list of the major repositories that are used in the project:
+
+- [`fish-lsp`](https://github.com/ndonfris/fish-lsp) - The main repository of the language-server  
+- [`fish-lsp.dev`](https://github.com/ndonfris/fish-lsp.dev) - The website source code.
+- [`vscode-fish-lsp`](https://github.com/ndonfris/vscode-fish-lsp) - The plugin/extension for [VSCode](https://code.visualstudio.com/)/[VSCodium](https://vscodium.com/) support
+- [`fish-lsp-language-clients`](https://github.com/ndonfris/fish-lsp-language-clients/) - Collection of <ins>***various***</ins> language clients configurations.
+- [`jetbrains-fish`](https://github.com/tox-dev/jetbrains-fish?tab=readme-ov-file#installation) - The [IntelliJ](https://www.jetbrains.com/idea/) plugin for fish-lsp.
+- [`zed-fish-lsp`](https://github.com/alysson-souza/zed-fish-lsp) - The [Zed]() plugin for fish-lsp
+
+## Community Resources
+
+- [Wiki](https://github.com/ndonfris/fish-lsp/wiki)
+- [Issues](https://github.com/ndonfris/fish-lsp/issues)
+- [Pull Requests](https://github.com/ndonfris/fish-lsp/pulls)
+- [Discussions](https://github.com/ndonfris/fish-lsp/discussions)
+- [Tags](https://github.com/ndonfris/fish-lsp/tags)
+- [Releases](https://github.com/ndonfris/fish-lsp/releases)
+
+## Package Managers
+
+- [`npm` / `pnpm`](https://www.npmjs.com/package/fish-lsp)
+- [`yarn`](https://yarnpkg.com/package?q=fish-ls&name=fish-lsp)
+- [`conda`](https://anaconda.org/conda-forge/fish-lsp) / [`mamba`](https://anaconda.org/conda-forge/fish-lsp)
+- [`nix`](https://search.nixos.org/packages?channel=23.05&show=fish-lsp&from=0&size=50&sort=relevance&type=packages)
+- [`brew` / `homebrew`](https://formulae.brew.sh/formula/fish-lsp)
+- [`arch` / `aur`](https://aur.archlinux.org/packages/fish-lsp)
+
+
+## Official Documentation
+
+- [**LSP / LSIF**](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#headerPart) - API spec for language-server-protocol
+  - [Document Synchronization](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_synchronization)
+  - [Language Features](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#languageFeatures)
+  - [Workspace Features](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspaceFeatures)
+  - [Window Features](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#windowFeatures)
+- [**VSCode-Extension-Samples**](https://github.com/microsoft/vscode-extension-samples/tree/main) - Collection of language feature examples
+  - [Diagnostic](https://github.com/microsoft/vscode-extension-samples/blob/main/diagnostic-related-information-sample/src/extension.ts)
+  - [Code Actions](https://github.com/microsoft/vscode-extension-samples/tree/main/code-actions-sample)
+  - [Code Lens](https://github.com/microsoft/vscode-extension-samples/tree/main/codelens-sample)
+  - [Command](https://github.com/microsoft/vscode-extension-samples/tree/main/helloworld-test-cli-sample)
+  - [Notification](https://github.com/microsoft/vscode-extension-samples/tree/main/notifications-sample)
+  - [Progress Notification](https://github.com/microsoft/vscode-extension-samples/tree/main/progress-sample)
+  - [Semantic Tokens](https://github.com/microsoft/vscode-extension-samples/tree/main/semantic-tokens-sample)
+  - [Quick Fix](https://github.com/microsoft/vscode-extension-samples/tree/main/task-provider-sample)
+  - [Simpler Quick Fix](https://github.com/microsoft/vscode-extension-samples/blob/main/lsp-user-input-sample/server/src/sampleServer.ts#L58)
+  - [Simple Client](https://github.com/microsoft/vscode-extension-samples/blob/main/lsp-embedded-language-service/client/src/extension.ts)
+- [**Tree-Sitter**](https://tree-sitter.github.io/tree-sitter/) - Incremental parsing system for programming tools
+  - [web-tree-sitter](https://www.npmjs.com/package/web-tree-sitter)
+  - [tree-sitter-fish](https://github.com/ram02z/tree-sitter-fish)
+
+## Important Dependency Packages
+
+- [vscode-jsonrpc](https://www.npmjs.com/package/vscode-jsonrpc) - **JSON-RPC** implementation for Node.js and browser
+- [vscode-languageserver](https://github.com/Microsoft/vscode-languageserver-node) - Entire **API** type definitions
+  - [client implementation](https://github.com/microsoft/vscode-languageserver-node/blob/main/client/src/common)
+  - [server implementation](https://github.com/microsoft/vscode-languageserver-node/tree/main/server/src/common)  
+- [vscode-languageserver-textdocument](https://github.com/Microsoft/vscode-languageserver-node) - `TextDocument` features & listeners
+
+## Related Projects
+
+*Inspiration and reference for the `fish-lsp` project was taken from the following related projects:*
+
+- [vscode-languageserver-node/testbed](https://github.com/microsoft/vscode-languageserver-node/tree/main/testbed)
+- [awk-language-server](https://github.com/Beaglefoot/awk-language-server/tree/master/server)
+- [bash-language-server](https://github.com/bash-lsp/bash-language-server/tree/main/server/src)
+- [coc.fish](https://github.com/oncomouse/coc-fish)
+- [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server#running-the-language-server)
+- [coc-tsserver](https://github.com/neoclide/coc-tsserver)
+- [json-language-server-release.xz](https://github.com/zed-industries/json-language-server) && [json-language-server](https://github.com/microsoft/vscode-json-languageservice/blob/main/README.md)
+

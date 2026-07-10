@@ -1,0 +1,82 @@
+---
+/**
+ * Reusable terminal window. Each command renders a `~ ❯ <input>` prompt line
+ * followed by its output line(s). `input` and `output` accept inline HTML so
+ * callers can colour tokens with the `t-*` classes (t-cmd, t-flag, t-str,
+ * t-green). `emptyFinalPrompt` appends a trailing prompt with a blinking
+ * cursor and no input/output.
+ *
+ * Structural styling uses Tailwind utilities (brand tokens from @theme). The
+ * only raw CSS is the `t-*` syntax-token colours, which must be global because
+ * they arrive through `set:html` (Astro doesn't scope-hash injected markup).
+ */
+export interface TerminalCommand {
+  /** Path shown before the chevron (default "~"). */
+  prompt?: string;
+  /** The typed command; inline HTML allowed for token colouring. */
+  input: string;
+  /** Output line(s) below the command; inline HTML allowed. */
+  output?: string | string[];
+}
+
+interface Props {
+  title?: string;
+  commands: TerminalCommand[];
+  emptyFinalPrompt?: boolean;
+}
+
+const { title, commands, emptyFinalPrompt = false } = Astro.props;
+
+const toLines = (o?: string | string[]): string[] =>
+  o == null ? [] : Array.isArray(o) ? o : [o];
+
+const line    = 'flex items-baseline gap-2 my-[0.1rem]';
+const outLine = `${line} pl-[1.1rem] text-[0.94em] text-ink-muted`;
+---
+
+<div
+  role="img"
+  aria-label={title ?? 'terminal'}
+  class="mx-auto max-w-[600px] overflow-hidden rounded-[10px] border border-line bg-surface-1
+         text-left font-mono leading-[1.7] text-[clamp(0.66rem,2.7vw,0.875rem)]
+         shadow-[0_24px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(78,108,250,0.1)]"
+>
+  <div class="flex items-center gap-2 border-b border-line bg-surface-2 px-4 py-[0.6rem]">
+    <span class="h-2.5 w-2.5 rounded-full bg-fish-red" aria-hidden="true"></span>
+    <span class="h-2.5 w-2.5 rounded-full bg-fish-yellow" aria-hidden="true"></span>
+    <span class="h-2.5 w-2.5 rounded-full bg-fish-green" aria-hidden="true"></span>
+    {title && <span class="flex-1 text-center text-[0.82em] tracking-[0.04em] text-ink-dim">{title}</span>}
+  </div>
+
+  <div class="px-[clamp(1rem,3.5vw,1.5rem)] py-[clamp(0.9rem,3vw,1.25rem)]">
+    {commands.map((cmd, i) => (
+      <Fragment>
+        <div class:list={[line, i > 0 && 'mt-2']}>
+          <span class="select-none text-fish-periwinkle">{cmd.prompt ?? '~'}</span><span class="text-ink-dim">❯</span>
+          <span set:html={cmd.input} />
+        </div>
+        {toLines(cmd.output).map(out => (
+          <div class={outLine} set:html={out} />
+        ))}
+      </Fragment>
+    ))}
+    {emptyFinalPrompt && (
+      <div class:list={[line, commands.length > 0 && 'mt-2']}>
+        <span class="select-none text-fish-periwinkle">~</span><span class="text-ink-dim">❯</span>
+        <!-- The zero-width space + leading-none give the empty cursor a real text
+             baseline, so flex `items-baseline` aligns it to the character cell
+             instead of pinning its bottom edge to the baseline (which left a gap
+             under it in the descender area). -->
+        <span class="inline-block h-[1.1em] w-2 leading-none animate-blink bg-fish-periwinkle" aria-hidden="true">&#8203;</span>
+      </div>
+    )}
+  </div>
+</div>
+
+<style is:global>
+/* Syntax-token colours referenced by `input`/`output` (set:html) markup. */
+.t-cmd   { color: var(--fish-cyan); }
+.t-flag  { color: var(--fish-yellow); }
+.t-str   { color: #a8ff78; }
+.t-green { color: var(--fish-green); }
+</style>
