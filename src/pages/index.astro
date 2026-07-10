@@ -8,7 +8,6 @@ import CodeTabs from '@components/CodeTabs.astro';
 import '@theme/global.css';
 import { getCollection } from 'astro:content';
 import type { NavSection } from '@typedefs/content';
-import { DOCS_ORIGIN } from '../config';
 import { getFishInfo } from '../lib/fish-info';
 
 const allPages = await getCollection('pages');
@@ -55,7 +54,7 @@ const fishInfo = await getFishInfo();
       completions, hover docs, go&#x2011;to&#x2011;definition, rename, and workspace analysis.
     </p>
     <div class="hero__actions">
-      <a href={`${DOCS_ORIGIN}/docs/installation`} class="btn-primary">Get Started →</a>
+      <a href="/docs/installation" class="btn-primary">Get Started →</a>
       <a href="https://github.com/ndonfris/fish-lsp" target="_blank" rel="noopener noreferrer" class="btn-ghost">View Source</a>
     </div>
 
@@ -135,7 +134,7 @@ const fishInfo = await getFishInfo();
     />
     <p class="install-hint">
       Need more detail?
-      <a href={`${DOCS_ORIGIN}/docs/installation`}>See the full installation guide →</a>
+      <a href="/docs/installation">See the full installation guide →</a>
     </p>
   </section>
 
@@ -146,7 +145,7 @@ const fishInfo = await getFishInfo();
     <div class="doc-grid">
       {navSections.map(section =>
         section.pages.map(page => (
-          <a href={`${DOCS_ORIGIN}/docs/${page.slug}`} class="doc-card">
+          <a href={`/docs/${page.slug}`} class="doc-card">
             <div class="doc-card__section">{section.label}</div>
             <div class="doc-card__title">{page.title}</div>
             <div class="doc-card__desc">
