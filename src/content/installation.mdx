@@ -6,6 +6,7 @@ order: 2
 section: Getting Started
 ---
 import CodeTabs from '@components/CodeTabs.astro';
+import MoreHelp from '@components/MoreHelp.astro';
 
 # Installation
 
@@ -60,7 +61,7 @@ chmod +x ~/.local/bin/fish-lsp
 
 ## Build from Source
 
-The most portable method. 
+{/* The most portable method.  */}
 
 > [!WARNING]
 > Recommended toolchain: `yarn@1.22.22`, `node@22.14.0`, `fish@4.0.8`.
@@ -70,8 +71,7 @@ git clone https://github.com/ndonfris/fish-lsp && cd fish-lsp
 yarn install && yarn build   # links ./dist/fish-lsp into your `yarn global bin` $PATH
 ```
 
-See [Building from Source](/docs/building-from-source) for troubleshooting
-(manual linking, the tree-sitter `.wasm`, and re-linking for VSCode).
+<MoreHelp text="Need more detail?" href="/docs/building-from-source" linkText="See the full building from source guide →" />
 
 ## Shell Completions
 
@@ -99,11 +99,10 @@ fish-lsp info --time-only
 ```
 
 If `fish-lsp` isn't found afterwards, confirm the install location is on your
-`$PATH` (`fish-lsp info --bin` prints the resolved binary path). See
-[Debugging](/docs/debugging) for more.
+`$PATH` (`fish-lsp info --bin` prints the resolved binary path). 
+<MoreHelp text="For more info, check out"  href="/docs/debugging" linkText="debugging" />
 
 ## Next Steps
 
 After installing, [configure your editor](/docs/client-configurations) to launch
-`fish-lsp start` for `fish` files, and optionally tune the
-[server settings](/docs/server-configurations).
+`fish-lsp start` for `fish` files, and optionally tune the [server settings](/docs/server-configurations).
