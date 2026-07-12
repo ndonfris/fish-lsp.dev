@@ -1,4 +1,6 @@
 ---
+import { Icon } from 'astro-icon/components';
+
 /**
  * A "Need more details?" hint line followed by a link — the reusable form of the
  * homepage's `.install-hint` paragraph.
@@ -31,5 +33,5 @@ const hasSlot = Astro.slots.has('default');
 <p class:list={['mt-4 text-[0.82rem] text-ink-muted', extra]}>
   {text}
   {' '}
-  {hasSlot ? <slot /> : href && <a href={href}>{linkText}</a>}
+  {hasSlot ? <slot /> : href && <a href={href}>{linkText}</a><Icon name="external-link" class="inline w-4 h-4 py-1 my-auto text-center align-text-top text-fish-periwinkle" /> }
 </p>

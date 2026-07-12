@@ -56,13 +56,81 @@ const { frontmatter, editPath } = Astro.props;
   // ── Mermaid diagrams (```mermaid fences → <pre class="mermaid">) ──
   import mermaid from 'mermaid';
   if (document.querySelector('.prose .mermaid')) {
+    // `theme: 'base'` + explicit themeVariables so the diagram matches the
+    // site palette (global.css tokens). The built-in 'dark' theme rendered
+    // edge labels (e.g. "LSP request") with a light background + light text,
+    // which collapsed to white-on-white inside <foreignObject> on iOS Safari.
     mermaid.initialize({
       startOnLoad: false,
-      theme: 'dark',
+      theme: 'base',
       securityLevel: 'loose',
       fontFamily: "'JetBrains Mono', monospace",
+      themeVariables: {
+        background:          '#0a0d14',  // --bg-0
+        primaryColor:        '#141829',  // node fill (--bg-2)
+        primaryBorderColor:  '#4e6cfa',  // --fish-periwinkle
+        primaryTextColor:    '#e8ecf8',  // --fish-white
+        lineColor:           '#4e6cfa',  // arrows (--fish-periwinkle)
+        edgeLabelBackground: '#1c2236',  // solid dark box (--bg-3)
+        tertiaryTextColor:   '#e8ecf8',  // edge-label text (--fish-white)
+        // sequenceDiagram notes ("Note over …") — keep them dark, not the
+        // built-in yellow.
+        noteBkgColor:        '#1c2236',  // --bg-3
+        noteTextColor:       '#e8ecf8',  // --fish-white
+        noteBorderColor:     '#4e6cfa',  // --fish-periwinkle
+        fontFamily:          "'JetBrains Mono', monospace",
+      },
+      // `.labelBkg` is mermaid's opaque backing box for edge labels; the
+      // rounded corners are cosmetic. Horizontal padding and the empty-edge
+      // cleanup are done in JS below (mermaid derives the box size from
+      // measured text, so CSS padding can't widen it).
+      themeCSS: `
+        .labelBkg { background: #1c2236 !important; }
+        span.edgeLabel { border-radius: 3px; }
+      `,
     });
-    mermaid.run({ querySelector: '.prose .mermaid' });
+    mermaid.run({ querySelector: '.prose .mermaid' }).then(() => {
+      // mermaid sizes each edge-label <foreignObject> to the raw text, so the
+      // opaque backing box hugs the text with no breathing room. Widen each
+      // one (and re-center it) for horizontal padding, and drop the backing
+      // box on label-less edges — at full opacity it showed as a stray gray
+      // square. Edge labels are decorative overlays on the edge midpoint, so
+      // resizing them never disturbs the arrow paths.
+      const PAD_X = 14;
+      for (const g of document.querySelectorAll<SVGGElement>('.prose .mermaid .edgeLabel')) {
+        const fo = g.querySelector('foreignObject');
+        if (!fo) continue;
+        const p = g.querySelector('p');
+        if (!p || !p.textContent?.trim()) {
+          g.querySelector('.labelBkg')?.remove();
+          continue;
+        }
+        const w = parseFloat(fo.getAttribute('width') ?? '0');
+        const newW = w + PAD_X * 2;
+        fo.setAttribute('width', String(newW));
+        // The visible box is a shrink-to-fit table-cell anchored to the left of
+        // the foreignObject; stretch it to the new width and center its text so
+        // the padding lands on both sides.
+        const bkg = fo.querySelector<HTMLElement>('.labelBkg');
+        if (bkg) {
+          // mermaid caps the box at `max-width: 200px` and switches long
+          // labels to a wrapping `display: table`; override both so the box
+          // fills the widened foreignObject and stays on one centered line.
+          bkg.style.width = `${newW}px`;
+          bkg.style.maxWidth = 'none';
+          bkg.style.whiteSpace = 'nowrap';
+          bkg.style.textAlign = 'center';
+        }
+        // The label group is centered via `translate(-w/2, …)`; nudge it left
+        // by PAD_X so the wider box stays centered on the edge.
+        const label = fo.closest<SVGGElement>('.label');
+        const t = label?.getAttribute('transform');
+        const m = t?.match(/translate\(\s*(-?[\d.]+)[ ,]+(-?[\d.]+)\s*\)/);
+        if (label && m) {
+          label.setAttribute('transform', `translate(${parseFloat(m[1]) - PAD_X}, ${m[2]})`);
+        }
+      }
+    });
   }
 </script>
 
