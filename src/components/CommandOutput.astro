@@ -57,7 +57,7 @@ const copyText = copy ?? cmd;
     class="flex w-full cursor-pointer list-none items-center gap-2.5 px-4 py-2.5 font-mono
            transition-colors hover:bg-surface-2"
   >
-    <span class="shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+    <span class="shrink-0 select-none text-[0.85rem] leading-[1.5] font-bold text-fish-green">{prompt}</span>
     <Code code={cmd} lang={lang as any} theme={codeTheme as any} class="cmd-code min-w-0 flex-1" />
 
     <span

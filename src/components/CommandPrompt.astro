@@ -80,7 +80,7 @@ const outId = `cmdout-${Math.random().toString(36).slice(2, 8)}`;
       { 'cursor-pointer hover:bg-surface-2/50': hasOutput },
     ]}
   >
-    <span class="shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+    <span class="shrink-0 select-none text-[0.85rem] leading-[1.5] font-bold text-fish-green">{prompt}</span>
     <Code code={cmdText} lang={lang as any} theme={codeTheme as any} class="flex-1 min-w-0 cmd-code" />
 
     {hasOutput && (

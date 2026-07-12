@@ -81,7 +81,7 @@ const norm = steps.map((s) => ({
           { 'cursor-pointer hover:bg-surface-2/60': s.expandable },
         ]}
       >
-        <span class="w-4 shrink-0 select-none text-[0.85rem] font-bold text-fish-green">{prompt}</span>
+        <span class="w-4 shrink-0 select-none text-[0.85rem] leading-[1.5] font-bold text-fish-green">{prompt}</span>
         <Code code={s.cmd} lang={s.lang as any} theme={codeTheme as any} class="cmd-code min-w-0 flex-1" />
 
         {s.expandable && (
