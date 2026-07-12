@@ -1,4 +1,118 @@
 ---
-// Redirect /docs → /docs/installation
-return Astro.redirect('/docs/installation', 302);
+/**
+ * /docs — the documentation index. Lists every doc page grouped by the same
+ * sections used across the site (Header hamburger menu, homepage doc cards, and
+ * the SecondHeader breadcrumb tree). Replaces the former /docs → /docs/installation
+ * redirect so `docs` is a real, linkable landing page.
+ */
+import '@theme/global.css';
+import BaseHead  from '@components/BaseHead.astro';
+import Header    from '@components/Header.astro';
+import Container from '@components/Container.astro';
+import Footer    from '@components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const allPages = await getCollection('pages');
+const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
+const grouped = new Map<string, typeof allPages>();
+for (const page of allPages) {
+  const sec = page.data.section ?? 'Other';
+  if (!grouped.has(sec)) grouped.set(sec, []);
+  grouped.get(sec)!.push(page);
+}
+for (const pages of grouped.values()) {
+  pages.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+}
+const orderedSections = [
+  ...sectionOrder.filter((s) => grouped.has(s)),
+  ...[...grouped.keys()].filter((s) => !sectionOrder.includes(s)),
+];
 ---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <BaseHead
+    title="Documentation — fish-lsp"
+    description="Browse the fish-lsp documentation: installation, configuration, CLI commands, diagnostics, and more."
+  />
+</head>
+<body>
+  <Header variant="docs" />
+
+  <main class="docs-index">
+    <Container class="max-w-5xl">
+      <header class="docs-index__head">
+        <p class="docs-index__eyebrow">Documentation</p>
+        <h1 class="docs-index__title">Everything you need</h1>
+        <p class="docs-index__sub">
+          Guides and reference for installing, configuring, and working with fish-lsp.
+        </p>
+      </header>
+
+      {orderedSections.map((label) => (
+        <section class="docs-index__section">
+          <h2 class="docs-index__section-label">{label}</h2>
+          <div class="doc-grid">
+            {(grouped.get(label) ?? []).map((page) => (
+              <a href={`/docs/${page.data.slug}`} class="doc-card">
+                <div class="doc-card__title">{page.data.title}</div>
+                <div class="doc-card__desc">{page.data.description}</div>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </Container>
+  </main>
+
+  <Footer />
+</body>
+</html>
+
+<style>
+  .docs-index { padding: 3rem 0 4rem; }
+  @media (max-width: 768px) { .docs-index { padding: 2rem 0; } }
+
+  .docs-index__head { margin-bottom: 2.5rem; }
+  .docs-index__eyebrow {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--fish-periwinkle); margin: 0 0 0.5rem;
+  }
+  .docs-index__title {
+    font-family: var(--font-mono); font-size: 1.75rem; font-weight: 700;
+    color: var(--fish-periwinkle); margin: 0 0 0.5rem;
+  }
+  .docs-index__sub { color: var(--text-muted); font-size: 0.95rem; margin: 0; max-width: 44rem; }
+
+  .docs-index__section { margin-bottom: 2.5rem; }
+  .docs-index__section-label {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); margin: 0 0 0.85rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+  }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+  .doc-card {
+    background: var(--bg-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.1rem 1.25rem;
+    text-decoration: none; display: block; transition: all 0.15s;
+  }
+  .doc-card:hover {
+    border-color: var(--fish-periwinkle);
+    background: rgba(78, 108, 250, 0.07); transform: translateY(-1px);
+  }
+  .doc-card__title {
+    font-family: var(--font-mono); font-size: 0.88rem;
+    font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;
+  }
+  .doc-card__desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+  @media (max-width: 640px) { .doc-grid { grid-template-columns: 1fr; } }
+</style>

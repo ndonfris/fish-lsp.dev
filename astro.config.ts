@@ -88,7 +88,7 @@ export default defineConfig({
   //   /docs/man → /docs/commands  (CLI reference doubles as the man-page docs)
   //   /page     → /docs/installation  (legacy bare path; the /page/* wildcard
   //               can't be a static redirect, so it lives in vercel.json)
-  // Note: bare `/docs` is already redirected by src/pages/docs/index.astro.
+  // Note: bare `/docs` is a real index page (src/pages/docs/index.astro).
   redirects: {
     '/docs/man': '/docs/commands',
     '/page': '/docs/installation',

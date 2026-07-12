@@ -1,20 +1,24 @@
 ---
 import '@theme/global.css';
-import BaseHead   from '@components/BaseHead.astro';
-import Header     from '@components/Header.astro';
-import Container  from '@components/Container.astro';
-import Footer     from '@components/Footer.astro';
-import DocsPager  from '@components/DocsPager.astro';
+import BaseHead     from '@components/BaseHead.astro';
+import Header       from '@components/Header.astro';
+import SecondHeader from '@components/SecondHeader.astro';
+import Container    from '@components/Container.astro';
+import Footer       from '@components/Footer.astro';
+import DocsPager    from '@components/DocsPager.astro';
 import { Icon } from 'astro-icon/components';
 import type { PageFrontmatter } from '@typedefs/content';
+import type { MarkdownHeading } from 'astro';
 
 interface Props {
   frontmatter: PageFrontmatter;
+  /** Section/subsection headings of the rendered page, for the on-this-page TOC. */
+  headings?: MarkdownHeading[];
   /** Repo-relative source path, forwarded to the footer's edit link. */
   editPath?: string;
 }
 
-const { frontmatter, editPath } = Astro.props;
+const { frontmatter, headings = [], editPath } = Astro.props;
 ---
 
 <!doctype html>
@@ -27,6 +31,8 @@ const { frontmatter, editPath } = Astro.props;
   <Header variant="docs" />
 
   <div class="docs-body">
+
+    <SecondHeader frontmatter={frontmatter} headings={headings} />
 
     <!-- Sidebar nav + hamburger drawer now live in HamburgerMenu.astro (in the Header) -->
 

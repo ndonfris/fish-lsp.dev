@@ -17,7 +17,7 @@ type Props = {
 };
 
 const { page }   = Astro.props;
-const { Content } = await render(page);
+const { Content, headings } = await render(page);
 
 // Repo-relative source path, e.g. "src/content/installation.md".
 // `filePath` is reported relative to the Astro project root (currently new/,
@@ -25,6 +25,6 @@ const { Content } = await render(page);
 const editPath = page.filePath ?? `src/content/${page.id}.md`;
 ---
 
-<DocsLayout frontmatter={page.data} editPath={editPath}>
+<DocsLayout frontmatter={page.data} headings={headings} editPath={editPath}>
   <Content />
 </DocsLayout>

@@ -1,0 +1,93 @@
+---
+
+// TODO
+// Adapt to Astro component w/ possible remark plugin for converting raw markdown content to Astro component in the future
+
+// ABOUT: Diplays output in a vertical stepper format.
+//
+// ```
+// 1. Step 1
+//    ...
+// 2. Step 2
+//    ...
+// 3. Step 3
+//    ...
+//    ...
+// ```
+// 
+// MORE STEPPERS AVAILABLE: https://preline.co/docs/components/stepper.html
+
+
+
+---
+
+<!-- Stepper -->
+<!-- https://preline.co/docs/components/stepper.html#vertical-white -->
+<!-- MORE STEPPERS AVAILABLE: https://preline.co/docs/components/stepper.html  -->
+
+<ul class="relative flex flex-col gap-y-2">
+  <!-- Item -->
+  <li class="flex gap-x-4 group">
+    <div class="flex flex-col items-center">
+      <span class="flex items-center justify-center text-xs font-medium border rounded-full size-7 shrink-0 bg-layer border-layer-line text-layer-foreground">
+        1
+      </span>
+      <div class="flex-1 w-px h-full mt-2 bg-surface-1 group-last:hidden"></div>
+    </div>
+    <div class="pb-6 grow group-last:pb-0">
+      <div class="inline-flex items-center text-xs align-middle min-w-7 min-h-7">
+        <span class="block text-sm font-medium text-foreground">
+          Workspace info
+        </span>
+      </div>
+      <p class="mt-1 text-sm text-muted-foreground-1">
+        Add the workspace name, choose a clear description, and set the core details teammates will see when they join.
+      </p>
+    </div>
+  </li>
+  <!-- End Item -->
+
+  <!-- Item -->
+  <li class="flex gap-x-4 group">
+    <div class="flex flex-col items-center">
+      <span class="flex items-center justify-center text-xs font-medium border rounded-full size-7 shrink-0 bg-layer border-layer-line text-layer-foreground">
+        2
+      </span>
+      <div class="flex-1 w-px h-full mt-2 bg-surface-1 group-last:hidden"></div>
+    </div>
+    <div class="pb-6 grow group-last:pb-0">
+      <div class="inline-flex items-center text-xs align-middle min-w-7 min-h-7">
+        <span class="block text-sm font-medium text-foreground">
+          Member setup
+        </span>
+      </div>
+      <p class="mt-1 text-sm text-muted-foreground-1">
+        Invite your team, assign responsibilities, and review the access each person should have before moving forward.
+      </p>
+    </div>
+  </li>
+  <!-- End Item -->
+
+  <!-- Item -->
+  <li class="flex gap-x-4 group">
+    <div class="flex flex-col items-center">
+      <span class="flex items-center justify-center text-xs font-medium border rounded-full size-7 shrink-0 bg-layer border-layer-line text-layer-foreground">
+        3
+      </span>
+      <div class="flex-1 w-px h-full mt-2 bg-surface-1 group-last:hidden"></div>
+    </div>
+    <div class="pb-6 grow group-last:pb-0">
+      <div class="inline-flex items-center text-xs align-middle min-w-7 min-h-7">
+        <span class="block text-sm font-medium text-foreground">
+          Final check
+        </span>
+      </div>
+      <p class="mt-1 text-sm text-muted-foreground-1">
+        Confirm the settings, review the summary, and publish the setup once everything is ready for the next stage.
+      </p>
+    </div>
+  </li>
+  <!-- End Item -->
+</ul>
+<!-- End Stepper -->
+
