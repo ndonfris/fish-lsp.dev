@@ -1,11 +1,11 @@
 ---
 import '@theme/global.css';
-import BaseHead     from '@components/BaseHead.astro';
-import Header       from '@components/Header.astro';
-import SecondHeader from '@components/SecondHeader.astro';
-import Container    from '@components/Container.astro';
-import Footer       from '@components/Footer.astro';
-import DocsPager    from '@components/DocsPager.astro';
+import BaseHead        from '@components/BaseHead.astro';
+import Header          from '@components/Header.astro';
+import TableOfContents from '@components/TableOfContents.astro';
+import Container       from '@components/Container.astro';
+import Footer          from '@components/Footer.astro';
+import DocsPager       from '@components/DocsPager.astro';
 import { Icon } from 'astro-icon/components';
 import type { PageFrontmatter } from '@typedefs/content';
 import type { MarkdownHeading } from 'astro';
@@ -32,7 +32,11 @@ const { frontmatter, headings = [], editPath } = Astro.props;
 
   <div class="docs-body">
 
-    <SecondHeader frontmatter={frontmatter} headings={headings} />
+    {/* ── EXPERIMENT: SecondHeader (breadcrumb bar) removed; TOC docked
+        top-right, sticky under the header, no full-width bar. ── */}
+    <div class="toc-dock">
+      <TableOfContents headings={headings} />
+    </div>
 
     <!-- Sidebar nav + hamburger drawer now live in HamburgerMenu.astro (in the Header) -->
 
@@ -185,6 +189,22 @@ const { frontmatter, headings = [], editPath } = Astro.props;
   }
 </script>
 
+<script>
+  // Give each h2/h3 subheading a hover-revealed "#" permalink (the
+  // "click to grab the section URL" pattern common on doc sites like
+  // Docusaurus/VitePress/MDN). Ids are already present on the rendered
+  // headings (Astro's markdown pipeline assigns them; <TableOfContents>
+  // links to the same slugs), so this just needs to append a real <a>.
+  for (const heading of document.querySelectorAll<HTMLHeadingElement>('.prose h2[id], .prose h3[id]')) {
+    const link = document.createElement('a');
+    link.className = 'heading-anchor';
+    link.href = `#${heading.id}`;
+    link.textContent = '#';
+    link.setAttribute('aria-label', `Link to "${heading.textContent}"`);
+    heading.appendChild(link);
+  }
+</script>
+
 <style>
 /* ── Layout shell ─────────────────────────────────────────────── */
 /* The sticky header lives in src/components/Header.astro */
@@ -195,16 +215,30 @@ html, body { margin: 0; width: 100%; }
 
 /* The nav drawer + backdrop now live in src/components/HamburgerMenu.astro */
 
+/* ── EXPERIMENT: TOC dock (replaces SecondHeader's breadcrumb bar) ──
+   No visible bar/background — just a sticky positioning host so
+   <TableOfContents> can dock itself at the top-right, under the primary
+   header's rightmost icon, the same way it did inside .second-header. */
+.toc-dock {
+  --sh-top: 56px;
+  position: sticky;
+  top: var(--sh-top);
+  z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.35rem 1.5rem 0;
+}
+
 /* ── Main: full width; inner content is centered by <Container> ──
    (mx-auto max-w-4xl). The drawer floats over the left margin. */
 .docs-main {
   width: 100%;
   box-sizing: border-box;
-  padding: 3rem 0 4rem;
+  padding: 1rem 0 4rem;
 }
 
 @media (max-width: 768px) {
-  .docs-main { padding: 2rem 0; }
+  .docs-main { padding: 0.5rem 0; }
 }
 
 /* The footer is the shared src/components/Footer.astro (<Footer editPage />) */

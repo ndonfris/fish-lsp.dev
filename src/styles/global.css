@@ -25,28 +25,31 @@
 @theme {
   /* True blue — reserved for large solid fills (footer, button backgrounds)
      where the periwinkle read as too purple. */
-  --color-fish-blue:     rgb(37, 99, 235);    /* #2563eb (blue-600) — hue ~221°, matches the material-ocean shiki blue #82aaff */
-  --color-fish-blue-dim: rgb(29, 78, 216);    /* #1d4ed8 (blue-700, button hover) */
+  --color-fish-blue:           rgb(37, 99, 235);      /* #2563eb (blue-600) — hue ~221°, matches the material-ocean shiki blue #82aaff */
+  --color-fish-blue-dim:       rgb(29, 78, 216);      /* #1d4ed8 (blue-700, button hover) */
   /* Periwinkle — the brand accent for text, links, logo, outlines, hovers. */
-  --color-fish-periwinkle:     rgb(78, 108, 250);   /* #4e6cfa */
-  --color-fish-periwinkle-dim: rgb(58, 85, 224);    /* #3a55e0 */
-  --color-fish-cyan:     rgb(100, 210, 255);  /* #64d2ff */
-  --color-fish-green:    rgb(50, 213, 131);   /* #32d583 */
-  --color-fish-yellow:   rgb(255, 209, 102);  /* #ffd166 */
-  --color-fish-red:      rgb(255, 107, 107);  /* #ff6b6b */
-  --color-fish-white:    rgb(232, 236, 248);  /* #e8ecf8 */
-  --color-fish-alt-white: rgb(175, 175, 255); /* #afafff */
+  --color-fish-periwinkle:     rgb(78, 108, 250);     /* #4e6cfa */
+  --color-fish-periwinkle-dim: rgb(58, 85, 224);      /* #3a55e0 */
+  --color-fish-magenta:        rgb(163, 113, 247);    /* #a371f7 */
+  --color-fish-pink:           rgb(228, 130, 250);    /* #e482fa */
+  --color-fish-cyan:           rgb(100, 210, 255);    /* #64d2ff */
+  --color-fish-green:          rgb(50, 213, 131);     /* #32d583 */
+  --color-fish-yellow:         rgb(255, 209, 102);    /* #ffd166 */
+  --color-fish-yellow-dim:     rgb(214, 202, 122);    /* #d6ca7a */
+  --color-fish-red:            rgb(255, 107, 107);    /* #ff6b6b */
+  --color-fish-white:          rgb(232, 236, 248);    /* #e8ecf8 */
+  --color-fish-alt-white:      rgb(175, 175, 255);    /* #afafff */
 
-  --color-surface-0: rgb(10, 13, 20);         /* #0a0d14 */
-  --color-surface-1: rgb(15, 19, 32);         /* #0f1320 */
-  --color-surface-2: rgb(20, 24, 41);         /* #141829 */
-  --color-surface-3: rgb(28, 34, 54);         /* #1c2236 */
+  --color-surface-0:           rgb(10, 13, 20);       /* #0a0d14 */
+  --color-surface-1:           rgb(15, 19, 32);       /* #0f1320 */
+  --color-surface-2:           rgb(20, 24, 41);       /* #141829 */
+  --color-surface-3:           rgb(28, 34, 54);       /* #1c2236 */
 
-  --color-ink:       rgb(232, 236, 248);      /* #e8ecf8; */
-  --color-ink-muted: rgb(122, 138, 180);      /* #7a8ab4; */
-  --color-ink-dim:   rgb(74, 85, 120);        /* #4a5578; */
+  --color-ink:                 rgb(232, 236, 248);    /* #e8ecf8; */
+  --color-ink-muted:           rgb(122, 138, 180);    /* #7a8ab4; */
+  --color-ink-dim:             rgb(74, 85, 120);      /* #4a5578; */
 
-  --color-line: rgba(78, 108, 250, 0.2);
+  --color-line:                rgba(78, 108, 250, 0.2);
 
   /* Font-size utilities (Tailwind `text-*`). `--text-xs` restates Tailwind's
      default so the small end of the scale is explicit; `--text-xxs` adds a new
@@ -80,29 +83,32 @@
 @layer base {
   :root {
     /* True blue — large solid fills only (footer, button backgrounds). */
-    --fish-blue:     #2563eb;
-    --fish-blue-dim: #1d4ed8;
+    --fish-blue:            #2563eb;
+    --fish-blue-dim:        #1d4ed8;
     /* Periwinkle — brand accent for text, links, logo, outlines, hovers. */
-    --fish-periwinkle:     #4e6cfa;
-    --fish-periwinkle-dim: #3a55e0;
+    --fish-periwinkle:      #4e6cfa;
+    --fish-periwinkle-dim:  #3a55e0;
     --fish-periwinkle-glow: rgba(78, 108, 250, 0.2);
-    --fish-cyan:     #64d2ff;
-    --fish-green:    #32d583;
-    --fish-yellow:   #ffd166;
-    --fish-red:      #ff6b6b;
-    --fish-white:    #e8ecf8;
-    --fish-alt-white: #afafff;
-    --fish-primary: #e8ecf8; /* text-primary */
+    --fish-magenta:         #a371f7;
+    --fish-pink:            #e482fa;
+    --fish-cyan:            #64d2ff;
+    --fish-green:           #32d583;
+    --fish-yellow:          #ffd166;
+    --fish-yellow-dim:      #d6ca7a;
+    --fish-red:             #ff6b6b;
+    --fish-white:           #e8ecf8;
+    --fish-alt-white:       #afafff;
+    --fish-primary:         #e8ecf8; /* text-primary */
 
-    --bg-0:  #0a0d14;
-    --bg-1:  #0f1320;
-    --bg-2:  #141829;
-    --bg-3:  #1c2236;
+    --bg-0:                #0a0d14;
+    --bg-1:                #0f1320;
+    --bg-2:                #141829;
+    --bg-3:                #1c2236;
 
-    --border:       rgba(78, 108, 250, 0.2);
-    --text-primary: #e8ecf8;
-    --text-muted:   #7a8ab4;
-    --text-dim:     #4a5578;
+    --border:              rgba(78, 108, 250, 0.2);
+    --text-primary:        #e8ecf8;
+    --text-muted:          #7a8ab4;
+    --text-dim:            #4a5578;
 
     --font-mono: 'JetBrains Mono', 'Symbols Nerd Subset', 'Cascadia Code', 'Fira Code',
                  'Source Code Pro', ui-monospace, monospace;
@@ -156,10 +162,19 @@
   color: var(--text-primary);
 }
 
+/* Anchor-linked headings (TOC links, #hash URLs) land right at the viewport
+   top otherwise, tucked under the sticky <Header> (56px). Offset the jump
+   target by the header height plus a little breathing room. */
+.prose h1,
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 72px;
+}
+
 .prose h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  margin: 0 0 1.25rem;
+  margin: 0 0 0 0rem;
   color: var(--fish-periwinkle);
   letter-spacing: -0.02em;
 }
@@ -167,7 +182,7 @@
 .prose h2 {
   font-size: 1.2rem;
   font-weight: 600;
-  margin: 2.5rem 0 0.75rem;
+  margin: 1.5rem 0 0.75rem;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.4rem;
@@ -179,6 +194,26 @@
   margin: 1.75rem 0 0.5rem;
   color: var(--fish-cyan);
 }
+
+/* Permalink "#" appended to h2/h3 by DocsLayout's script — hidden until the
+   heading is hovered/focused so it doesn't clutter the reading view.
+   `.prose a.heading-anchor` (not just `.heading-anchor`) so this out-specifies
+   the general `.prose a` link styling (underline, periwinkle) below. */
+.prose a.heading-anchor {
+  margin-left: 0.5rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 0;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+}
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.prose a.heading-anchor:focus {
+  opacity: 1;
+}
+.prose a.heading-anchor:hover { color: var(--fish-periwinkle); border-color: transparent; }
 
 .prose p   { margin: 0 0 1rem; }
 .prose ul,
@@ -447,8 +482,8 @@
 :root {
   --color-note:      var(--fish-periwinkle);
   --color-tip:       var(--fish-green);
-  --color-important: #a371f7;
-  --color-warning:   var(--fish-yellow);
+  --color-important: var(--fish-magenta);
+  --color-warning:   var(--fish-yellow-dim);
   --color-caution:   var(--fish-red);
 }
 .prose .markdown-alert {
@@ -470,7 +505,7 @@
 .prose .markdown-alert-note      { background: color-mix(in srgb, var(--color-note)      8%, var(--bg-2)); }
 .prose .markdown-alert-tip       { background: color-mix(in srgb, var(--color-tip)       8%, var(--bg-2)); }
 .prose .markdown-alert-important { background: color-mix(in srgb, var(--color-important) 8%, var(--bg-2)); }
-.prose .markdown-alert-warning   { background: color-mix(in srgb, var(--color-warning)   8%, var(--bg-2)); }
+.prose .markdown-alert-warning   { background: color-mix(in srgb, var(--color-warning)   4%, var(--bg-2)); }
 .prose .markdown-alert-caution   { background: color-mix(in srgb, var(--color-caution)   8%, var(--bg-2)); }
 
 /* ─── Lists ───────────────────────────────────────────────────── */

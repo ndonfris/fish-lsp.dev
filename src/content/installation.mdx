@@ -27,14 +27,15 @@ gives you trouble, try another method.
 id="install-docs"
 tabs={[
     { label: 'npm',    lines: ['# install globally', 'npm install -g fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'yarn',   lines: ['# install globally', 'yarn global add fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'pnpm',   lines: ['# install globally', 'pnpm add -g fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'brew',   lines: ['# install globally', 'brew install fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'pacman', lines: ['# install globally', 'pacman -S fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'nix',    lines: ['# install globally', 'nix profile install nixpkgs#fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'conda',  lines: ['# install globally', 'conda install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'mamba',  lines: ['# install globally', 'mamba install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
-        { label: 'curl',   lines: ['# install globally', 'curl -fsSL https://fish-lsp.dev/install.fish | fish', '', '# verify', 'fish-lsp info'] },
+    { label: 'yarn',   lines: ['# install globally', 'yarn global add fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'pnpm',   lines: ['# install globally', 'pnpm add -g fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'bun',    lines: ['# install globally', 'bun add -g fish-lsp', '', '# verify', 'fish-lsp info', '', '# install temporally', 'bunx fish-lsp info'] },
+    { label: 'brew',   lines: ['# install globally', 'brew install fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'pacman', lines: ['# install globally', 'pacman -S fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'nix',    lines: ['# install globally', 'nix profile install nixpkgs#fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'conda',  lines: ['# install globally', 'conda install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'mamba',  lines: ['# install globally', 'mamba install -c conda-forge fish-lsp', '', '# verify', 'fish-lsp info'] },
+    { label: 'curl',   lines: ['# install globally', 'curl -fsSL https://fish-lsp.dev/install.fish | fish', '', '# verify', 'fish-lsp info'] },
 ]}
 />
 
@@ -64,7 +65,7 @@ chmod +x ~/.local/bin/fish-lsp
 {/* The most portable method.  */}
 
 > [!WARNING]
-> Recommended toolchain: `yarn@1.22.22`, `node@22.14.0`, `fish@4.0.8`.
+> Recommended toolchain: `yarn@1.22.22`, `node@22.22.2`, `fish@4.8.0`.
 
 ```fish
 git clone https://github.com/ndonfris/fish-lsp && cd fish-lsp
