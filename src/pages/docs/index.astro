@@ -6,11 +6,13 @@
  * redirect so `docs` is a real, linkable landing page.
  */
 import '@theme/global.css';
-import BaseHead  from '@components/BaseHead.astro';
-import Header    from '@components/Header.astro';
-import Container from '@components/Container.astro';
-import Footer    from '@components/Footer.astro';
+import BaseHead     from '@components/BaseHead.astro';
+import Header       from '@components/Header.astro';
+import SecondHeader from '@components/SecondHeader.astro';
+import Container    from '@components/Container.astro';
+import Footer       from '@components/Footer.astro';
 import { getCollection } from 'astro:content';
+import type { PageFrontmatter } from '@typedefs/content';
 
 const allPages = await getCollection('pages');
 const sectionOrder = ['Getting Started', 'Configuration', 'Reference'];
@@ -27,6 +29,12 @@ const orderedSections = [
   ...sectionOrder.filter((s) => grouped.has(s)),
   ...[...grouped.keys()].filter((s) => !sectionOrder.includes(s)),
 ];
+
+const frontmatter: PageFrontmatter = {
+  title: 'Documentation',
+  description: 'Browse the fish-lsp documentation: installation, configuration, CLI commands, diagnostics, and more.',
+  slug: '',
+};
 ---
 
 <!doctype html>
@@ -39,6 +47,7 @@ const orderedSections = [
 </head>
 <body>
   <Header variant="docs" />
+  <SecondHeader frontmatter={frontmatter} headings={[]} />
 
   <main class="docs-index">
     <Container class="max-w-5xl">

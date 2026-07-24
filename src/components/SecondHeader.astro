@@ -226,7 +226,13 @@ const hasToc = toc.length > 0;
   }
 
   /* Home icon + segments share one baseline and hover treatment. */
-  .sh-crumb-home { display: inline-flex; align-items: center; color: var(--text-muted); transition: color 0.12s; }
+  .sh-crumb-home {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    color: var(--text-muted);
+    transition: color 0.12s;
+  }
   .sh-crumb-home:hover { color: var(--fish-periwinkle); }
   .sh-home-icon { display: block; width: 14px; height: 14px; }
 
@@ -381,50 +387,30 @@ const hasToc = toc.length > 0;
     border-left-color: var(--fish-periwinkle);
   }
 
-  /* ── Wide: float the two sections into the whitespace beside the prose ──
+  /* ── Wide: keep the second header row, promote TOC into the right gutter ──
      Above this width there's room outside the article (max-w-4xl = 56rem) to
-     show the breadcrumb in the left whitespace and the on-this-page list as a
-     rail in the right whitespace. The bar becomes a full-width, zero-height
-     sticky overlay with no border, and the two sections align to the SAME edges
-     as the primary header's controls — the breadcrumb under the hamburger (left,
-     1.5rem) and the TOC rail under the playground icon (right, 1.5rem). The
-     breadcrumb is display-only here (not expandable); the TOC shows inline. */
+     show the on-this-page list as an always-visible rail in the right whitespace.
+     The second header remains a real sticky bar with its separator and contains
+     only the breadcrumb controls. */
   @media (min-width: 1500px) {
     .second-header {
-      display: block;
       position: sticky;
       top: var(--sh-top);
-      height: 0;
-      padding: 0;
-      background: transparent;
-      backdrop-filter: none;
-      border-bottom: 0;   /* no hr in gutter mode */
-      pointer-events: none;
+      justify-content: flex-start;
     }
 
-    /* Breadcrumb → left whitespace, starting at the header's left edge (aligns
-       with the hamburger). Capped to the whitespace so it never overlaps the
-       article; the last entry wraps on spaces rather than truncating. */
+    /* Breadcrumb stays in the second header. Let long titles wrap instead of
+       forcing a truncation when there is ample horizontal space. */
     .sh-crumb {
-      position: absolute;
-      top: 3rem; /* ≈ .docs-main padding-top */
-      left: 1.5rem;
-      width: max-content;
-      max-width: calc((100vw - 56rem) / 2 - 3rem);
-      flex: none;
-      pointer-events: none;
+      flex: 1 1 auto;
+      max-width: min(100%, 56rem);
     }
-    /* Let the last entry drop to its own line when the trail is too wide, then
-       wrap on spaces within that line — rather than truncating. */
     .sh-crumb-trail {
       justify-content: flex-start;
-      align-items: flex-start;
+      align-items: center;
       flex-wrap: wrap;
       row-gap: 0.15rem;
     }
-    .sh-crumb-expand { display: none; } /* no expand affordance when static */
-    .sh-nav-panel { display: none !important; } /* never opens here */
-    .sh-crumb-item--current { align-items: flex-start; }
     .sh-crumb-item--current .sh-seg-label {
       white-space: normal;
       overflow: visible;
@@ -432,11 +418,11 @@ const hasToc = toc.length > 0;
       overflow-wrap: break-word;
     }
 
-    /* On-this-page → right whitespace as a sticky rail, ending at the header's
-       right edge (aligns with the playground icon). */
+    /* On-this-page → right whitespace as a rail. The hidden button is still in
+       the DOM for smaller breakpoints; at this size the panel is always shown. */
     .sh-toc {
       position: absolute;
-      top: 3rem;
+      top: calc(100% + 3rem);
       right: 1.5rem;
       width: 14rem;
       max-width: calc((100vw - 56rem) / 2 - 3rem);
