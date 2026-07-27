@@ -14,7 +14,7 @@ import type { APIRoute } from 'astro';
 const DISALLOW = ['/playground', '/schema/', '/schema.json'];
 
 export const GET: APIRoute = ({ site }) => {
-  // `site` comes from `site:` in astro.config.ts (https://fish-lsp.dev).
+  // `site` comes from `site:` in astro.config.ts (https://www.fish-lsp.dev).
   const sitemap = site ? new URL('sitemap-index.xml', site).href : '';
 
   const lines = [

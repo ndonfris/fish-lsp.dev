@@ -71,9 +71,12 @@ function remarkMermaid() {
 }
 
 export default defineConfig({
-  // Canonical production root. The dev server still serves from localhost:4321;
-  // in-site links are relative in dev and absolute in prod (see src/config.ts).
-  site: 'https://fish-lsp.dev',
+  // Canonical production root. Vercel redirects the apex to `www`, so this must
+  // match `www` — otherwise sitemap/robots URLs 307-redirect and Google won't
+  // index them (see src/config.ts SITE_ORIGIN, which must stay in sync).
+  // The dev server still serves from localhost:4321; in-site links are
+  // relative in dev and absolute in prod (see src/config.ts).
+  site: 'https://www.fish-lsp.dev',
 
   // pnpm astro build writes to dist/ (gitignored)
   outDir: 'dist',

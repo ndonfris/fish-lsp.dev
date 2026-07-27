@@ -5,4 +5,4 @@
  *
  * Change this if the production root domain ever moves.
  */
-export const SITE_ORIGIN = 'https://fish-lsp.dev';
+export const SITE_ORIGIN = 'https://www.fish-lsp.dev';
