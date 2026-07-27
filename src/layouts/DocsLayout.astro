@@ -241,5 +241,13 @@ html, body { margin: 0; width: 100%; }
   .docs-main { padding: 0.5rem 0; }
 }
 
+/* Mobile: <Header> switches to `position: fixed` at 640px (see Header.astro),
+   so the sticky toc-dock now docks directly under a fixed bar instead of a
+   bar that scrolls away with the page. Give it more clearance there so the
+   "On this page" button doesn't crowd the hamburger menu row above it. */
+@media (max-width: 640px) {
+  .toc-dock { padding-top: 1rem; }
+}
+
 /* The footer is the shared src/components/Footer.astro (<Footer editPage />) */
 </style>
