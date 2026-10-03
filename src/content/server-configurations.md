@@ -58,6 +58,18 @@ set -gx fish_lsp_disabled_handlers
 # (Default: ['\t', ';', ' '])
 set -gx fish_lsp_commit_characters 
 
+# $fish_lsp_enable_snippets <BOOLEAN>
+# Include snippet completions when the client supports snippets. When false, snippet suggestions are hidden and syntax templates are inserted as plain text. Can also be set through initializationOptions.
+# (Options: 'true', 'false')
+# (Default: 'true')
+set -gx fish_lsp_enable_snippets 
+
+# $fish_lsp_enable_multiword_snippets <BOOLEAN>
+# Match snippet triggers spanning several words, such as `string split` or `if else`. Off by default: a multiword snippet replaces the typed command name, so completion clients rank it above that command's own arguments (`string <TAB>`). Snippets stay reachable by their one-word triggers. Can also be set through initializationOptions.
+# (Options: 'true', 'false')
+# (Default: 'false')
+set -gx fish_lsp_enable_multiword_snippets 
+
 # $fish_lsp_log_file <STRING>
 # A path to the fish-lsp's logging file. Empty string disables logging.
 # (Example Options: '/tmp/fish_lsp.log', '~/path/to/fish_lsp/logs.txt')
@@ -87,9 +99,9 @@ set -gx fish_lsp_modifiable_paths
 
 # $fish_lsp_diagnostic_disable_error_codes <ARRAY>
 # The diagnostics error codes to disable from the fish-lsp's diagnostics.
-# (Options: 1001, 1002, 1003, 1004, 1005, 2001, 2002, 2003, 2004, 3001, 3002, 
-#           3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 5001, 
-#           5555, 6001, 7001, 8001, 9999)
+# (Options: 1001, 1002, 1003, 1004, 1005, 1006, 1007, 2001, 2002, 2003, 2004, 
+#           3001, 3002, 3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 
+#           4009, 5001, 5555, 6001, 6002, 7001, 8001, 9999)
 # (Default: [])
 set -gx fish_lsp_diagnostic_disable_error_codes 
 
@@ -228,6 +240,18 @@ set -gx fish_lsp_disabled_handlers
 # (Default: ['\t', ';', ' '])
 set -gx fish_lsp_commit_characters '\t' ';' ' '
 
+# $fish_lsp_enable_snippets <BOOLEAN>
+# Include snippet completions when the client supports snippets. When false, snippet suggestions are hidden and syntax templates are inserted as plain text. Can also be set through initializationOptions.
+# (Options: 'true', 'false')
+# (Default: 'true')
+set -gx fish_lsp_enable_snippets true
+
+# $fish_lsp_enable_multiword_snippets <BOOLEAN>
+# Match snippet triggers spanning several words, such as `string split` or `if else`. Off by default: a multiword snippet replaces the typed command name, so completion clients rank it above that command's own arguments (`string <TAB>`). Snippets stay reachable by their one-word triggers. Can also be set through initializationOptions.
+# (Options: 'true', 'false')
+# (Default: 'false')
+set -gx fish_lsp_enable_multiword_snippets false
+
 # $fish_lsp_log_file <STRING>
 # A path to the fish-lsp's logging file. Empty string disables logging.
 # (Example Options: '/tmp/fish_lsp.log', '~/path/to/fish_lsp/logs.txt')
@@ -257,9 +281,9 @@ set -gx fish_lsp_modifiable_paths "$__fish_config_dir"
 
 # $fish_lsp_diagnostic_disable_error_codes <ARRAY>
 # The diagnostics error codes to disable from the fish-lsp's diagnostics.
-# (Options: 1001, 1002, 1003, 1004, 1005, 2001, 2002, 2003, 2004, 3001, 3002, 
-#           3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 5001, 
-#           5555, 6001, 7001, 8001, 9999)
+# (Options: 1001, 1002, 1003, 1004, 1005, 1006, 1007, 2001, 2002, 2003, 2004, 
+#           3001, 3002, 3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 
+#           4009, 5001, 5555, 6001, 6002, 7001, 8001, 9999)
 # (Default: [])
 set -gx fish_lsp_diagnostic_disable_error_codes 
 
@@ -287,8 +311,7 @@ set -gx fish_lsp_enable_experimental_diagnostics false
 set -gx fish_lsp_strict_conditional_command_warnings false
 
 # $fish_lsp_prefer_builtin_fish_commands <BOOLEAN>
-# Show diagnostic `2004` which warns the user when they are using a recognized external command that can be replaced by an equivalent fish buil
-tin command.
+# Show diagnostic `2004` which warns the user when they are using a recognized external command that can be replaced by an equivalent fish builtin command.
 # (Options: 'true', 'false')
 # (Default: 'false')
 set -gx fish_lsp_prefer_builtin_fish_commands false
@@ -375,6 +398,10 @@ set -gx fish_lsp_disabled_handlers
 
 set -gx fish_lsp_commit_characters 
 
+set -gx fish_lsp_enable_snippets 
+
+set -gx fish_lsp_enable_multiword_snippets 
+
 set -gx fish_lsp_log_file 
 
 set -gx fish_lsp_log_level 
@@ -426,6 +453,10 @@ set -gx fish_lsp_enabled_handlers
 set -gx fish_lsp_disabled_handlers 
 
 set -gx fish_lsp_commit_characters '\t' ';' ' '
+
+set -gx fish_lsp_enable_snippets true
+
+set -gx fish_lsp_enable_multiword_snippets false
 
 set -gx fish_lsp_log_file ''
 
@@ -506,6 +537,18 @@ if status is-interactive
     # (Default: ['\t', ';', ' '])
     set -gx fish_lsp_commit_characters '\t' ';' ' '
 
+    # $fish_lsp_enable_snippets <BOOLEAN>
+    # Include snippet completions when the client supports snippets. When false, snippet suggestions are hidden and syntax templates are inserted as plain text. Can also be set through initializationOptions.
+    # (Options: 'true', 'false')
+    # (Default: 'true')
+    set -gx fish_lsp_enable_snippets true
+
+    # $fish_lsp_enable_multiword_snippets <BOOLEAN>
+    # Match snippet triggers spanning several words, such as `string split` or `if else`. Off by default: a multiword snippet replaces the typed command name, so completion clients rank it above that command's own arguments (`string <TAB>`). Snippets stay reachable by their one-word triggers. Can also be set through initializationOptions.
+    # (Options: 'true', 'false')
+    # (Default: 'false')
+    set -gx fish_lsp_enable_multiword_snippets false
+
     # $fish_lsp_log_file <STRING>
     # A path to the fish-lsp's logging file. Empty string disables logging.
     # (Example Options: '/tmp/fish_lsp.log', '~/path/to/fish_lsp/logs.txt')
@@ -535,9 +578,9 @@ if status is-interactive
 
     # $fish_lsp_diagnostic_disable_error_codes <ARRAY>
     # The diagnostics error codes to disable from the fish-lsp's diagnostics.
-    # (Options: 1001, 1002, 1003, 1004, 1005, 2001, 2002, 2003, 2004, 3001, 3002, 
-    #           3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 5001, 
-    #           5555, 6001, 7001, 8001, 9999)
+    # (Options: 1001, 1002, 1003, 1004, 1005, 1006, 1007, 2001, 2002, 2003, 2004, 
+    #           3001, 3002, 3003, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 
+    #           4009, 5001, 5555, 6001, 6002, 7001, 8001, 9999)
     # (Default: [])
     set -gx fish_lsp_diagnostic_disable_error_codes
 
@@ -655,6 +698,8 @@ end
     ";",
     " "
   ],
+  "fish_lsp_enable_snippets": true,
+  "fish_lsp_enable_multiword_snippets": false,
   "fish_lsp_log_file": "",
   "fish_lsp_log_level": "",
   "fish_lsp_all_indexed_paths": [
