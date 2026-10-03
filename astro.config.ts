@@ -9,6 +9,8 @@ import { unified } from '@astrojs/markdown-remark';
 import remarkGithubAlerts from 'remark-github-alerts';
 import remarkCodeFile from './src/plugins/remark-codefile.mjs';
 import remarkCommandPrompt from './src/plugins/remark-command-prompt.mjs';
+import rehypeDiagnosticCodeIds from './src/plugins/rehype-diagnostic-code-ids.mjs';
+import rehypeDiagnosticSeverity from './src/plugins/rehype-diagnostic-severity.mjs';
 import tailwindcss from '@tailwindcss/vite';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -132,6 +134,7 @@ export default defineConfig({
     // heading IDs, gfm) is still applied by createMarkdownProcessor.
     processor: unified({
       remarkPlugins: [remarkMermaid, remarkGithubAlerts, remarkCodeFile, remarkCommandPrompt],
+      rehypePlugins: [rehypeDiagnosticCodeIds, rehypeDiagnosticSeverity],
     }),
     shikiConfig: {
       theme: 'material-theme-ocean',
