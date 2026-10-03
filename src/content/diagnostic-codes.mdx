@@ -8,6 +8,8 @@ section: Reference
 import { Icon } from 'astro-icon/components';
 import TrCode from '@components/table/TrCode.astro';
 import Thr from '@components/table/Thr.astro';
+export const Example4009 = () => <><TrCode splitNewlines code={"# functions/foo.fish\n# ...\nfunction _helper\nend"} /><Thr /><TrCode splitNewlines code={"# functions/bar.fish\n# ...\nfunction _helper\nend"} /></>;
+export const Fix4009 = () => <><TrCode splitNewlines code={"# functions/foo.fish\n# ...\nfunction _foo_helper\nend"} /><Thr /><TrCode splitNewlines code={"# functions/bar.fish\n# ...\nfunction _bar_helper\nend"} /></>;
 
 # Diagnostic Error Codes
 The `fish-lsp` provides numerous diagnostics which are displayed in your editor with a specific error code, and a description of the error.
@@ -57,6 +59,7 @@ The error codes are used to identify specific diagnostics and can be used to dis
 |  **`9999`** | use `fish --no-execute` to check for syntax errors              | <Diag level="ERROR" />  | **N/A**                                                                                                         | **N/A**                                                                                                                                                                                               |
 
 */}
+{/* | INFO     |  **`4009`**  | Autoloaded helper function name collision                  | `# functions/foo.fish`<br/>`# ...`<br/>`function _helper; end;`<br/>`# functions/bar.fish`<br/>`# ...`<br/>`function _helper; end` | `# functions/foo.fish`<br/>`# ...`<br/>`function _foo_helper; end;`<br/>`# functions/bar.fish`<br/>`# ...` <br/>`function _bar_helper; end`|  */}
 
 
 | Severity | Code         | Description                                                | Example                                                                                                         | Fix                                                                                                                                                                                                  |
@@ -83,7 +86,7 @@ The error codes are used to identify specific diagnostics and can be used to dis
 | WARNING  |  **`4006`**  | duplicate function name in same scope                      | <TrCode splitNewlines splitTabs>function a; end;\nfunction a; end;\nalias a="command a"</TrCode>                | <TrCode splitNewlines splitTabs>function a; end;\nfunction b; end;\nalias c="command a"</TrCode>                                                                                                     |
 | WARNING  |  **`4007`**  | Autoloaded event hook function missing usage               | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend</TrCode>                          | <TrCode splitNewlines splitTabs>function foo \\\n\t--on-event some_event\nend\nemit some_event</TrCode>                                                                                              |
 | WARNING  |  **`4008`**  | Autoloaded function requires a description                 | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                                                                                                                                |
-| INFO     |  **`4009`**  | Autoloaded helper function name collision                  | `function foo; end;`                                                                                            | `function foo -d "description"; end;`                                                                                                                                                                |
+| INFO     |  **`4009`**  | Autoloaded helper function name collision                  | <Example4009 /> | <Fix4009 /> |
 | ERROR    |  **`5001`**  | Argparse missing end of stdin                              | `argparse h/help`                                                                                               | `argparse h/help -- $argv`                                                                                                                                                                           |
 | WARNING  |  **`5555`**  | Unreachable code                                           | <TrCode splitNewlines splitTabs>return 0\necho $status # unreachable</TrCode>                                   | <TrCode splitNewlines splitTabs>echo $status # reachable</TrCode>                                                                                                                                    |
 | WARNING  |  **`6001`**  | fish-lsp deprecated env variable                           | `set -gx fish_lsp_logfile`                                                                                      | `set -gx fish_lsp_log_file`                                                                                                                                                                          |
